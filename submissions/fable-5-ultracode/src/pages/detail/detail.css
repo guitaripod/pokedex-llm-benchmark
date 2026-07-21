@@ -1,0 +1,609 @@
+.pd-page {
+  position: relative;
+  --wash: color-mix(in oklab, var(--accent) 13%, var(--bg));
+  --wash-strong: color-mix(in oklab, var(--accent) 24%, var(--bg));
+  --accent-soft: color-mix(in oklab, var(--accent) 22%, var(--surface));
+  --accent-text: color-mix(in oklab, var(--accent) 70%, var(--text));
+}
+
+[data-theme='light'] .pd-page {
+  --wash: color-mix(in oklab, var(--accent) 9%, var(--bg));
+  --wash-strong: color-mix(in oklab, var(--accent) 17%, var(--bg));
+  --accent-soft: color-mix(in oklab, var(--accent) 15%, var(--surface));
+  --accent-text: color-mix(in oklab, var(--accent) 80%, var(--text));
+}
+
+.pd-hero-wash {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 480px;
+  background:
+    radial-gradient(70% 90% at 22% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 68%),
+    radial-gradient(50% 60% at 85% 8%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.pd-page .container {
+  position: relative;
+}
+
+.pd-page .section {
+  scroll-margin-top: calc(var(--nav-h) + 56px);
+}
+
+.pd-adjnav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+}
+
+.pd-adj {
+  color: var(--text-dim);
+  padding: 5px 10px;
+  border-radius: var(--r-sm);
+}
+
+.pd-adj:hover {
+  color: var(--text);
+  background: var(--surface-2);
+  text-decoration: none;
+}
+
+.pd-hero {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) 1fr;
+  gap: clamp(20px, 4vw, 48px);
+  align-items: center;
+}
+
+.pd-art-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pd-ghostno {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -58%);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: clamp(7rem, 16vw, 13rem);
+  letter-spacing: -0.04em;
+  color: color-mix(in oklab, var(--accent) 55%, var(--text));
+  opacity: 0.09;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.pd-art {
+  width: min(100%, 420px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 22px 34px color-mix(in oklab, var(--accent) 34%, transparent));
+  animation: pd-art-in var(--dur-3) var(--ease);
+}
+
+@keyframes pd-art-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+}
+
+.pd-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pd-art-tools {
+  display: flex;
+  gap: 8px;
+}
+
+.pd-head-col {
+  min-width: 0;
+}
+
+.pd-head-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pd-jname {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: color-mix(in oklab, var(--accent) 60%, var(--text-faint));
+  letter-spacing: 0.12em;
+}
+
+.pd-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 12px;
+}
+
+.pd-title .fav-btn {
+  width: 38px;
+  height: 38px;
+}
+
+.pd-title .fav-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pd-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pd-pasttypes {
+  margin-top: 8px;
+  font-size: 0.88rem;
+}
+
+.pd-lead {
+  margin-top: 14px;
+  font-size: 1.06rem;
+  max-width: 56ch;
+}
+
+.pd-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.pd-forms {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.pd-secnav {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 30;
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  margin-top: clamp(24px, 4vw, 40px);
+  padding: 8px 4px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  scrollbar-width: none;
+}
+
+.pd-secnav::-webkit-scrollbar {
+  display: none;
+}
+
+.pd-secnav a {
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.pd-secnav a:hover {
+  color: var(--text);
+  background: var(--surface-2);
+  text-decoration: none;
+}
+
+.pd-readout {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.pd-entries,
+.pd-defense,
+.pd-dl,
+.pd-stats,
+.pd-moves,
+.pd-evo,
+.pd-enc {
+  padding: clamp(16px, 2.5vw, 24px);
+}
+
+.pd-entries-bar,
+.pd-moves-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.pd-fl-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.pd-fl-row {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pd-fl-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pd-fl-v {
+  font-size: 0.72rem;
+  color: color-mix(in oklab, var(--accent) 55%, var(--text-dim));
+  letter-spacing: 0.05em;
+  padding-top: 3px;
+}
+
+.pd-fl-t {
+  margin: 0;
+}
+
+.pd-dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 18px 24px;
+  margin: 0;
+}
+
+.pd-dl-item dd {
+  margin: 4px 0 0;
+}
+
+.pd-dl-wide {
+  grid-column: 1 / -1;
+}
+
+.pd-egg-groups {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pd-gender {
+  max-width: 320px;
+}
+
+.pd-gender-bar {
+  display: flex;
+  height: 8px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.pd-gender-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  margin-top: 5px;
+  color: var(--text-dim);
+}
+
+.pd-held {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.pd-held-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pd-abilities {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.pd-ability {
+  padding: 16px 18px;
+}
+
+.pd-ability-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pd-ability-name {
+  font-family: var(--font-display);
+  font-weight: 640;
+  font-size: 1.02rem;
+  color: var(--text);
+}
+
+.pd-hidden-chip {
+  font-size: 0.68rem;
+  padding: 2px 9px;
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.pd-ability-effect {
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.pd-def-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pd-def-row:first-child {
+  padding-top: 0;
+}
+
+.pd-def-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pd-def-label {
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  padding-top: 4px;
+}
+
+.pd-def-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pd-evo {
+  overflow-x: auto;
+}
+
+.pd-evo-chain {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pd-evo-branches {
+  display: grid;
+  gap: 16px;
+}
+
+.pd-evo-branch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pd-evo-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 120px;
+  max-width: 190px;
+  text-align: center;
+}
+
+.pd-evo-arrow {
+  color: color-mix(in oklab, var(--accent) 70%, var(--text-faint));
+  font-size: 1.15rem;
+}
+
+.pd-evo-cond {
+  font-size: 0.66rem;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 2px 9px;
+  line-height: 1.5;
+}
+
+.pd-evo-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  color: var(--text);
+  min-width: 108px;
+}
+
+.pd-evo-node:hover {
+  background: var(--surface-2);
+  text-decoration: none;
+}
+
+.pd-evo-node.cur {
+  border-color: color-mix(in oklab, var(--accent) 60%, var(--border));
+  background: color-mix(in oklab, var(--accent) 10%, var(--surface));
+}
+
+.pd-evo-node img {
+  image-rendering: pixelated;
+}
+
+.pd-evo-no {
+  font-size: 0.66rem;
+  color: var(--text-faint);
+}
+
+.pd-evo-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.pd-moves-tablewrap {
+  overflow-x: auto;
+  margin-top: 14px;
+}
+
+.pd-moves .tabs {
+  margin-top: 4px;
+}
+
+.pd-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.84rem;
+}
+
+.pd-cat i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.pd-lcd-wrap {
+  display: grid;
+  gap: 18px;
+}
+
+.pd-lcd-tools {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pd-lcd-gen {
+  display: grid;
+  gap: 10px;
+}
+
+.pd-lcd-genlabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.pd-lcd-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pd-lcd {
+  margin: 0;
+  width: 128px;
+}
+
+.pd-lcd-screen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 128px;
+  height: 128px;
+  background: linear-gradient(160deg, var(--lcd-1), var(--lcd-2) 70%);
+  border: 3px solid var(--lcd-4);
+  border-radius: 8px;
+  box-shadow: inset 0 2px 10px rgb(15 56 15 / 0.35);
+}
+
+.pd-lcd-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgb(15 56 15 / 0.06) 2px 3px);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.pd-lcd-screen img {
+  filter: saturate(0.9);
+}
+
+.pd-lcd-label {
+  margin-top: 6px;
+  font-size: 0.64rem;
+  text-align: center;
+  color: var(--text-faint);
+  letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pd-enc-versions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.pd-enc-areas {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pd-enc-area {
+  font-size: 0.76rem;
+  padding: 4px 11px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  color: var(--text-dim);
+}
+
+@media (max-width: 860px) {
+  .pd-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-art-col {
+    order: -1;
+  }
+
+  .pd-art {
+    width: min(78vw, 340px);
+  }
+
+  .pd-fl-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .pd-head-top {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

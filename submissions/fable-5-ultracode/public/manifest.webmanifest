@@ -1,0 +1,12 @@
+{
+  "name": "Pokédex — Fable-5 Ultracode",
+  "short_name": "Pokédex",
+  "description": "A complete Pokédex field instrument.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e1116",
+  "theme_color": "#e3350d",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

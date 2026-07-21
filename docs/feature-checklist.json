@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "note": "Canonical feature space for the Pokédex brief. Every submission is scored present | partial | absent against each item. These are the columns of the comparison matrix and the objective spine of the rubric.",
+  "categories": [
+    {
+      "id": "browse",
+      "label": "Browse & Discovery",
+      "features": [
+        { "id": "national-dex", "label": "National Dex", "counts": "Lists all ~1025 species (not a truncated subset)." },
+        { "id": "search", "label": "Instant search", "counts": "Client-side search by name and/or number with no server round-trip." },
+        { "id": "type-filter", "label": "Type filter", "counts": "Filter by one or more of the 18 types." },
+        { "id": "generation-filter", "label": "Generation filter", "counts": "Filter/scope by generation (1-9)." },
+        { "id": "sort", "label": "Sorting", "counts": "Sort by id, name, and at least one base stat." },
+        { "id": "advanced-filter", "label": "Advanced filters", "counts": "Legendary/mythical, min-BST, ability, or learnset filters." },
+        { "id": "shareable-urls", "label": "Shareable filter URLs", "counts": "Filter/search state is reflected in the URL." }
+      ]
+    },
+    {
+      "id": "detail",
+      "label": "Detail Depth",
+      "features": [
+        { "id": "artwork", "label": "Official artwork", "counts": "High-res official artwork on detail view." },
+        { "id": "shiny", "label": "Shiny toggle", "counts": "Toggle between normal and shiny sprites/art." },
+        { "id": "cries", "label": "Cry playback", "counts": "Plays the Pokémon's cry audio." },
+        { "id": "stats-viz", "label": "Stat visualization", "counts": "Base stats as bars and/or a radar chart." },
+        { "id": "abilities", "label": "Abilities with effects", "counts": "Lists abilities with their effect text." },
+        { "id": "evolution", "label": "Evolution chains", "counts": "Shows evolution chain with conditions/branches." },
+        { "id": "learnsets", "label": "Move learnsets", "counts": "Learnable moves by method (level/TM/egg/tutor)." },
+        { "id": "type-matchups", "label": "Defensive matchups", "counts": "Computed per-Pokémon type effectiveness." },
+        { "id": "breeding", "label": "Breeding data", "counts": "Egg groups, gender ratio, hatch cycles, EV yield." },
+        { "id": "forms", "label": "Alternate forms", "counts": "Mega / Gigantamax / regional / variant forms." },
+        { "id": "flavor-entries", "label": "Pokédex entries", "counts": "Version flavor-text entries." }
+      ]
+    },
+    {
+      "id": "tools",
+      "label": "Tools & Modes",
+      "features": [
+        { "id": "type-chart", "label": "Type chart", "counts": "Interactive 18×18 effectiveness matrix." },
+        { "id": "compare", "label": "Compare tool", "counts": "Side-by-side comparison of 2+ Pokémon." },
+        { "id": "team-builder", "label": "Team builder", "counts": "Multi-slot team with coverage/defensive analysis." },
+        { "id": "damage-calc", "label": "Damage calculator", "counts": "Computes damage across level/power/modifiers." },
+        { "id": "moves-dex", "label": "Moves / Items / Abilities dex", "counts": "Standalone searchable dex for moves, items or abilities." },
+        { "id": "minigame", "label": "Who's-that-Pokémon", "counts": "Silhouette quiz or comparable minigame." },
+        { "id": "command-palette", "label": "Command palette", "counts": "⌘K / global jump-to-anything palette." }
+      ]
+    },
+    {
+      "id": "polish",
+      "label": "Polish & Platform",
+      "features": [
+        { "id": "favorites", "label": "Favorites", "counts": "Persistent favorites (localStorage or similar)." },
+        { "id": "theming", "label": "Dark/light theming", "counts": "Theme switch and/or type-themed styling." },
+        { "id": "keyboard-nav", "label": "Keyboard navigation", "counts": "Shortcuts for search/browse/random." },
+        { "id": "responsive", "label": "Responsive design", "counts": "Usable down to phone widths." },
+        { "id": "export", "label": "Export / sharing", "counts": "PNG card export or Showdown import/export." }
+      ]
+    }
+  ]
+}

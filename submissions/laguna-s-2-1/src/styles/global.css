@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@theme {
+  --color-normal: #A8A77A;
+  --color-fire: #EE8130;
+  --color-water: #6390F0;
+  --color-electric: #F7D02C;
+  --color-grass: #7AC74C;
+  --color-ice: #98D0D8;
+  --color-fighting: #C22E28;
+  --color-poison: #A33EA1;
+  --color-ground: #E2AE66;
+  --color-flying: #A98FF3;
+  --color-psychic: #F95587;
+  --color-bug: #A6B91A;
+  --color-ghost: #735797;
+  --color-dragon: #6F35FC;
+  --color-dark: #705848;
+  --color-steel: #B6B6B6;
+  --color-fairy: #D685AD;
+  --color-stellar: #5398D4;
+  --color-unknown: #7C7C7C;
+  --color-pokemon: #F04F4F;
+  --color-pokemon-red: #F04F4F;
+  --color-pokemon-dark: #1A1A1A;
+  --color-pokemon-light: #F5F5F5;
+  --color-pokemon-card: #FFFFFF;
+  --color-pokemon-card-dark: #2A2A2A;
+  --shadow-pokemon-card: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-pokemon-card-dark: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-pokemon-glow: 0 0 20px rgba(240, 79, 79, 0.3);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-pokemon-light);
+    color: #1f2937;
+    transition: colors 300ms;
+  }
+  .dark body {
+    background-color: var(--color-pokemon-dark);
+    color: #e5e7eb;
+  }
+}
+
+@layer components {
+  .pokemon-card {
+    background-color: var(--color-pokemon-card);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-pokemon-card);
+    transition: all 300ms;
+  }
+  .dark .pokemon-card {
+    background-color: var(--color-pokemon-card-dark);
+    box-shadow: var(--shadow-pokemon-card-dark);
+  }
+  .pokemon-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+  .type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: white;
+  }
+  .stat-bar {
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #e5e7eb;
+    overflow: hidden;
+  }
+  .dark .stat-bar {
+    background-color: #374151;
+  }
+  .stat-fill {
+    height: 100%;
+    border-radius: 0.25rem;
+    transition: all 500ms ease-out;
+  }
+}
+
+@layer utilities {
+  .text-type-normal { color: var(--color-normal); }
+  .text-type-fire { color: var(--color-fire); }
+  .text-type-water { color: var(--color-water); }
+  .text-type-electric { color: var(--color-electric); }
+  .text-type-grass { color: var(--color-grass); }
+  .text-type-ice { color: var(--color-ice); }
+  .text-type-fighting { color: var(--color-fighting); }
+  .text-type-poison { color: var(--color-poison); }
+  .text-type-ground { color: var(--color-ground); }
+  .text-type-flying { color: var(--color-flying); }
+  .text-type-psychic { color: var(--color-psychic); }
+  .text-type-bug { color: var(--color-bug); }
+  .text-type-ghost { color: var(--color-ghost); }
+  .text-type-dragon { color: var(--color-dragon); }
+  .text-type-dark { color: var(--color-dark); }
+  .text-type-steel { color: var(--color-steel); }
+  .text-type-fairy { color: var(--color-fairy); }
+  .text-type-stellar { color: var(--color-stellar); }
+  .bg-type-normal { background-color: var(--color-normal); }
+  .bg-type-fire { background-color: var(--color-fire); }
+  .bg-type-water { background-color: var(--color-water); }
+  .bg-type-electric { background-color: var(--color-electric); }
+  .bg-type-grass { background-color: var(--color-grass); }
+  .bg-type-ice { background-color: var(--color-ice); }
+  .bg-type-fighting { background-color: var(--color-fighting); }
+  .bg-type-poison { background-color: var(--color-poison); }
+  .bg-type-ground { background-color: var(--color-ground); }
+  .bg-type-flying { background-color: var(--color-flying); }
+  .bg-type-psychic { background-color: var(--color-psychic); }
+  .bg-type-bug { background-color: var(--color-bug); }
+  .bg-type-ghost { background-color: var(--color-ghost); }
+  .bg-type-dragon { background-color: var(--color-dragon); }
+  .bg-type-dark { background-color: var(--color-dark); }
+  .bg-type-steel { background-color: var(--color-steel); }
+  .bg-type-fairy { background-color: var(--color-fairy); }
+  .bg-type-stellar { background-color: var(--color-stellar); }
+  .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+  .animate-fade-up { animation: fadeUp 0.4s ease-out; }
+  .animate-slide-left { animation: slideLeft 0.3s ease-out; }
+  .animate-pulse-slow { animation: pulse 2s infinite; }
+  .animate-bounce-subtle { animation: bounce 0.5s ease-in-out; }
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideLeft {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(0); }
+  }
+}

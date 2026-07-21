@@ -1,0 +1,35 @@
+{
+  "name": "pokedex-laguna-s-2-1",
+  "compatibility_date": "2026-06-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "POKEAPI_BASE_URL": "https://pokeapi.co/api/v2"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "POKEAPI_CACHE",
+      "id": "4a35a610fcfe4c69a60a7222da908bfb"
+    },
+    {
+      "binding": "USER_DATA",
+      "id": "bd0a06d57c6a4161a4708ee684cdafbe"
+    }
+  ],
+  "migrations": [
+    {
+      "tag": "v1",
+      "sql": "CREATE TABLE IF NOT EXISTS favorites (id INTEGER PRIMARY KEY, user_id TEXT, pokemon_id INTEGER, created_at TEXT);"
+    },
+    {
+      "tag": "v2",
+      "sql": "CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY, user_id TEXT, name TEXT, pokemon_ids TEXT, created_at TEXT);"
+    },
+    {
+      "tag": "v3",
+      "sql": "CREATE TABLE IF NOT EXISTS search_history (id INTEGER PRIMARY KEY, user_id TEXT, query TEXT, created_at TEXT);"
+    }
+  ]
+}

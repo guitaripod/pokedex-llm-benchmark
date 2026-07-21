@@ -1,0 +1,100 @@
+.dex-console {
+  margin-bottom: 26px;
+}
+
+.dex-console h1 {
+  margin: 4px 0 18px;
+}
+
+.dex-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px 4px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  color: var(--text-faint);
+  transition: border-color var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease);
+  margin-bottom: 16px;
+}
+
+.dex-search:focus-within {
+  border-color: var(--dex-red);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--dex-red) 22%, transparent);
+}
+
+.dex-search-input {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background: transparent;
+  font-size: 1.08rem;
+  font-family: var(--font-body);
+}
+
+.dex-search-input:focus {
+  outline: none;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.type-chip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+}
+
+.filter-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border-strong);
+  margin-inline: 6px;
+}
+
+.dex-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 16px;
+}
+
+.dex-toolbar .readout {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.toolbar-controls {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 12px;
+}
+
+.dex-grid .poke-card-wrap {
+  content-visibility: auto;
+  contain-intrinsic-size: 176px 214px;
+}
+
+@media (max-width: 560px) {
+  .dex-grid {
+    grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+    gap: 9px;
+  }
+}

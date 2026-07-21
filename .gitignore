@@ -1,0 +1,16 @@
+# Build output & dependencies (may appear inside vendored submissions if built locally)
+node_modules/
+dist/
+build/
+.wrangler/
+.cache/
+.parcel-cache/
+.vite/
+
+# Regenerable PokéAPI data — vendored submissions ship code, not generated blobs.
+# Rebuild inside a submission with its own build script (see each dataNote).
+submissions/*/public/data/
+
+# OS / editor
+.DS_Store
+*.log

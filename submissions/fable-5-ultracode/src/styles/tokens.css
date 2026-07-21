@@ -1,0 +1,94 @@
+:root {
+  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --font-body: 'Figtree Variable', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  --bg: #0e1116;
+  --bg-deep: #0a0d11;
+  --surface: #151b23;
+  --surface-2: #1b242f;
+  --surface-3: #242f3c;
+  --border: #29323e;
+  --border-strong: #3a4552;
+  --text: #e9ecf1;
+  --text-dim: #9aa6b2;
+  --text-faint: #647080;
+  --ink-on-type: #10141a;
+
+  --dex-red: #e3350d;
+  --dex-red-hi: #ff5a2e;
+  --gold: #f2c24b;
+
+  --lcd-1: #9bbc0f;
+  --lcd-2: #8bac0f;
+  --lcd-3: #306230;
+  --lcd-4: #0f380f;
+
+  --accent: var(--dex-red);
+  --accent-2: var(--dex-red);
+  --wash: color-mix(in oklab, var(--accent) 13%, var(--bg));
+  --wash-strong: color-mix(in oklab, var(--accent) 24%, var(--bg));
+  --accent-soft: color-mix(in oklab, var(--accent) 22%, var(--surface));
+  --accent-text: color-mix(in oklab, var(--accent) 70%, var(--text));
+
+  --type-normal: #a8a77a;
+  --type-fighting: #c22e28;
+  --type-flying: #a98ff3;
+  --type-poison: #a33ea1;
+  --type-ground: #e2bf65;
+  --type-rock: #b6a136;
+  --type-bug: #a6b91a;
+  --type-ghost: #735797;
+  --type-steel: #b7b7ce;
+  --type-fire: #ee8130;
+  --type-water: #6390f0;
+  --type-grass: #7ac74c;
+  --type-electric: #f7d02c;
+  --type-psychic: #f95587;
+  --type-ice: #96d9d6;
+  --type-dragon: #6f35fc;
+  --type-dark: #705746;
+  --type-fairy: #d685ad;
+
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.25);
+  --shadow-2: 0 8px 28px -8px rgb(0 0 0 / 0.45);
+
+  --dur-1: 140ms;
+  --dur-2: 240ms;
+  --dur-3: 420ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.21, 1);
+
+  --page-max: 1240px;
+  --page-pad: clamp(16px, 4vw, 32px);
+  --nav-h: 60px;
+
+  --dot-grid: rgb(255 255 255 / 0.045);
+}
+
+[data-theme='light'] {
+  --bg: #fafaf7;
+  --bg-deep: #f1f0ea;
+  --surface: #ffffff;
+  --surface-2: #f4f3ee;
+  --surface-3: #eceae2;
+  --border: #e2e0d6;
+  --border-strong: #cfccbf;
+  --text: #1b2129;
+  --text-dim: #59636e;
+  --text-faint: #8b94a0;
+
+  --shadow-1: 0 1px 2px rgb(27 33 41 / 0.07);
+  --shadow-2: 0 10px 30px -10px rgb(27 33 41 / 0.18);
+
+  --wash: color-mix(in oklab, var(--accent) 9%, var(--bg));
+  --wash-strong: color-mix(in oklab, var(--accent) 17%, var(--bg));
+  --accent-soft: color-mix(in oklab, var(--accent) 15%, var(--surface));
+  --accent-text: color-mix(in oklab, var(--accent) 80%, var(--text));
+
+  --dot-grid: rgb(27 33 41 / 0.05);
+}

@@ -1,0 +1,27 @@
+name: validate
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Recompute metrics
+        run: node scripts/compute-metrics.mjs
+      - name: Regenerate all artifacts
+        run: |
+          node scripts/gen-entries.mjs
+          node scripts/gen-readme.mjs
+      - name: Validate manifest + README in sync
+        run: node scripts/validate.mjs
+      - name: Fail if generated files are stale
+        run: |
+          git diff --exit-code -- submissions.json README.md 'submissions/*/ENTRY.md' \
+            || (echo '::error::Generated files out of date — run: node scripts/compute-metrics.mjs && node scripts/gen-entries.mjs && node scripts/gen-readme.mjs' && exit 1)
