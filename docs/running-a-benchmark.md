@@ -51,13 +51,13 @@ Hand that prompt to an agent (in this project, ask Claude to grade `<id>` agains
 node scripts/grade.mjs --submission <id> --merge <grader-output.json>
 ```
 
-**Autonomous via opencode (single pass).** Fully hands-off, uses a judge model:
+**Autonomous via opencode (two-pass).** Fully hands-off — grades, then adversarially verifies, with a judge model:
 
 ```bash
 node scripts/grade.mjs --submission <id> --model <judge-model>
 ```
 
-`grade.mjs` rejects any output that isn't all 30 features graded 0–3 with the four 0–10 axes (see [RUBRIC.md](../RUBRIC.md) for what the grades mean). Grade against the vendored source, not the README; a Claude Code session can run the two-pass grade-then-adversarially-verify flow that produced the committed scores.
+`grade.mjs` rejects any output that isn't all 30 features graded 0–3 with the four 0–10 axes (see [RUBRIC.md](../RUBRIC.md) for what the grades mean), and on merge it stamps `grading.gradedBy / gradedOn / rubricVersion`. Grade against the vendored source, not the README.
 
 ## 4. Regenerate and validate
 
@@ -72,4 +72,6 @@ node scripts/validate.mjs          # must pass before committing
 
 ## Calibration
 
-Grades are LLM-judged, so scale can drift between sessions. To keep a new submission comparable to the existing seven, grade it in the same pass/session as at least one already-graded submission, or re-grade the whole set together when adding several at once. The feature checklist never moves — only the grades — which keeps columns stable.
+Grades are LLM-judged, so scale could drift between sessions — the **fixed anchors** in [`grading/PROMPT.md`](../grading/PROMPT.md) are what prevent it. Grade a new submission against those anchors and it stays comparable to the existing set; you do **not** re-grade or co-grade the others, and their scores never change. This is append-only: adding a model is O(1), and the leaderboard stays reproducible.
+
+Re-grade the whole set together **only** when you deliberately bump `rubricVersion` in [`grading/config.json`](../grading/config.json) — a breaking change to the scale — then re-grade every submission so all `grading.rubricVersion` match. See [RUBRIC.md](../RUBRIC.md#staying-comparable-as-models-are-added).

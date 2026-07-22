@@ -14,5 +14,6 @@ submissions/*/public/data/
 # OS / editor
 .DS_Store
 *.log
+
+# Generated locally, not committed
 grading/prompts/
-node_modules/

@@ -9,6 +9,7 @@ const manifest = JSON.parse(readFileSync(join(ROOT, "submissions.json"), "utf8")
 const checklist = JSON.parse(
   readFileSync(join(ROOT, "docs", "feature-checklist.json"), "utf8"),
 );
+const config = JSON.parse(readFileSync(join(ROOT, "grading", "config.json"), "utf8"));
 const validIds = new Set(
   checklist.categories.flatMap((c) => c.features.map((f) => f.id)),
 );
@@ -49,15 +50,16 @@ for (const s of manifest.submissions) {
     const g = s.grading;
     if (!g || !g.gradedBy || !g.gradedOn || typeof g.rubricVersion !== "number")
       errors.push(`${tag}: graded but missing grading provenance (gradedBy/gradedOn/rubricVersion)`);
-    else if (g.rubricVersion !== manifest.rubricVersion)
-      errors.push(`${tag}: graded under rubric v${g.rubricVersion} but current is v${manifest.rubricVersion} — re-grade or bump`);
+    else if (g.rubricVersion !== config.rubricVersion)
+      errors.push(`${tag}: graded under rubric v${g.rubricVersion} but current is v${config.rubricVersion} (grading/config.json) — re-grade or bump`);
   }
-  if (!s.provenance || typeof s.provenance.oneShot !== "boolean")
-    errors.push(`${tag}: missing provenance (oneShot/autonomous/verified)`);
+  const pv = s.provenance;
+  if (!pv || typeof pv.oneShot !== "boolean" || typeof pv.autonomous !== "boolean" || !pv.verified)
+    errors.push(`${tag}: incomplete provenance (need oneShot / autonomous / verified)`);
 }
 
-if (typeof manifest.rubricVersion !== "number")
-  errors.push("manifest: missing top-level rubricVersion");
+if (typeof config.rubricVersion !== "number")
+  errors.push("grading/config.json: missing numeric rubricVersion");
 
 const current = readFileSync(join(ROOT, "README.md"), "utf8");
 if (current !== loadAndRender().text) {

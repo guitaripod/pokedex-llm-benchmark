@@ -47,7 +47,7 @@ Grade against these FIXED reference points from already-scored submissions so sc
 - **codeQuality** — 9: Fable-5-ultracode / Opus-4.8 (modular, strongly typed, no rot). 3: Laguna-S-2.1 (mis-wired references, dead tokens, broken imports).
 - **architecture** — 9: Fable-5-ultracode (entire dataset prebuilt into static shards, zero runtime API). 3: Laguna (intended prebuild is non-functional, so every page live-fetches thousands of resources).
 - **uxDesign** — 9: Opus-4.8 / Fable-5-ultracode (polished, animated, accessible, responsive). 4: Laguna (rough, broken views).
-- **robustness** — 9: Fable-5-ultracode (works end-to-end, correct logic). 6.5: DeepSeek-V4-Flash (works, minor issues). 4.5: Grok (filters halt infinite-loading; dual-type matchups wrong). 2: Laguna (crashes on load).
+- **robustness** — 9: Fable-5-ultracode (works end-to-end, correct logic). 6.5: DeepSeek-V4-Flash (works, minor issues). 4.5: Grok (filters halt infinite-loading; dual-type matchups wrong). 2: Laguna (loads and renders, then throws a JS exception and the detail route fails — runtime verdict: errors).
 
 ## Rules
 
