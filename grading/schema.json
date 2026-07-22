@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Graded submission entry",
+  "description": "The object a grader must produce for one submission. Merged into submissions.json (features, scores, assessment). See grading/PROMPT.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "features", "scores", "assessment"],
+  "properties": {
+    "id": { "type": "string" },
+    "features": {
+      "type": "array",
+      "minItems": 30,
+      "maxItems": 30,
+      "description": "Exactly one grade per id in docs/feature-checklist.json",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "grade", "evidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "grade": {
+            "type": "integer",
+            "enum": [0, 1, 2, 3],
+            "description": "0 absent, 1 shallow/broken, 2 solid, 3 exceptional"
+          },
+          "evidence": {
+            "type": "string",
+            "description": "File + brief note on what makes it that grade; empty string only if grade 0"
+          }
+        }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codeQuality", "architecture", "uxDesign", "robustness"],
+      "properties": {
+        "codeQuality": { "type": "number", "minimum": 0, "maximum": 10 },
+        "architecture": { "type": "number", "minimum": 0, "maximum": 10 },
+        "uxDesign": { "type": "number", "minimum": 0, "maximum": 10 },
+        "robustness": { "type": "number", "minimum": 0, "maximum": 10 }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "strengths", "weaknesses", "standout"],
+      "properties": {
+        "summary": { "type": "string" },
+        "strengths": { "type": "array", "items": { "type": "string" } },
+        "weaknesses": { "type": "array", "items": { "type": "string" } },
+        "standout": { "type": "string" }
+      }
+    }
+  }
+}

@@ -14,3 +14,4 @@ submissions/*/public/data/
 # OS / editor
 .DS_Store
 *.log
+grading/prompts/

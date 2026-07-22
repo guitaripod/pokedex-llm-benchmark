@@ -148,15 +148,23 @@ ${matrix()}
 
 ${entryList()}
 
-## Adding a model
+## Running a new model
 
-New model, same brief? One command vendors the repo, computes metrics, and wires it into the tables:
+The benchmark runs itself. Hand any model the canonical prompt and it builds + deploys its own Pokédex fully autonomously via [opencode](https://opencode.ai) (it uses \`gh\` + \`wrangler\` itself):
 
 \`\`\`bash
-node scripts/add-submission.mjs <github-repo-url> --model "<Name>" --effort <level>
+node scripts/run-benchmark.mjs --model opencode/deepseek-v4-flash-free --name deepseek-v4-flash
 \`\`\`
 
-Then grade it against the checklist and regenerate. Full walkthrough: **[docs/adding-a-model.md](docs/adding-a-model.md)**.
+Then ingest, grade against the pinned rubric, and regenerate:
+
+\`\`\`bash
+node scripts/add-submission.mjs <repo-url> --model "<Name>" --effort <level>
+node scripts/grade.mjs --submission <id>        # then merge the grader's JSON
+node scripts/gen-entries.mjs && node scripts/gen-readme.mjs && node scripts/validate.mjs
+\`\`\`
+
+Full walkthrough — run → ingest → grade → regenerate: **[docs/running-a-benchmark.md](docs/running-a-benchmark.md)**.
 
 ## Repository layout
 
@@ -166,8 +174,9 @@ Then grade it against the checklist and regenerate. Full walkthrough: **[docs/ad
 | [\`submissions/<id>/\`](submissions/) | Each model's vendored source + \`ENTRY.md\` scorecard. |
 | [\`THE_BRIEF.md\`](THE_BRIEF.md) | The exact task every model was given. |
 | [\`RUBRIC.md\`](RUBRIC.md) | Scoring model: depth grades, craft axes, and the composite. |
-| [\`docs/\`](docs/) | Methodology, feature checklist, how to add a model. |
-| [\`scripts/\`](scripts/) | \`compute-metrics\` · \`gen-entries\` · \`gen-readme\` · \`add-submission\` · \`validate\`. |
+| [\`grading/\`](grading/) | Pinned grading prompt + JSON schema — the reproducible scorer. |
+| [\`docs/\`](docs/) | Methodology, feature checklist, running a benchmark. |
+| [\`scripts/\`](scripts/) | \`run-benchmark\` · \`add-submission\` · \`grade\` · \`compute-metrics\` · \`gen-entries\` · \`gen-readme\` · \`validate\`. |
 
 ## Reproducing the tables
 

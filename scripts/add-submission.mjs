@@ -108,4 +108,4 @@ console.log(`\n✓ Added "${id}" (${analysis.metrics.sourceLoc} LOC, ${analysis.
 console.log("\nNext:");
 console.log(`  1. Score it against docs/feature-checklist.json → fill "features", "scores", "assessment" for "${id}" in submissions.json`);
 console.log(`  2. node scripts/gen-entries.mjs && node scripts/gen-readme.mjs && node scripts/validate.mjs`);
-console.log("\nSee docs/adding-a-model.md for the full flow.");
+console.log("\nSee docs/running-a-benchmark.md for the full flow.");
