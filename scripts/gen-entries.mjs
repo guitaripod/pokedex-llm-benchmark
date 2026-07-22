@@ -52,6 +52,7 @@ function entry(sub) {
   if (sub.metrics) L.push(`| **Source** | ${sub.metrics.sourceLoc.toLocaleString("en-US")} LOC · ${sub.metrics.sourceFiles} files · ${sub.metrics.dependencies}+${sub.metrics.devDependencies} deps |`);
   if (scored) L.push(`| **Feature depth** | ${featureQuality(sub)} / ${MAX_QUALITY} (${solid}/${TOTAL} features solid or better) |`);
   L.push("");
+  if (sub.notes) L.push(`> ⚙️ **Run note:** ${sub.notes}\n`);
 
   if (sub.scores) {
     L.push(`## Scorecard\n`);

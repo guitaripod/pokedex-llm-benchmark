@@ -209,205 +209,6 @@
       }
     },
     {
-      "id": "deepseek-v4",
-      "model": "DeepSeek",
-      "provider": "DeepSeek",
-      "modelVersion": "V4",
-      "effort": "default",
-      "date": "2026-07-01",
-      "sourceRepo": "https://github.com/guitaripod/pokedex-deepseek-v4",
-      "liveUrl": "https://pokedex-deepseek-v4.pages.dev",
-      "platform": "Cloudflare Pages",
-      "metrics": {
-        "sourceLoc": 1535,
-        "sourceFiles": 4,
-        "sourceBytes": 44956,
-        "dependencies": 0,
-        "devDependencies": 1
-      },
-      "stack": {
-        "framework": "vanilla",
-        "language": "javascript",
-        "bundler": "none",
-        "styling": "hand-rolled css"
-      },
-      "dataStrategy": "edge-proxy",
-      "features": [
-        {
-          "id": "national-dex",
-          "grade": 2,
-          "evidence": "app.js:57-64 fetchAllPokemon fetches pokemon?limit=100000 and maps every result (id+name) into state.allPokemon; full ~1302 list with load-more (app.js:505) + IntersectionObserver infinite scroll (app.js:511-517) + result counts (app.js:187-188). Works, but cards fetch types one-by-one live (fetchCardTypes app.js:212) instead of from baked data, so solid not exceptional."
-        },
-        {
-          "id": "search",
-          "grade": 2,
-          "evidence": "getFilteredPokemon app.js:86-94 client-side substring name match OR exact numeric id on fully-loaded state.allPokemon; debounced 200ms input app.js:481-492 + clear button app.js:493-502. No fuzzy/number-range, so solid not best-in-class."
-        },
-        {
-          "id": "type-filter",
-          "grade": 1,
-          "evidence": "renderTypeFilters app.js:106-142 builds all 18 multi-select chips, but getFilteredPokemon app.js:95-101 filters against state.pokemonCache populated only per-rendered card; pending promises are objects without .types so they also fail the filter. Effectively filters only the already-scrolled subset, never the full dex — present but broken as a dex filter."
-        },
-        {
-          "id": "generation-filter",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "sort",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "advanced-filter",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "shareable-urls",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "artwork",
-          "grade": 2,
-          "evidence": "Official-artwork PNGs on cards (app.js:192) with sprite onerror fallback (app.js:201), and 200px detail artwork (app.js:269,291) with hover scale (style.css:506). No zoom/multi-sprite gallery, so a 2."
-        },
-        {
-          "id": "shiny",
-          "grade": 2,
-          "evidence": "Shiny official-artwork URL app.js:270; toggle button app.js:294 with delegated handler app.js:469-477 swaps #detailArtwork src and relabels. Real working toggle but detail-only (cards not toggleable)."
-        },
-        {
-          "id": "cries",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "stats-viz",
-          "grade": 2,
-          "evidence": "app.js:314-333 per-stat bars with fill %, per-stat color, BST total row; animateStats app.js:364-372 double-rAF triggers CSS width transition (style.css:641-647). Bars only, no radar; polished so a solid 2."
-        },
-        {
-          "id": "abilities",
-          "grade": 1,
-          "evidence": "app.js:335-343 lists ability names with a Hidden badge but fetches no ability effect/description text — thin."
-        },
-        {
-          "id": "evolution",
-          "grade": 1,
-          "evidence": "renderEvolution app.js:374-408 walks the chain but only node.evolves_to[0], dropping every branch (Eevee/Wurmple/Slowpoke); shows no evolution methods/conditions. Nodes are clickable, but branch-drop is a correctness gap → shallow."
-        },
-        {
-          "id": "learnsets",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "type-matchups",
-          "grade": 2,
-          "evidence": "renderEffectiveness app.js:410-449 fetches each type's damage_relations and correctly multiplies defensive multipliers across both types (0/¼/½/2/4×) with no_damage overriding to 0, sorted and color-coded. Dual-type combination is correct; flat list omits neutral types and weakness/resist grouping, so solid not exceptional."
-        },
-        {
-          "id": "breeding",
-          "grade": 1,
-          "evidence": "app.js:282-311 shows correct gender-ratio math (gender_rate), egg groups, and catch rate as meta tiles, but no egg cycles/hatch time, compatibility, or EV yield — thin."
-        },
-        {
-          "id": "forms",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "flavor-entries",
-          "grade": 1,
-          "evidence": "app.js:272-273 picks a single first English flavor_text entry; no version-grouped list of Pokédex entries — thin."
-        },
-        {
-          "id": "type-chart",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "compare",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "team-builder",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "damage-calc",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "moves-dex",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "minigame",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "command-palette",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "favorites",
-          "grade": 0,
-          "evidence": ""
-        },
-        {
-          "id": "theming",
-          "grade": 2,
-          "evidence": "Cohesive type-themed styling: per-card accent bar + border from primary type (app.js:224-225), detail header radial/linear gradients from primaryColor (app.js:288-289), type-colored badges; fixed dark palette in :root (style.css:2-50). Satisfies the type-themed branch but NO dark/light toggle, so a 2."
-        },
-        {
-          "id": "keyboard-nav",
-          "grade": 1,
-          "evidence": "app.js:464-466 Escape-to-close-modal handler + focusable search input; no arrow/tab grid navigation, focus trap, or tabindex management — present but thin."
-        },
-        {
-          "id": "responsive",
-          "grade": 2,
-          "evidence": "auto-fill minmax grids (style.css:281) plus @media 700px (stack header, 140px cards, 2-col meta, resized modal/artwork) and 420px (2-col grid, smaller chips) at style.css:783-803 — genuinely usable on phone widths."
-        },
-        {
-          "id": "export",
-          "grade": 0,
-          "evidence": "No PNG card export and no Pokémon Showdown import/export."
-        }
-      ],
-      "scores": {
-        "codeQuality": 7,
-        "architecture": 6,
-        "uxDesign": 7,
-        "robustness": 6
-      },
-      "assessment": {
-        "summary": "A tightly-built vanilla-JS single-page Pokédex (588-line app.js + CSS + a Cloudflare Pages Functions edge proxy) that does a focused set of things well: full national dex with infinite scroll, name/number search, a polished type-themed dark UI, and a rich detail modal (stats, abilities, evolution, dual-type matchups, breeding meta, shiny toggle). It ships roughly eight solid features and stops there — the bulk of the 30-feature space (sort, generation/advanced filters, shareable URLs, favorites, compare, team builder, damage calc, moves, cries, minigame, command palette, export) is entirely absent.",
-        "strengths": [
-          "Clean, consistent, comment-free code with sensible helpers ($/$$, padNum, clamp) and clear section structure; no dead code or copy-paste",
-          "Correct dual-type defensive matchup math with immunity override, plus good defensive coverage: init timeout race, image onerror fallbacks, guarded species fetch, and try/catch around effectiveness rendering",
-          "Genuinely polished UX: card fade-in stagger, animated stat bars, modal slide-in, hover scale, toast, loading/empty states, and cohesive per-type theming across cards and detail header",
-          "Edge-proxy architecture with proper cache headers (s-maxage=604800) and client-side promise-dedup caching"
-        ],
-        "weaknesses": [
-          "Type-filter is architecturally broken — it filters only the already-scrolled subset because there's no prebuilt type index; live per-card type fetches (N+1) drive both this bug and slow card population",
-          "Evolution only follows evolves_to[0], silently dropping every branched line (Eevee, Wurmple, Slowpoke, Tyrogue) and showing no evolution conditions",
-          "A failed evolution-chain fetch runs openDetail's catch, wiping an already-rendered detail modal instead of degrading gracefully",
-          "Thin on data depth (single flavor entry, ability names without effect text, no version selector) and covers only ~8 of 30 features"
-        ],
-        "standout": "cacheWithResolve (app.js:66-74) stores the in-flight promise so concurrent callers dedupe to one fetch — a nice touch, but it's also the root of the type-filter bug: a pending promise is an object without .types, so it silently fails the filter check just like uncached entries."
-      }
-    },
-    {
       "id": "fable-5-low",
       "model": "Fable 5",
       "provider": "Anthropic",
@@ -1397,6 +1198,207 @@
         ],
         "standout": "The evolution tab looks implemented (recursive EvolutionNode, ~20 parsed condition types) but is silently broken: it gates child rendering on node.evolution_details.length>0, which is always empty for a chain root, so every Pokemon's evolution tab shows a single Pokemon and no chain (verified: 1 of 3 nodes render)."
       }
+    },
+    {
+      "id": "deepseek-v4-flash",
+      "model": "DeepSeek V4 Flash",
+      "provider": "DeepSeek",
+      "modelVersion": "V4 Flash",
+      "effort": "default",
+      "date": "2026-07-22",
+      "sourceRepo": "https://github.com/guitaripod/pokedex-deepseek-v4-flash",
+      "liveUrl": "https://pokedex-deepseek-v4-flash.pages.dev",
+      "platform": "Cloudflare Pages",
+      "metrics": {
+        "sourceLoc": 2406,
+        "sourceFiles": 27,
+        "sourceBytes": 94086,
+        "dependencies": 7,
+        "devDependencies": 7
+      },
+      "stack": {
+        "framework": "react",
+        "language": "typescript",
+        "bundler": "vite",
+        "styling": "tailwind"
+      },
+      "dataStrategy": "live-api",
+      "features": [
+        {
+          "id": "national-dex",
+          "grade": 2,
+          "evidence": "PokemonGrid.tsx GEN_LIMITS/GEN_OFFSETS (sum exactly 1025, offsets align cumulatively); ids=offset+i+1 correctly generate each gen's range so all 1025 are reachable. But selectedGen defaults to null -> loads only Kanto 151; there is NO 'all' view, so you never see more than one generation (max 156, gen 5) at once despite the 'National Pokedex - Complete database' title."
+        },
+        {
+          "id": "search",
+          "grade": 2,
+          "evidence": "SearchBar.tsx debounced 300ms -> pokeapi.searchPokemon: numeric->/pokemon/id, else exact name, else fetch full 1025 list and substring-filter to 20 full records. Works, but every keystroke query hits PokeAPI over the network (up to 20 detail fetches on fallback); not the client-side/no-round-trip search the checklist asks for."
+        },
+        {
+          "id": "type-filter",
+          "grade": 2,
+          "evidence": "PokemonGrid.tsx toggleType + filtered useMemo uses selectedTypes.every() (AND of multiple types) against loaded set (lines 46-50). Multi-select AND works but only filters the currently-loaded generation/151, not the full dex."
+        },
+        {
+          "id": "generation-filter",
+          "grade": 2,
+          "evidence": "PokemonGrid.tsx GENERATIONS 1-9 buttons re-fetch with correct GEN_OFFSETS+GEN_LIMITS per gen; region labels (Kanto..Paldea) from types/pokemon.ts GENERATIONS. Solid, working; single-select toggle."
+        },
+        {
+          "id": "sort",
+          "grade": 2,
+          "evidence": "UPGRADE. PokemonGrid.tsx has a working sort dropdown (state line 22; sort logic lines 51-56; UI lines 75-84) over id (asc), name (localeCompare), height (desc), weight (desc), applied live via useMemo. Working multi-key sort; no asc/desc direction toggle and only sorts the currently-loaded gen set."
+        },
+        {
+          "id": "advanced-filter",
+          "grade": 1,
+          "evidence": "Beyond single-toggle: type multi-select uses AND semantics (every()) and combines live with the generation filter and the sort in one useMemo. But no numeric/stat-range, ability, legendary, height/weight, or egg-group filters and no dedicated advanced-filter panel; incremental value over type-filter+generation-filter is small."
+        },
+        {
+          "id": "shareable-urls",
+          "grade": 1,
+          "evidence": "Detail pages use clean deep-linkable routes /pokemon/:id (App.tsx), which are shareable. But no URL state anywhere else: pokedex type/gen/sort/search, compare selections, and type-calc selections are all component useState with no searchParams (grep: no useSearchParams/URLSearchParams), so filtered views and comparisons cannot be shared."
+        },
+        {
+          "id": "artwork",
+          "grade": 2,
+          "evidence": "PokemonDetailPage.tsx renders official-artwork front_default at w-64 h-64 with a type-colored blurred glow backdrop (lines 90-100); getPokemonImageUrl -> PokeAPI official-artwork PNGs. Cards/home also use official-artwork. Works."
+        },
+        {
+          "id": "shiny",
+          "grade": 2,
+          "evidence": "PokemonDetailPage.tsx spriteMode toggle switches official-artwork front_default vs front_shiny via Normal / 'Shiny' buttons (lines 60-118). Works on the detail page only; grid/compare/search show non-shiny."
+        },
+        {
+          "id": "cries",
+          "grade": 0,
+          "evidence": "No audio at all: grep for cry/cries/Audio/.ogg/.mp3 across src returns nothing. Cries not implemented."
+        },
+        {
+          "id": "stats-viz",
+          "grade": 3,
+          "evidence": "StatBar.tsx: animated per-stat bars with per-stat STAT_MAX normalization + 5-tier color thresholds, PLUS a hand-built SVG StatRadar hexagon (concentric rings, vertex dots, type-colored fill); detail page shows both + BST total. Genuinely strong dual viz. Flaw: StatRadar labels/axis lines use getPoint(i, radius+14) which passes 86 through the /255 normalizer (line 55), clustering all labels at ~24px from center instead of the rim."
+        },
+        {
+          "id": "abilities",
+          "grade": 1,
+          "evidence": "PokemonDetailPage.tsx and ComparePage.tsx list ability names with an is_hidden (Hidden) marker. But names only: no ability effect/description text, no tooltips, no getAbility fetch (grep: no getAbility; effect_entries exists only on the Move type). Shallow display."
+        },
+        {
+          "id": "evolution",
+          "grade": 2,
+          "evidence": "EvolutionChain.tsx fetches chain, renders sprites with trigger + min_level + item conditions. But flattenChain() linearizes branches (base + DFS of every child sequentially), so branching lines (Eevee's 8, Wurmple) render as one misleading sequence with arrows between siblings; only level/item shown, not happiness/trade/time/etc."
+        },
+        {
+          "id": "learnsets",
+          "grade": 2,
+          "evidence": "MovesSection.tsx: moves filterable by learn method (dropdown from actual methods), searchable, sortable by level/name, deduped to min level. But capped at 50 rows (slice(0,50)) and the Type column is a permanently-empty placeholder <span> with a stray '{/* Type info fetched lazily */}' comment (lines 111-114)."
+        },
+        {
+          "id": "type-matchups",
+          "grade": 2,
+          "evidence": "TypeEffectiveness.tsx computes per-Pokemon DEFENSIVE effectiveness from live getAllTypes() damage_relations, multiplying half(0.5)/double(2) across dual types and zeroing on no_damage_from; grouped Immune/Weak/Resists. Math is correct including immunities (multiplier reset per attacker, immunity dominates)."
+        },
+        {
+          "id": "breeding",
+          "grade": 2,
+          "evidence": "PokemonDetailPage.tsx Profile/Classification blocks show egg_groups, gender ratio (formatGenderRatio handles -1 genderless and rate/8), hatch_counter as cycles + steps (*257), growth rate, capture rate %. Missing EV yield (stats.effort is in the type but never displayed)."
+        },
+        {
+          "id": "forms",
+          "grade": 0,
+          "evidence": "No alternate-form handling: grep for varieties/mega/gigantamax/regional/form_default returns nothing. Grid loads base species by id 1..1025 and detail loads by id; no form switcher."
+        },
+        {
+          "id": "flavor-entries",
+          "grade": 1,
+          "evidence": "PokemonDetailPage.tsx shows a single flavor text (filters en entries, takes .at(-1)) with sanitizeFlavorText cleanup. No version/game selector and no browsing of multiple entries; one blurb only."
+        },
+        {
+          "id": "type-chart",
+          "grade": 2,
+          "evidence": "TypeCalculatorPage.tsx 'All Type Matchups' renders a full 18x18 offensive matrix from each attacker's damage_relations double/half/no_damage_to with correct 0/0.5/1/2 values and color coding. Complete and correct, but axis headers are bare color swatches (no type labels) and cells aren't clickable."
+        },
+        {
+          "id": "compare",
+          "grade": 2,
+          "evidence": "ComparePage.tsx side-by-side of exactly two Pokemon: dual stat bars (red vs blue, normalized to per-row max), types, abilities (hidden flagged), height/weight/base-xp, VS divider. Works but hard-limited to 2 (not 2+), no radar, no defensive/coverage analysis."
+        },
+        {
+          "id": "team-builder",
+          "grade": 0,
+          "evidence": "No team builder: no route (App.tsx has only home/pokedex/pokemon/compare/type-calc), no team component, no team state/persistence anywhere in src."
+        },
+        {
+          "id": "damage-calc",
+          "grade": 1,
+          "evidence": "TypeCalculatorPage.tsx provides an interactive attacker x up-to-2-defenders effectiveness calculator producing 0/0.25/0.5/1/2/4 multipliers with labels. But it is a type-matchup calculator, not a damage calculator: no level, base power, attack/defense stats, STAB, or damage formula anywhere."
+        },
+        {
+          "id": "moves-dex",
+          "grade": 0,
+          "evidence": "No standalone move dex: getMove() is defined in pokeapi.ts but never called (grep confirms), and there is no /moves route or global move browser. The per-Pokemon MovesSection is the learnset, credited separately."
+        },
+        {
+          "id": "minigame",
+          "grade": 0,
+          "evidence": "No minigame: grep for minigame/whos-that/guess/quiz returns nothing. Not implemented."
+        },
+        {
+          "id": "command-palette",
+          "grade": 0,
+          "evidence": "No command palette: grep for cmdk/command-palette/ctrl+k/cmd+k/metaKey returns nothing. SearchBar is a click-driven dropdown with no open shortcut."
+        },
+        {
+          "id": "favorites",
+          "grade": 0,
+          "evidence": "No favorites/bookmarks: grep for favorite/localStorage/sessionStorage/bookmark returns no persistence. No way to pin or save Pokemon."
+        },
+        {
+          "id": "theming",
+          "grade": 2,
+          "evidence": "Pervasive type-themed styling: getTypeColor drives card glows, detail hero gradients, radar fill, badges via inline styles. NOTE: index.css @theme --color-type-* tokens and TYPE_GRADIENTS/getTypeGradient are defined but never used (components use inline getTypeColor). No light/dark toggle (html hardcoded class='dark', body bg-gray-950), but checklist accepts type-themed styling."
+        },
+        {
+          "id": "keyboard-nav",
+          "grade": 0,
+          "evidence": "No meaningful keyboard navigation: only handler is onKeyDown Enter-to-submit in ComparePage inputs (form submit, not nav). SearchBar results have no arrow-key/Enter selection, no '/' focus shortcut, grid/detail not keyboard-navigable."
+        },
+        {
+          "id": "responsive",
+          "grade": 2,
+          "evidence": "Thorough responsive design: grid-cols-2 -> xl:grid-cols-6 (PokemonGrid/home), sm/md/lg breakpoints throughout, nav labels hidden below md (Header.tsx), search hidden below sm, flex-col->row switches, sticky blurred header, detail lg:grid-cols-5. Usable at phone widths."
+        },
+        {
+          "id": "export",
+          "grade": 0,
+          "evidence": "No export: grep for download/toBlob/csv/clipboard/navigator.share returns nothing. No JSON/CSV/image export of any data."
+        }
+      ],
+      "scores": {
+        "codeQuality": 7,
+        "architecture": 6.5,
+        "uxDesign": 7.5,
+        "robustness": 6.5
+      },
+      "assessment": {
+        "summary": "A polished, visually strong React/TS Pokedex covering the core surface well: gen-by-gen national dex, network search, AND-multi-type + generation + sort filtering, a rich detail page (animated stat bars + SVG radar, correct defensive type-effectiveness, breeding/profile data, evolution, learnsets, encounters), a 2-way compare page, and a type calculator with a correct full 18x18 chart. Depth thins out beyond the core: no all-Pokemon view, network-only search, and none of the stretch features (team builder, cries, favorites, forms, command palette, export, moves dex, minigame, real damage calc). Feature grades were accurate; the only correction is that sort is a genuinely working 4-key feature (upgraded from the 0-1 bucket to 2).",
+        "strengths": [
+          "Correct type math throughout: defensive effectiveness (half*0.5/double*2/immunity->0 across dual types) and the offensive 18x18 chart both compute right values including immunities",
+          "Strong dual stat visualization: animated per-stat bars with per-stat STAT_MAX normalization + tiered color thresholds AND a hand-built SVG radar, plus BST total",
+          "Clean, well-typed architecture: api/components/pages/utils/types separation, thorough TypeScript interfaces, consistent Tailwind and framer-motion polish, skeletons and not-found/loading states",
+          "Genuinely responsive and attractive dark UI (2->6 col grids, sticky blurred header, type-themed gradients/glows, nice hero)"
+        ],
+        "weaknesses": [
+          "react-query is dead scaffolding: QueryClientProvider wraps the app but zero useQuery hooks exist (grep-confirmed); all fetching is hand-rolled in useEffect against a module-level Map cache",
+          "Notable dead code / DRY violations: TYPE_GRADIENTS + getTypeGradient and the index.css @theme --color-type-* tokens are never used; typeToHex is duplicated verbatim in PokemonGrid.tsx and StatBar.tsx despite getTypeColor existing; getMove/getGeneration/getPokemonSpriteUrl unused",
+          "No 'all species' view (one generation at a time, max ~156 visible) despite the 'Complete database' title; search and grid rely on heavy bulk PokeAPI fetches (151 per gen, up to 20 per search) that risk rate-limiting",
+          "Real bugs/limits: StatRadar axis labels are misplaced inward (getPoint(i, radius+14) fed through /255), evolution branches linearize into a misleading single chain, learnset Type column is a permanent empty placeholder capped at 50 rows, detail next-arrow capped at 1010 not 1025",
+          "Build unverifiable here (no node_modules) and package.json pins non-existent future versions (typescript ~6.0.2, vite ^8.1.1)"
+        ],
+        "standout": "The type-effectiveness engine: both the per-Pokemon defensive breakdown and the full 18x18 offensive matrix are derived live from PokeAPI damage_relations and are mathematically correct, including 0.25x/4x dual-type stacking and immunities."
+      },
+      "notes": "Deployed to Cloudflare Pages by the model, but it did not create/push a GitHub repo despite being given gh; its unmodified commits were published for the record."
     }
   ]
 }

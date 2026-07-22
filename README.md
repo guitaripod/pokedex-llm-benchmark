@@ -21,7 +21,7 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 | 🥉 | **Opus 4.8** | low | **69.3** | 53 / 90 | 9 · 8 · 9 · 8 | react/ts&nbsp;·&nbsp;vite | 2,395 | [demo](https://pokedex-opus-4-8-low.guitaripod.workers.dev) |
 | 4 | **Fable 5** | low | **65.7** | 52 / 90 | 8 · 8 · 8 · 7 | vanilla/js | 1,379 | [demo](https://pokedex-fable-5-low.guitaripod.workers.dev) |
 | 5 | **Grok** | default | **53.2** | 43 / 90 | 6.5 · 6 · 7.5 · 4.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | [demo](https://pokedex-a7l.pages.dev) |
-| 6 | **DeepSeek** | default | **40.7** | 22 / 90 | 7 · 6 · 7 · 6 | vanilla/js | 1,535 | [demo](https://pokedex-deepseek-v4.pages.dev) |
+| 6 | **DeepSeek V4 Flash** | default | **52.8** | 38 / 90 | 7 · 6.5 · 7.5 · 6.5 | react/ts&nbsp;·&nbsp;vite | 2,406 | [demo](https://pokedex-deepseek-v4-flash.pages.dev) |
 | 7 | **Laguna S-2.1** | default | **37.3** | 38 / 90 | 3 · 3 · 4 · 2 | preact/ts&nbsp;·&nbsp;vite | 9,208 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
 
 *Bench (0–100) = 60% feature depth + 40% craft axes. **Feature depth** grades each of the 30 features 0–3 (absent → shallow/broken → solid → exceptional), so a few excellent features outscore many stubs. **Code · Arch · UX · Robust** are the four 0–10 craft axes. LOC counts hand-written source only. See [RUBRIC.md](RUBRIC.md).*
@@ -30,43 +30,43 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 
 Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow / broken (1) · ○ absent (0)
 
-| Feature | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [Grok](https://pokedex-a7l.pages.dev) | [DeepSeek](https://pokedex-deepseek-v4.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
+| Feature | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [Grok](https://pokedex-a7l.pages.dev) | [DeepSeek](https://pokedex-deepseek-v4-flash.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | **Browse & Discovery** | | | | | | | |
 | National Dex | ● | ● | ● | ● | ◕ | ◕ | ◔ |
 | Instant search | ● | ● | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Type filter | ● | ◔ | ◕ | ◕ | ◔ | ◔ | ◔ |
-| Generation filter | ● | ● | ◕ | ◕ | ◔ | ○ | ◔ |
-| Sorting | ● | ◕ | ◕ | ◕ | ◕ | ○ | ◔ |
-| Advanced filters | ◕ | ○ | ○ | ◕ | ◕ | ○ | ◔ |
-| Shareable filter URLs | ● | ◔ | ○ | ◔ | ◕ | ○ | ◔ |
+| Type filter | ● | ◔ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Generation filter | ● | ● | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Sorting | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ |
+| Advanced filters | ◕ | ○ | ○ | ◕ | ◕ | ◔ | ◔ |
+| Shareable filter URLs | ● | ◔ | ○ | ◔ | ◕ | ◔ | ◔ |
 | **Detail Depth** | | | | | | | |
 | Official artwork | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ |
 | Shiny toggle | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
 | Cry playback | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ |
-| Stat visualization | ◕ | ● | ● | ◕ | ● | ◕ | ◕ |
+| Stat visualization | ◕ | ● | ● | ◕ | ● | ● | ◕ |
 | Abilities with effects | ● | ◕ | ● | ◕ | ◔ | ◔ | ◕ |
-| Evolution chains | ● | ● | ● | ● | ◕ | ◔ | ◔ |
-| Move learnsets | ● | ● | ● | ● | ◔ | ○ | ◕ |
+| Evolution chains | ● | ● | ● | ● | ◕ | ◕ | ◔ |
+| Move learnsets | ● | ● | ● | ● | ◔ | ◕ | ◕ |
 | Defensive matchups | ● | ● | ● | ● | ◔ | ◕ | ◕ |
-| Breeding data | ◕ | ◕ | ● | ● | ◕ | ◔ | ◕ |
+| Breeding data | ◕ | ◕ | ● | ● | ◕ | ◕ | ◕ |
 | Alternate forms | ● | ◔ | ◕ | ◕ | ○ | ○ | ○ |
 | Pokédex entries | ● | ◕ | ● | ◔ | ◔ | ◔ | ◕ |
 | **Tools & Modes** | | | | | | | |
-| Type chart | ● | ● | ● | ● | ○ | ○ | ◕ |
-| Compare tool | ● | ◕ | ◕ | ◕ | ◕ | ○ | ◔ |
+| Type chart | ● | ● | ● | ● | ○ | ◕ | ◕ |
+| Compare tool | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ |
 | Team builder | ● | ● | ○ | ○ | ● | ○ | ◔ |
-| Damage calculator | ○ | ○ | ○ | ○ | ◕ | ○ | ○ |
+| Damage calculator | ○ | ○ | ○ | ○ | ◕ | ◔ | ○ |
 | Moves / Items / Abilities dex | ● | ◕ | ● | ○ | ○ | ○ | ◕ |
 | Who's-that-Pokémon | ● | ○ | ○ | ○ | ○ | ○ | ○ |
 | Command palette | ● | ◔ | ○ | ○ | ○ | ○ | ○ |
 | **Polish & Platform** | | | | | | | |
 | Favorites | ● | ● | ○ | ◕ | ◕ | ○ | ◔ |
 | Dark/light theming | ● | ● | ● | ◕ | ◔ | ◕ | ◕ |
-| Keyboard navigation | ● | ◕ | ○ | ◕ | ◔ | ◔ | ◔ |
+| Keyboard navigation | ● | ◕ | ○ | ◕ | ◔ | ○ | ◔ |
 | Responsive design | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ |
 | Export / sharing | ◔ | ○ | ○ | ○ | ◕ | ○ | ○ |
-| **Feature depth / 90** | **81** | **61** | **53** | **52** | **43** | **22** | **38** |
+| **Feature depth / 90** | **81** | **61** | **53** | **52** | **43** | **38** | **38** |
 
 ## Submissions
 
@@ -120,13 +120,13 @@ A compact (~2,800 LOC) client-side React 19 + TypeScript + Tailwind 4 Pokédex t
 
 ---
 
-#### DeepSeek
+#### DeepSeek V4 Flash
 
-Bench **40.7** · feature depth 22/90 · 8/30 features solid+
+Bench **52.8** · feature depth 38/90 · 16/30 features solid+
 
-A tightly-built vanilla-JS single-page Pokédex (588-line app.js + CSS + a Cloudflare Pages Functions edge proxy) that does a focused set of things well: full national dex with infinite scroll, name/number search, a polished type-themed dark UI, and a rich detail modal (stats, abilities, evolution, dual-type matchups, breeding meta, shiny toggle). It ships roughly eight solid features and stops there — the bulk of the 30-feature space (sort, generation/advanced filters, shareable URLs, favorites, compare, team builder, damage calc, moves, cries, minigame, command palette, export) is entirely absent.
+A polished, visually strong React/TS Pokedex covering the core surface well: gen-by-gen national dex, network search, AND-multi-type + generation + sort filtering, a rich detail page (animated stat bars + SVG radar, correct defensive type-effectiveness, breeding/profile data, evolution, learnsets, encounters), a 2-way compare page, and a type calculator with a correct full 18x18 chart. Depth thins out beyond the core: no all-Pokemon view, network-only search, and none of the stretch features (team builder, cries, favorites, forms, command palette, export, moves dex, minigame, real damage calc). Feature grades were accurate; the only correction is that sort is a genuinely working 4-key feature (upgraded from the 0-1 bucket to 2).
 
-[**Live demo**](https://pokedex-deepseek-v4.pages.dev) · [source](https://github.com/guitaripod/pokedex-deepseek-v4) · [vendored code & full scorecard](submissions/deepseek-v4/ENTRY.md)
+[**Live demo**](https://pokedex-deepseek-v4-flash.pages.dev) · [source](https://github.com/guitaripod/pokedex-deepseek-v4-flash) · [vendored code & full scorecard](submissions/deepseek-v4-flash/ENTRY.md)
 
 ---
 
