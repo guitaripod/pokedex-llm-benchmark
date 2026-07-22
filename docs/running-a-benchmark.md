@@ -2,7 +2,7 @@
 
 The benchmark is a loop: **run → ingest → grade → regenerate.** A new model runs the same one-shot [brief](../THE_BRIEF.md), builds and deploys its own Pokédex fully autonomously, then gets scored and folded into the leaderboard.
 
-> **TL;DR — the easy way.** Open a Claude Code session in this repo and say: *"benchmark `<model-id>`"* (list ids with `opencode models`; e.g. `opencode/deepseek-v4-flash-free`, add `--variant high` for more effort). It runs every step below for you — kicks off the autonomous build, ingests, grades with the two-pass method, regenerates, and commits. The manual four steps follow for when you're not in a session.
+> **TL;DR — the easy way.** Open a Claude Code session in this repo and say: *"benchmark `<model-id>`"* (list ids with `opencode models`, e.g. `opencode/deepseek-v4-flash-free`). **The agent will ask you which variant/effort to run** (model default, `high`, `max`, … — or two efforts to compare, like the Fable 5 low-vs-ultracode pair) before it launches, since effort materially changes the result. It then runs every step below — the autonomous build, ingest, two-pass grade, regenerate, and commit. The manual four steps follow for when you're not in a session.
 
 ## 1. Run — the model builds it
 
