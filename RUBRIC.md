@@ -42,6 +42,15 @@ Their average is the other 40% of the Bench score. **Robustness** is what separa
 
 An earlier version scored `present | partial | absent` and a separate `completeness` axis — which both measured the same thing (how much exists) and ignored quality. This model fixes both: depth is graded, and the axes are orthogonal to coverage. Nothing in the five numbers restates another.
 
+## Staying comparable as models are added
+
+Grades are LLM-judged, so the risk is **drift** — the scale shifting between sessions or judges. The design keeps scores comparable without ever re-running the whole board:
+
+- **Fixed calibration anchors.** [`grading/PROMPT.md`](grading/PROMPT.md) pins concrete reference points from already-scored submissions ("a `3` on team-builder = Fable-ultracode's; robustness `2` = Laguna crashing on load"). Every judge grades against the same yardstick — calibration is static data in the repo, not a live relative computation.
+- **Append-only.** Adding a model grades *only* the new submission against those anchors. Existing scores are immutable, so the leaderboard is reproducible and each addition is O(1) — never an O(N²) re-grade cascade.
+- **Runtime signal.** The objective [smoke test](docs/methodology.md) result is fed to the judge to ground the `robustness` axis in what actually happens on the live site, not just a code read.
+- **Versioned + provenance-stamped.** [`grading/config.json`](grading/config.json) carries a `rubricVersion`; every submission records `grading.gradedBy / gradedOn / rubricVersion`. Drift is *detectable*, and re-grading the whole set is a deliberate version bump — not an accident. Scores across different rubric versions aren't directly comparable.
+
 ## Objective metrics (context, not score)
 
 Reported for every submission, computed by [`scripts/compute-metrics.mjs`](scripts/compute-metrics.mjs): source **LOC** and **file count** (hand-written source only), **dependency count**, detected **stack**, and **data strategy**. LOC is context, not merit — a tight vanilla entry and a sprawling React one are both legitimate answers to the brief.

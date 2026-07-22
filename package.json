@@ -1,0 +1,27 @@
+{
+  "name": "pokedex-llm-benchmark",
+  "version": "1.0.0",
+  "description": "One prompt, many LLMs: each autonomously builds and deploys a Pokedex; scored on a depth + craft rubric.",
+  "type": "module",
+  "private": true,
+  "license": "GPL-3.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "metrics": "node scripts/compute-metrics.mjs",
+    "entries": "node scripts/gen-entries.mjs",
+    "readme": "node scripts/gen-readme.mjs",
+    "gen": "node scripts/compute-metrics.mjs && node scripts/gen-entries.mjs && node scripts/gen-readme.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test",
+    "check": "node --test && node scripts/validate.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "add": "node scripts/add-submission.mjs",
+    "grade": "node scripts/grade.mjs",
+    "run-benchmark": "node scripts/run-benchmark.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}

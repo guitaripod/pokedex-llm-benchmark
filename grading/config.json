@@ -1,0 +1,10 @@
+{
+  "rubricVersion": 1,
+  "recommendedJudge": {
+    "primary": "Claude Code session (Opus-class) running the two-pass grade + adversarial-verify flow — how every current score was produced",
+    "autonomous": "scripts/grade.mjs --model <capable opencode model> (single command, two-pass)"
+  },
+  "scalability": "Append-only. Adding a model grades ONLY the new submission against the fixed calibration anchors in grading/PROMPT.md — existing scores are immutable and never recomputed, so the leaderboard stays reproducible and cost is O(1) per addition. Calibration lives as static anchors in the repo, not a live relative computation.",
+  "reGrade": "Re-grade the whole set together ONLY when bumping rubricVersion (a deliberate, breaking change to the scale). Then update every submission's grading.rubricVersion. Scores across different rubricVersions are not directly comparable.",
+  "provenance": "Every submission records grading.gradedBy / gradedOn / rubricVersion so drift between sessions or judges is detectable."
+}

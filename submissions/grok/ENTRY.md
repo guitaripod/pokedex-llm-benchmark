@@ -13,8 +13,11 @@
 | **Live** | <https://pokedex-a7l.pages.dev> |
 | **Source repo** | <https://github.com/guitaripod/pokedex> |
 | **Platform** | Cloudflare Pages |
+| **Provenance** | one-shot · autonomous · self-provisioned · verified: owner-confirmed |
+| **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
 | **Stack** | react · typescript · vite · tailwind |
 | **Data strategy** | live-api |
+| **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ (headless, 2026-07-22) |
 | **Source** | 3,104 LOC · 24 files · 7+8 deps |
 | **Feature depth** | 43 / 90 (16/30 features solid or better) |
 

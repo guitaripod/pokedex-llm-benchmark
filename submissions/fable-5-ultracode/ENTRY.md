@@ -13,8 +13,11 @@
 | **Live** | <https://pokedex-fable-5-ultracode.guitaripod.workers.dev> |
 | **Source repo** | <https://github.com/guitaripod/pokedex-fable-5-ultracode> |
 | **Platform** | Cloudflare Workers |
+| **Provenance** | one-shot · autonomous · self-provisioned · verified: owner-confirmed |
+| **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
 | **Stack** | react · typescript · vite · hand-rolled css |
 | **Data strategy** | prebuilt-static |
+| **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ (headless, 2026-07-22) |
 | **Source** | 11,058 LOC · 67 files · 6+5 deps |
 | **Feature depth** | 81 / 90 (28/30 features solid or better) |
 

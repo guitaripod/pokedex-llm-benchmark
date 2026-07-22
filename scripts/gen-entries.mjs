@@ -2,29 +2,22 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  AXIS_KEYS, COVERAGE_WEIGHT, AXES_WEIGHT,
+  totalFeatures, maxDepth, gradeOf, featureDepth, bench as benchRaw,
+} from "./lib/score.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(readFileSync(join(ROOT, "submissions.json"), "utf8"));
 const checklist = JSON.parse(readFileSync(join(ROOT, "docs", "feature-checklist.json"), "utf8"));
 
-const COVERAGE_WEIGHT = 0.6;
-const AXES_WEIGHT = 0.4;
 const GRADE_MARK = { 3: "●", 2: "◕", 1: "◔", 0: "○" };
-const AXIS_KEYS = ["codeQuality", "architecture", "uxDesign", "robustness"];
 const AXIS_LABEL = { codeQuality: "Code quality", architecture: "Architecture", uxDesign: "UX & design", robustness: "Robustness" };
-const TOTAL = checklist.categories.reduce((n, c) => n + c.features.length, 0);
-const MAX_QUALITY = TOTAL * 3;
-
+const TOTAL = totalFeatures(checklist);
+const MAX_QUALITY = maxDepth(checklist);
 const feat = (sub, fid) => (sub.features || []).find((f) => f.id === fid);
-const gradeOf = (sub, fid) => {
-  const f = feat(sub, fid);
-  return f && typeof f.grade === "number" ? f.grade : 0;
-};
-const featureQuality = (sub) =>
-  checklist.categories.reduce((n, c) => n + c.features.reduce((m, f) => m + gradeOf(sub, f.id), 0), 0);
-const axesAvg = (sub) => AXIS_KEYS.reduce((a, k) => a + sub.scores[k], 0) / AXIS_KEYS.length;
-const bench = (sub) =>
-  COVERAGE_WEIGHT * (featureQuality(sub) / MAX_QUALITY) * 100 + AXES_WEIGHT * axesAvg(sub) * 10;
+const featureQuality = (sub) => featureDepth(sub, checklist);
+const bench = (sub) => benchRaw(sub, checklist);
 
 function entry(sub) {
   const title = sub.effort && sub.effort !== "default" ? `${sub.model} — ${sub.effort}` : sub.model;
@@ -47,8 +40,24 @@ function entry(sub) {
   L.push(`| **Live** | ${sub.liveUrl ? `<${sub.liveUrl}>` : "—"} |`);
   L.push(`| **Source repo** | <${sub.sourceRepo}> |`);
   L.push(`| **Platform** | ${sub.platform} |`);
+  if (sub.provenance) {
+    const p = sub.provenance;
+    const bits = [
+      p.oneShot && "one-shot",
+      p.autonomous && "autonomous",
+      p.selfProvisioned ? "self-provisioned" : "deploy-only (no self-created repo)",
+      `verified: ${p.verified}`,
+    ].filter(Boolean);
+    L.push(`| **Provenance** | ${bits.join(" · ")} |`);
+  }
+  if (sub.grading) L.push(`| **Graded** | ${sub.grading.gradedBy} · ${sub.grading.gradedOn} · rubric v${sub.grading.rubricVersion} |`);
   if (sub.stack) L.push(`| **Stack** | ${sub.stack.framework} · ${sub.stack.language} · ${sub.stack.bundler} · ${sub.stack.styling} |`);
   if (sub.dataStrategy) L.push(`| **Data strategy** | ${sub.dataStrategy} |`);
+  if (sub.runtime) {
+    const r = sub.runtime;
+    const tick = (b) => (b ? "✓" : "✗");
+    L.push(`| **Runtime check** | **${r.verdict}** — loads ${tick(r.loadOk)} · content ${tick(r.contentOk)} · JS exceptions ${r.pageErrors} · console errors ${r.consoleErrors} · detail route ${tick(r.detailOk)} (headless, ${r.checkedAt}) |`);
+  }
   if (sub.metrics) L.push(`| **Source** | ${sub.metrics.sourceLoc.toLocaleString("en-US")} LOC · ${sub.metrics.sourceFiles} files · ${sub.metrics.dependencies}+${sub.metrics.devDependencies} deps |`);
   if (scored) L.push(`| **Feature depth** | ${featureQuality(sub)} / ${MAX_QUALITY} (${solid}/${TOTAL} features solid or better) |`);
   L.push("");

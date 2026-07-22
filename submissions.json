@@ -206,6 +206,26 @@
           "Abilities (names only), learnsets (truncated sample), and flavor (single entry) are shallow"
         ],
         "standout": "The evolution-chain click handler openModals a {id,name} stub for any stage not yet loaded, and getSprite reads p.sprites.other without guarding p.sprites — so a very common action (open Pikachu on a fresh load, click Pichu at id 172) throws a TypeError and the ErrorBoundary swaps the whole app for a 'Something went wrong' screen."
+      },
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": true,
+        "verified": "owner-confirmed"
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 4.8, two-pass (grade + adversarial verify)",
+        "gradedOn": "2026-07-22",
+        "rubricVersion": 1
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "detailOk": true,
+        "verdict": "clean",
+        "checkedAt": "2026-07-22"
       }
     },
     {
@@ -406,6 +426,26 @@
           "Single responsive breakpoint and no automated tests; generated data is not committed, so the app is blank until build scripts are re-run"
         ],
         "standout": "defensiveEffectiveness (app.js:51-64) computes combined dual-type defensive multipliers correctly by iterating attacking types and multiplying 2/0.5/0 per defending type, then bucketing into 4x/2x/half/quarter/0x — accurate type math that many submissions get wrong."
+      },
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": true,
+        "verified": "owner-confirmed"
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 4.8, two-pass (grade + adversarial verify)",
+        "gradedOn": "2026-07-22",
+        "rubricVersion": 1
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "detailOk": true,
+        "verdict": "clean",
+        "checkedAt": "2026-07-22"
       }
     },
     {
@@ -605,6 +645,26 @@
           "Minor dead code: ResourceListPage.tsx filter '(r) => !r.name.includes(\"-mega\") || true' is a no-op; api.ts homeUrl defined but unused; accessibility is thin (no keyboard nav, decorative emoji controls)"
         ],
         "standout": "typechart.ts hand-implements the full 18-type chart and combines both defending types by multiplication to produce correct 4x/2x/half/quarter/0x matchups with zero data/chart libraries — the dual-type math and the 18x18 grid both check out against the canonical chart."
+      },
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": true,
+        "verified": "owner-confirmed"
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 4.8, two-pass (grade + adversarial verify)",
+        "gradedOn": "2026-07-22",
+        "rubricVersion": 1
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "detailOk": true,
+        "verdict": "clean",
+        "checkedAt": "2026-07-22"
       }
     },
     {
@@ -802,6 +862,26 @@
           "Scalability/feedback gaps: stat sorting fires 1025 unthrottled fetches with no progress UI; default grid cards never show type badges because enrichment is gated behind filtering/sorting"
         ],
         "standout": "The type-filter enrichment-cache deadlock (pokedex.js:97-101 vs loadMore early-return at line 140) — a subtle ordering bug that leaves a core, prominently-placed feature silently broken on first use despite the rest of the dex working."
+      },
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": true,
+        "verified": "owner-confirmed"
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 4.8, two-pass (grade + adversarial verify)",
+        "gradedOn": "2026-07-22",
+        "rubricVersion": 1
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "detailOk": true,
+        "verdict": "clean",
+        "checkedAt": "2026-07-22"
       }
     },
     {
@@ -1000,6 +1080,26 @@
           "Stats visualization is bar-only (no radar/hexagon, no per-stat tier coloring) and the breeding panel omits EV yield"
         ],
         "standout": "The build-data.mjs pipeline shards PokeAPI into per-entity static JSON with compact move encoding and evolution-condition synthesis, guarded by a >=1000-species sanity check, letting the whole app run client-side with local fuzzy search and no runtime API calls."
+      },
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": true,
+        "verified": "owner-confirmed"
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 4.8, two-pass (grade + adversarial verify)",
+        "gradedOn": "2026-07-22",
+        "rubricVersion": 1
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "detailOk": true,
+        "verdict": "clean",
+        "checkedAt": "2026-07-22"
       }
     },
     {
@@ -1197,6 +1297,26 @@
           "Broken data architecture: build-data.mjs/build-moves.mjs use TS syntax under .mjs (SyntaxError, unrunnable), no prebuilt data exists, dexes fake list metadata (all moves badged type='normal'), and dynamic imports are ineffective (single bundle)"
         ],
         "standout": "The evolution tab looks implemented (recursive EvolutionNode, ~20 parsed condition types) but is silently broken: it gates child rendering on node.evolution_details.length>0, which is always empty for a chain root, so every Pokemon's evolution tab shows a single Pokemon and no chain (verified: 1 of 3 nodes render)."
+      },
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": true,
+        "verified": "owner-confirmed"
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 4.8, two-pass (grade + adversarial verify)",
+        "gradedOn": "2026-07-22",
+        "rubricVersion": 1
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 1,
+        "detailOk": false,
+        "verdict": "errors",
+        "checkedAt": "2026-07-22"
       }
     },
     {
@@ -1398,7 +1518,28 @@
         ],
         "standout": "The type-effectiveness engine: both the per-Pokemon defensive breakdown and the full 18x18 offensive matrix are derived live from PokeAPI damage_relations and are mathematically correct, including 0.25x/4x dual-type stacking and immunities."
       },
-      "notes": "Deployed to Cloudflare Pages by the model, but it did not create/push a GitHub repo despite being given gh; its unmodified commits were published for the record."
+      "notes": "Deployed to Cloudflare Pages by the model, but it did not create/push a GitHub repo despite being given gh; its unmodified commits were published for the record.",
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": false,
+        "verified": "harness (scripts/run-benchmark.mjs)"
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 4.8, two-pass (grade + adversarial verify)",
+        "gradedOn": "2026-07-22",
+        "rubricVersion": 1
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "detailOk": true,
+        "verdict": "clean",
+        "checkedAt": "2026-07-22"
+      }
     }
-  ]
+  ],
+  "rubricVersion": 1
 }

@@ -13,8 +13,11 @@
 | **Live** | <https://pokedex-glm52-max.guitaripod.workers.dev> |
 | **Source repo** | <https://github.com/guitaripod/pokedex-glm52-max> |
 | **Platform** | Cloudflare Workers |
+| **Provenance** | one-shot · autonomous · self-provisioned · verified: owner-confirmed |
+| **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
 | **Stack** | vanilla · javascript · none · hand-rolled css |
 | **Data strategy** | edge-proxy |
+| **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ (headless, 2026-07-22) |
 | **Source** | 6,523 LOC · 20 files · 0+1 deps |
 | **Feature depth** | 61 / 90 (22/30 features solid or better) |
 

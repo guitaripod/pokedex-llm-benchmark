@@ -13,8 +13,11 @@
 | **Live** | <https://pokedex-laguna-s-2-1.guitaripod.workers.dev> |
 | **Source repo** | <https://github.com/guitaripod/pokedex-laguna-s-2-1> |
 | **Platform** | Cloudflare Workers |
+| **Provenance** | one-shot · autonomous · self-provisioned · verified: owner-confirmed |
+| **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
 | **Stack** | preact · typescript · vite · tailwind |
 | **Data strategy** | live-api |
+| **Runtime check** | **errors** — loads ✓ · content ✓ · JS exceptions 1 · console errors 0 · detail route ✗ (headless, 2026-07-22) |
 | **Source** | 9,208 LOC · 34 files · 0+17 deps |
 | **Feature depth** | 38 / 90 (13/30 features solid or better) |
 

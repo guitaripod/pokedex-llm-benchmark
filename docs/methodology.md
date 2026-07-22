@@ -28,12 +28,17 @@ Two passes, both reading source (not the README, which oversells):
 
 The calibrated grades, scores, and prose are what land in `submissions.json`; each `ENTRY.md` is generated from them.
 
+## Runtime verification
+
+The `robustness` axis can't rest on a code read alone — so [`scripts/smoke.mjs`](../scripts/smoke.mjs) loads each submission's **live deployment** in headless Chromium (Playwright) and records an objective `runtime` signal: whether the page renders real content, counts of console errors and uncaught JS exceptions, and whether a detail route navigates without new errors → a `clean | errors | broken` verdict. It's run once per submission and the result is stored in the manifest (like every other measured value); the grader is shown it so `robustness` reflects what actually happens on the site. This is what objectively separates "built but crashes" (e.g. Laguna) from "smaller but works."
+
 ## Honest caveats
 
 - **One-shot, not best-of-N.** Each submission is a single autonomous run against the [verbatim prompt](../THE_BRIEF.md) — no iteration or human course-correction. A model could do better on a second try; this measures the first, unassisted attempt.
 - **The prompt is held constant**, word-for-word, except the trailing name token (`pokedex-<model>-<effort>`). This is a controlled prompt-identical trial, not a loose build-off.
 - **The model self-provisions.** It uses `gh` and `wrangler` to create its own repo and deploy — so repo hygiene and a successful deploy are themselves part of what's being tested.
-- **Effort labels are self-reported** from the run setup (the model's own reasoning-effort setting), not independently measured compute.
+- **Effort labels are self-reported and not cross-comparable.** They come from the run setup (the model's own reasoning-effort setting), not measured compute — and an Anthropic "ultracode" is not the same knob as an opencode `--variant high`. Compare same-provider/same-tool efforts (e.g. the two Fable 5 entries) for the cleanest read.
+- **Provenance is recorded per submission** (`provenance`: one-shot, autonomous, self-provisioned, verified). All current entries are owner-confirmed legit one-shot runs; `deepseek-v4-flash` additionally carries the full harness trail (it deployed but did not self-create its repo, so its source was published for the record).
 - **Assessment scores are subjective.** The feature matrix is the reproducible layer; the 0–10 scores are a calibrated reviewer's read.
 - **No live performance numbers yet.** Perf/bundle depend on deploy config; a uniform pass is future work (the manifest has room for it).
 - **Dates** are the repo's build/push date, a proxy for when the run happened — not a controlled release timeline.

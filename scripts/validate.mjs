@@ -46,8 +46,18 @@ for (const s of manifest.submissions) {
         if (typeof v !== "number" || v < 0 || v > 10)
           errors.push(`${tag}: axis "${k}" = ${v} (want number 0-10)`);
       }
+    const g = s.grading;
+    if (!g || !g.gradedBy || !g.gradedOn || typeof g.rubricVersion !== "number")
+      errors.push(`${tag}: graded but missing grading provenance (gradedBy/gradedOn/rubricVersion)`);
+    else if (g.rubricVersion !== manifest.rubricVersion)
+      errors.push(`${tag}: graded under rubric v${g.rubricVersion} but current is v${manifest.rubricVersion} — re-grade or bump`);
   }
+  if (!s.provenance || typeof s.provenance.oneShot !== "boolean")
+    errors.push(`${tag}: missing provenance (oneShot/autonomous/verified)`);
 }
+
+if (typeof manifest.rubricVersion !== "number")
+  errors.push("manifest: missing top-level rubricVersion");
 
 const current = readFileSync(join(ROOT, "README.md"), "utf8");
 if (current !== loadAndRender().text) {

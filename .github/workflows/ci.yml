@@ -13,10 +13,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Recompute metrics
-        run: node scripts/compute-metrics.mjs
-      - name: Regenerate all artifacts
+          cache: npm
+      - run: npm ci
+      - name: Unit tests
+        run: node --test
+      - name: Recompute metrics + regenerate
         run: |
+          node scripts/compute-metrics.mjs
           node scripts/gen-entries.mjs
           node scripts/gen-readme.mjs
       - name: Validate manifest + README in sync

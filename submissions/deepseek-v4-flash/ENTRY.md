@@ -13,8 +13,11 @@
 | **Live** | <https://pokedex-deepseek-v4-flash.pages.dev> |
 | **Source repo** | <https://github.com/guitaripod/pokedex-deepseek-v4-flash> |
 | **Platform** | Cloudflare Pages |
+| **Provenance** | one-shot · autonomous · deploy-only (no self-created repo) · verified: harness (scripts/run-benchmark.mjs) |
+| **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
 | **Stack** | react · typescript · vite · tailwind |
 | **Data strategy** | live-api |
+| **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ (headless, 2026-07-22) |
 | **Source** | 2,406 LOC · 27 files · 7+7 deps |
 | **Feature depth** | 38 / 90 (16/30 features solid or better) |
 

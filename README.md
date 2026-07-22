@@ -72,7 +72,7 @@ Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow / broken (1) · ○ 
 
 #### Fable 5 — ultracode
 
-Bench **90.0** · feature depth 81/90 · 28/30 features solid+
+Bench **90.0** · feature depth 81/90 · 28/30 features solid+ · runtime ✓ clean
 
 A remarkably complete React/TypeScript SPA Pokedex that precomputes the entire PokeAPI dataset into per-entity static JSON shards at build time (scripts/build-data.mjs, 639 lines) and serves them from Cloudflare with fully client-side fuzzy search and zero runtime API. Code is strongly-typed, modular (dedicated lib modules, custom hooks, useSyncExternalStore stores), and free of comment rot; feature depth is genuine across detail pages, learnsets, evolution trees, type chart, team builder, compare, quiz, and command palette.
 
@@ -82,7 +82,7 @@ A remarkably complete React/TypeScript SPA Pokedex that precomputes the entire P
 
 #### GLM 5.2 — max
 
-Bench **69.7** · feature depth 61/90 · 22/30 features solid+
+Bench **69.7** · feature depth 61/90 · 22/30 features solid+ · runtime ✓ clean
 
 A broad, well-organized vanilla-JS Pokedex on a Cloudflare Worker that proxies and edge-caches PokeAPI, including a smart server-side composite pokemon+species endpoint. It covers an unusually wide feature surface (detail tabs, type chart, team builder with real defensive coverage, compare, moves/abilities/generations dexes, favorites, theming, responsive) at genuine depth, but several features are undermined by cache-ordering and filter bugs.
 
@@ -92,7 +92,7 @@ A broad, well-organized vanilla-JS Pokedex on a Cloudflare Worker that proxies a
 
 #### Opus 4.8 — low
 
-Bench **69.3** · feature depth 53/90 · 21/30 features solid+
+Bench **69.3** · feature depth 53/90 · 21/30 features solid+ · runtime ✓ clean
 
 A polished, tightly-built React + TypeScript + Vite Pokedex on Cloudflare Workers that leans into depth over breadth: fewer than a handful of runtime deps, a prebuilt 1025-entry index for instant client-side search/filter/sort, and rich detail pages (correct dual-type matchups, branching evolutions, per-game learnsets, hand-rolled SVG radar, three secondary dexes). It deliberately skips the 'app-shell' features (favorites, URL state, team builder, damage calc, minigame, command palette, keyboard nav, export) in favor of building the core dex features well.
 
@@ -102,7 +102,7 @@ A polished, tightly-built React + TypeScript + Vite Pokedex on Cloudflare Worker
 
 #### Fable 5 — low
 
-Bench **65.7** · feature depth 52/90 · 22/30 features solid+
+Bench **65.7** · feature depth 52/90 · 22/30 features solid+ · runtime ✓ clean
 
 A polished single-page vanilla-JS Pokédex with a distinctive dark terminal aesthetic, served as static assets on Cloudflare Workers. Data (1025 species + 326 forms plus abilities, types, evolution chains, moves) is prebuilt from PokéAPI into static JSON, with only per-Pokémon learnsets fetched live. It covers the core dex deeply with no framework and no build step, and is defensively coded (escaping, image fallbacks, try/catch, retry/backoff).
 
@@ -112,7 +112,7 @@ A polished single-page vanilla-JS Pokédex with a distinctive dark terminal aest
 
 #### Grok
 
-Bench **53.2** · feature depth 43/90 · 16/30 features solid+
+Bench **53.2** · feature depth 43/90 · 16/30 features solid+ · runtime ✓ clean
 
 A compact (~2,800 LOC) client-side React 19 + TypeScript + Tailwind 4 Pokédex that fetches live from PokeAPI with progressive batch loading and a hand-rolled virtualized grid. It is cleanly organized and visually polished, with a genuinely deep Team Lab (its standout), but is undermined by a broken generation filter, filters that halt data loading, and a reachable whole-app crash.
 
@@ -122,7 +122,7 @@ A compact (~2,800 LOC) client-side React 19 + TypeScript + Tailwind 4 Pokédex t
 
 #### DeepSeek V4 Flash
 
-Bench **52.8** · feature depth 38/90 · 16/30 features solid+
+Bench **52.8** · feature depth 38/90 · 16/30 features solid+ · runtime ✓ clean
 
 A polished, visually strong React/TS Pokedex covering the core surface well: gen-by-gen national dex, network search, AND-multi-type + generation + sort filtering, a rich detail page (animated stat bars + SVG radar, correct defensive type-effectiveness, breeding/profile data, evolution, learnsets, encounters), a 2-way compare page, and a type calculator with a correct full 18x18 chart. Depth thins out beyond the core: no all-Pokemon view, network-only search, and none of the stretch features (team builder, cries, favorites, forms, command palette, export, moves dex, minigame, real damage calc). Feature grades were accurate; the only correction is that sort is a genuinely working 4-key feature (upgraded from the 0-1 bucket to 2).
 
@@ -132,7 +132,7 @@ A polished, visually strong React/TS Pokedex covering the core surface well: gen
 
 #### Laguna S-2.1
 
-Bench **37.3** · feature depth 38/90 · 13/30 features solid+
+Bench **37.3** · feature depth 38/90 · 13/30 features solid+ · runtime ⚠ errors
 
 A Preact + Vite + Tailwind SPA that builds and deploys (npm run build exits 0) and ships a genuinely rich per-Pokemon detail page and working secondary dexes for moves/items/abilities/types. But the flagship 'browse all Pokemon' grid hard-crashes via four undefined references, several tools (compare, favorites page, team analysis, evolution chain) are broken by mis-wired code, and the intended static-data pipeline is non-functional so every page live-fetches hundreds-to-thousands of PokeAPI resources.
 
@@ -164,18 +164,20 @@ Full walkthrough — run → ingest → grade → regenerate: **[docs/running-a-
 | [`submissions/<id>/`](submissions/) | Each model's vendored source + `ENTRY.md` scorecard. |
 | [`THE_BRIEF.md`](THE_BRIEF.md) | The exact task every model was given. |
 | [`RUBRIC.md`](RUBRIC.md) | Scoring model: depth grades, craft axes, and the composite. |
-| [`grading/`](grading/) | Pinned grading prompt + JSON schema — the reproducible scorer. |
+| [`grading/`](grading/) | Pinned grading prompt + schema + config — the reproducible, versioned scorer. |
 | [`docs/`](docs/) | Methodology, feature checklist, running a benchmark. |
-| [`scripts/`](scripts/) | `run-benchmark` · `add-submission` · `grade` · `compute-metrics` · `gen-entries` · `gen-readme` · `validate`. |
+| [`scripts/`](scripts/) | `run-benchmark` · `add-submission` · `grade` · `smoke` · `compute-metrics` · `gen-entries` · `gen-readme` · `validate`. |
+| [`test/`](test/) | Unit tests for the scoring math and generators (`npm test`). |
 
 ## Reproducing the tables
 
 ```bash
-node scripts/compute-metrics.mjs   # re-derive LOC / files / deps / stack from vendored source
-node scripts/gen-entries.mjs       # regenerate per-submission ENTRY.md scorecards
-node scripts/gen-readme.mjs        # regenerate this README from submissions.json
-node scripts/validate.mjs          # check the manifest + that README is in sync
+npm run gen        # compute-metrics + gen-entries + gen-readme (rebuild all tables)
+npm run check      # unit tests + validate (manifest sound, README in sync)
+npm run smoke -- --all   # re-run the headless runtime checks against live deployments
 ```
+
+Each maps to a `node scripts/*.mjs` (see [`package.json`](package.json)); nothing but Node and, for `smoke`, Playwright is required.
 
 ## License
 

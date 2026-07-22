@@ -2,48 +2,22 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  AXIS_KEYS, COVERAGE_WEIGHT, AXES_WEIGHT,
+  totalFeatures, maxDepth, gradeOf, isScored,
+  featureDepth as featureDepthRaw, solidCount as solidCountRaw, bench as benchRaw,
+} from "./lib/score.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-// Composite weighting — how much the final benchmark score leans on graded
-// feature depth vs. the four craft/robustness axes. Tweak here; everything
-// downstream (leaderboard, ranking) follows.
-const COVERAGE_WEIGHT = 0.6;
-const AXES_WEIGHT = 0.4;
-
 export function render(manifest, checklist) {
 const GRADE_MARK = { 3: "●", 2: "◕", 1: "◔", 0: "○" };
-const AXIS_KEYS = ["codeQuality", "architecture", "uxDesign", "robustness"];
-const TOTAL_FEATURES = checklist.categories.reduce((n, c) => n + c.features.length, 0);
-const MAX_QUALITY = TOTAL_FEATURES * 3;
-
-const gradeOf = (sub, fid) => {
-  const f = (sub.features || []).find((x) => x.id === fid);
-  return f && typeof f.grade === "number" ? f.grade : 0;
-};
-const scored = (sub) => sub.features && sub.features.length && sub.scores;
-
-const featureQuality = (sub) => {
-  let sum = 0;
-  for (const c of checklist.categories)
-    for (const f of c.features) sum += gradeOf(sub, f.id);
-  return sum;
-};
-const solidCount = (sub) => {
-  let n = 0;
-  for (const c of checklist.categories)
-    for (const f of c.features) if (gradeOf(sub, f.id) >= 2) n += 1;
-  return n;
-};
-const axesAvg = (sub) =>
-  sub.scores ? AXIS_KEYS.reduce((a, k) => a + sub.scores[k], 0) / AXIS_KEYS.length : null;
-
-const bench = (sub) => {
-  if (!scored(sub)) return null;
-  const cov = (featureQuality(sub) / MAX_QUALITY) * 100;
-  const ax = axesAvg(sub) * 10;
-  return COVERAGE_WEIGHT * cov + AXES_WEIGHT * ax;
-};
+const TOTAL_FEATURES = totalFeatures(checklist);
+const MAX_QUALITY = maxDepth(checklist);
+const scored = isScored;
+const featureQuality = (sub) => featureDepthRaw(sub, checklist);
+const solidCount = (sub) => solidCountRaw(sub, checklist);
+const bench = (sub) => benchRaw(sub, checklist);
 
 const fmt = (n, d = 1) => (n == null ? "—" : n.toFixed(d));
 const nbsp = (s) => s.replace(/ /g, "&nbsp;");
@@ -110,8 +84,10 @@ function entryList() {
   return ranked
     .map((s) => {
       const line = s.assessment ? s.assessment.summary : "_Not yet assessed._";
+      const rtIcon = { clean: "✓", errors: "⚠", broken: "✗" };
+      const rt = s.runtime ? ` · runtime ${rtIcon[s.runtime.verdict]} ${s.runtime.verdict}` : "";
       const stat = scored(s)
-        ? `Bench **${fmt(bench(s))}** · feature depth ${featureQuality(s)}/${MAX_QUALITY} · ${solidCount(s)}/${TOTAL_FEATURES} features solid+`
+        ? `Bench **${fmt(bench(s))}** · feature depth ${featureQuality(s)}/${MAX_QUALITY} · ${solidCount(s)}/${TOTAL_FEATURES} features solid+${rt}`
         : "_unscored_";
       return `#### ${s.model}${s.effort !== "default" ? ` — ${s.effort}` : ""}\n\n${stat}\n\n${line}\n\n[**Live demo**](${s.liveUrl}) · [source](${s.sourceRepo}) · [vendored code & full scorecard](submissions/${s.id}/ENTRY.md)`;
     })
@@ -174,18 +150,20 @@ Full walkthrough — run → ingest → grade → regenerate: **[docs/running-a-
 | [\`submissions/<id>/\`](submissions/) | Each model's vendored source + \`ENTRY.md\` scorecard. |
 | [\`THE_BRIEF.md\`](THE_BRIEF.md) | The exact task every model was given. |
 | [\`RUBRIC.md\`](RUBRIC.md) | Scoring model: depth grades, craft axes, and the composite. |
-| [\`grading/\`](grading/) | Pinned grading prompt + JSON schema — the reproducible scorer. |
+| [\`grading/\`](grading/) | Pinned grading prompt + schema + config — the reproducible, versioned scorer. |
 | [\`docs/\`](docs/) | Methodology, feature checklist, running a benchmark. |
-| [\`scripts/\`](scripts/) | \`run-benchmark\` · \`add-submission\` · \`grade\` · \`compute-metrics\` · \`gen-entries\` · \`gen-readme\` · \`validate\`. |
+| [\`scripts/\`](scripts/) | \`run-benchmark\` · \`add-submission\` · \`grade\` · \`smoke\` · \`compute-metrics\` · \`gen-entries\` · \`gen-readme\` · \`validate\`. |
+| [\`test/\`](test/) | Unit tests for the scoring math and generators (\`npm test\`). |
 
 ## Reproducing the tables
 
 \`\`\`bash
-node scripts/compute-metrics.mjs   # re-derive LOC / files / deps / stack from vendored source
-node scripts/gen-entries.mjs       # regenerate per-submission ENTRY.md scorecards
-node scripts/gen-readme.mjs        # regenerate this README from submissions.json
-node scripts/validate.mjs          # check the manifest + that README is in sync
+npm run gen        # compute-metrics + gen-entries + gen-readme (rebuild all tables)
+npm run check      # unit tests + validate (manifest sound, README in sync)
+npm run smoke -- --all   # re-run the headless runtime checks against live deployments
 \`\`\`
+
+Each maps to a \`node scripts/*.mjs\` (see [\`package.json\`](package.json)); nothing but Node and, for \`smoke\`, Playwright is required.
 
 ## License
 
