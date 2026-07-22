@@ -2,6 +2,8 @@
 
 The benchmark is a loop: **run → ingest → grade → regenerate.** A new model runs the same one-shot [brief](../THE_BRIEF.md), builds and deploys its own Pokédex fully autonomously, then gets scored and folded into the leaderboard.
 
+> **TL;DR — the easy way.** Open a Claude Code session in this repo and say: *"benchmark `<model-id>`"* (list ids with `opencode models`; e.g. `opencode/deepseek-v4-flash-free`, add `--variant high` for more effort). It runs every step below for you — kicks off the autonomous build, ingests, grades with the two-pass method, regenerates, and commits. The manual four steps follow for when you're not in a session.
+
 ## 1. Run — the model builds it
 
 Hand a model the canonical prompt and let it work autonomously via [opencode](https://opencode.ai) (it uses `gh` and `wrangler` itself to create a repo and deploy to Cloudflare — provisioning is part of the test):
