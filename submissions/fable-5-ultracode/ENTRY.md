@@ -2,10 +2,11 @@
 
 # Fable 5 — ultracode
 
-> A remarkably complete React SPA Pokédex that precomputes the entire dataset into static JSON shards at build time and serves them from Cloudflare, with client-side fuzzy search and no runtime API. 28 of 30 checklist features are implemented with real depth — detail pages, learnsets, evolution trees, type chart, team builder, compare, quiz minigame, command palette, and theming.
+> A remarkably complete React/TypeScript SPA Pokedex that precomputes the entire PokeAPI dataset into per-entity static JSON shards at build time (scripts/build-data.mjs, 639 lines) and serves them from Cloudflare with fully client-side fuzzy search and zero runtime API. Code is strongly-typed, modular (dedicated lib modules, custom hooks, useSyncExternalStore stores), and free of comment rot; feature depth is genuine across detail pages, learnsets, evolution trees, type chart, team builder, compare, quiz, and command palette.
 
 | | |
 |---|---|
+| **Benchmark score** | **90.0 / 100** |
 | **Model** | Fable 5 (Anthropic, 5) |
 | **Effort** | ultracode |
 | **Built** | 2026-07-10 |
@@ -15,86 +16,85 @@
 | **Stack** | react · typescript · vite · hand-rolled css |
 | **Data strategy** | prebuilt-static |
 | **Source** | 11,058 LOC · 67 files · 6+5 deps |
-| **Feature coverage** | 28 / 30 |
+| **Feature depth** | 81 / 90 (28/30 features solid or better) |
 
 ## Scorecard
 
-| Completeness | Code quality | Architecture | UX polish |
+| Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 9.5 | 9 | 9 | 9 |
+| 9 | 9 | 9 | 9 |
 
-_Scored 0–10 from source; see [RUBRIC.md](../../RUBRIC.md)._
+_Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Static data build pipeline (scripts/build-data.mjs, 639 lines) with retry/backoff, compact move encoding, evolution-condition extraction, sprite eras, and a sanity guard that fails the build if fewer than 1000 species — runtime is fully static with client-side fuzzy search
-- Broad and deep feature coverage: recursive branching evolution tree, per-version-group learnsets with full move tables, defensive type profiles, 18x18 type matrix with keyboard grid nav, team builder with coverage/soft-spot analysis, Who's-That-Pokémon minigame with two difficulty modes
-- Clean, strongly-typed, modular code: dedicated lib modules (search, typechart, store, api), custom hooks, useSyncExternalStore for favorites/team/settings persistence, no comment rot
-- Strong UX/accessibility signals: system/dark/light theming with per-type accent atmosphere, command palette, skip-link, aria-live regions, prefers-reduced-motion, responsive burger nav, viewport-fit=cover
+- Static-data build pipeline with retry/backoff, compact [vg,method,level] move encoding, ~30-case evolution-condition synthesis, sprite eras, and a >=1000-species sanity guard that fails the build — runtime is fully static with local fuzzy search
+- Correct battle-math primitives: dual-type defensive product, consistent attacker-row/defender-col matrix orientation, and a team builder with real defensive-matrix + STAB-coverage + gap-patching recruit analysis
+- Strong robustness and accessibility signals: ErrorBoundary, per-page error states on every async page, integer/NaN guards on URL ids, stable sort tiebreaks, aria roles/meter/grid nav, skip-link, prefers-reduced-motion
 
 ## Weaknesses
 
-- No real battle damage calculator — the type chart's 'Defense calculator' only yields type-effectiveness multiplier buckets, not HP damage from level/EVs/move power
-- No data export — the only 'copy' action writes the current URL to the clipboard (shareable-URL plumbing), with no CSV/JSON/image/Showdown-format export
-- Stats visualization is bar-only (no radar); breeding panel omits EV yield
+- No real battle damage calculator — the type chart 'Defense calculator' only yields type-effectiveness multiplier buckets, not HP damage from level/EVs/move power
+- No data-format export (CSV/JSON/image/Showdown); sharing is limited to copying a URL
+- Stats visualization is bar-only (no radar/hexagon, no per-stat tier coloring) and the breeding panel omits EV yield
 
 ## Standout
 
-The build-data.mjs pipeline that shards PokeAPI into per-entity static JSON with a compact move encoding and evolution-condition synthesis, guarded by a >=1000-species sanity check, letting the app run entirely client-side with local fuzzy search and zero runtime API calls.
+The build-data.mjs pipeline shards PokeAPI into per-entity static JSON with compact move encoding and evolution-condition synthesis, guarded by a >=1000-species sanity check, letting the whole app run client-side with local fuzzy search and no runtime API calls.
 
-## Feature coverage detail
+## Feature depth detail
 
-Legend: ● present · ◐ partial · ○ absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ absent (0)
 
 **Browse & Discovery**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ● | `scripts/build-data.mjs writes index.json for all sortedSpecies with sanity guard at line 639 (throws if <1000); HomePage.tsx renders every filtered index row via PokeCard` |
-| Instant search | ● | `src/lib/search.ts fuzzyScore/rankSearch; HomePage.tsx filtered useMemo does client-side name+number fuzzy match, no runtime fetch` |
-| Type filter | ● | `HomePage.tsx selTypes chips, multi-type AND via selTypes.every(t => s.types.includes(t)) at line 85` |
-| Generation filter | ● | `HomePage.tsx selGens chips from meta.gens, multi-select via toggleCsv('gen'), filter at line 86` |
-| Sorting | ● | `HomePage.tsx SORTS array (line 14): id, name, bst, hp/atk/def/spa/spd/spe, height, weight + asc/desc dir toggle` |
-| Advanced filters | ● | `HomePage.tsx FLAGS (line 29): legendary, mythical, baby, has-forms filters (no min-BST/ability filter)` |
-| Shareable filter URLs | ● | `HomePage/Compare/Team/TypeChart use useSearchParams; TeamPage ?ids=, ComparePage ?ids=, HomePage q/type/gen/flag/sort/dir` |
+| National Dex | ● 3 | `scripts/build-data.mjs writes index.json for all sortedSpecies with a sanity guard at line 639 (throws if <1000); HomePage.tsx filtered useMemo renders every index row via PokeCard. ~1025 species, not truncated.` |
+| Instant search | ● 3 | `src/lib/search.ts fuzzyScore is tiered exact/prefix/word-boundary/substring/subsequence with numeric-prefix handling; HomePage.tsx runs it client-side on the in-memory index (debounced, no runtime fetch), reused in CommandPalette/Moves/Abilities.` |
+| Type filter | ● 3 | `HomePage.tsx selTypes chips over all 18 types with AND logic (selTypes.every(t=>s.types.includes(t)) line 85) so dual-typings are findable; URL-backed via toggleCsv('type').` |
+| Generation filter | ● 3 | `HomePage.tsx selGens chips from meta.gens (all 9), multi-select, URL-backed; species.gen derived from generation.name in build-data. Combines with type/flag/search.` |
+| Sorting | ● 3 | `HomePage.tsx SORTS (line 13): id,name,bst,hp/atk/def/spa/spd/spe,height,weight + asc/desc dir toggle, URL-persisted, stable tiebreak by id (line ~110). Well beyond required id+name+one-stat.` |
+| Advanced filters | ◕ 2 | `HomePage.tsx FLAGS (line 29): legendary/mythical/baby/has-forms booleans, URL-backed and combinable. Working and solid but boolean-only — no min-BST range, ability, or learnset filter.` |
+| Shareable filter URLs | ● 3 | `useSearchParams throughout: home q/type/gen/flag/sort/dir; compare/team ?ids=; typechart ?type=&def=; abilities/moves q/filters/sort. useSearchParamText debounces text into URL; compare & team also expose copy-link buttons.` |
 
 **Detail Depth**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ● | `src/lib/api.ts artUrl official-artwork; DetailPage renders variety.art at size 420` |
-| Shiny toggle | ● | `DetailPage shiny state toggles variety.artShiny; SpriteHistory.tsx independent shiny toggle across eras` |
-| Cry playback | ● | `src/components/CryButton.tsx new Audio(src).play() (line 27); QuizPage.tsx plays variety.cry on reveal (line 222)` |
-| Stat visualization | ● | `src/components/StatBars.tsx bar chart (no radar/svg); used on DetailPage and TeamPage` |
-| Abilities with effects | ● | `src/pages/detail/AbilitiesPanel.tsx lists abilities with short effect; AbilityDetailPage.tsx full effect + holders list` |
-| Evolution chains | ● | `src/pages/detail/EvoTree.tsx recursive branching tree; build-data.mjs evoCondition emits items/happiness/time/moves/location conditions` |
-| Move learnsets | ● | `src/pages/detail/MovesPanel.tsx tabs level-up/machine/egg/tutor/other with per-version-group selector and move stat table` |
-| Defensive matchups | ● | `src/pages/detail/TypeDefense.tsx uses defenseProfile/weaknessBuckets (lib/typechart.ts) for x4/x2/half/quarter/immune per Pokémon` |
-| Breeding data | ● | `src/pages/detail/BreedingPanel.tsx egg groups, gender ratio bar, hatch cycles+step estimate; EV yield not captured` |
-| Alternate forms | ● | `DetailPage form chips over detail.varieties; build-data varietyDname resolves Mega/Gigantamax/Alolan/Galarian/Hisuian/Paldean with own stats/types/art/moves` |
-| Pokédex entries | ● | `src/pages/detail/DexEntries.tsx grouped flavor text with per-version filter; build-data groupFlavor dedupes across versions` |
+| Official artwork | ● 3 | `api.ts artUrl points to official-artwork; DetailPage renders variety.art at 420 with home/sprite fallback chain in build-data pickSprites (line ~270); Sprite.tsx SVG fallback + fade-in; shiny art variant supported.` |
+| Shiny toggle | ● 3 | `DetailPage shiny state swaps variety.artShiny (button shown only when shiny exists); SpriteHistory.tsx independent shiny toggle across every generation's front/back shiny sprites.` |
+| Cry playback | ◕ 2 | `CryButton.tsx news up Audio(variety.cry) with play/stop toggle, 0.5 volume, equalizer animation, error+unmount cleanup; QuizPage plays cry on reveal (line 222). Working but an inherently simple audio feature.` |
+| Stat visualization | ◕ 2 | `StatBars.tsx animated bars armed via IntersectionObserver, role=meter with aria-valuenow/max, BST total; DetailPage adds a percentile. Polished but bars-only confirmed — no radar/hexagon, no per-stat tier coloring.` |
+| Abilities with effects | ● 3 | `AbilitiesPanel lists abilities with short effect (hidden tag, skeleton); AbilityDetailPage renders full effectFull + flavor + holders split Standard/Hidden with adjacent-ability pager; standalone AbilitiesPage dex.` |
+| Evolution chains | ● 3 | `EvoTree.tsx recursive branching tree with per-edge condition chips; build-data evoCondition (line ~230) synthesizes ~30 cases (level, item, trade-species, happiness, time, known-move/-type, location, gender, held item, beauty, relative stats, upside-down).` |
+| Move learnsets | ● 3 | `MovesPanel.tsx: per-version-group selector + by-method tabs (level-up/machine/egg/tutor/other), full stat table (Lv/type/category/power/acc/pp), dedup and method-aware sorting; compact [vg,method,level] encoding in build-data compactMoves.` |
+| Defensive matchups | ● 3 | `lib/typechart.ts defenseProfile multiplies matrix[atk][def] across BOTH defending types (correct dual-type product); weaknessBuckets splits x4/x2/half/quarter/immune; TypeDefense.tsx renders per-Pokemon buckets. Matrix orientation attacker-row/defender-col consistent with build-data.` |
+| Breeding data | ◕ 2 | `BreedingPanel.tsx shows egg groups, gender-ratio split bar with genderless handling, hatch cycles + estimated steps, undiscovered-group note. Solid but EV yield not captured in build-data nor shown — the one checklist item missing.` |
+| Alternate forms | ● 3 | `DetailPage renders form chips over detail.varieties, each with own stats/types/art/abilities/moves/cry; build-data varietyDname resolves Mega/Gigantamax/Alolan/Galarian/Hisuian/Paldean; past_types shown.` |
+| Pokédex entries | ● 3 | `DexEntries.tsx renders grouped flavor text with per-version filter and count; build-data groupFlavor (line ~330) dedupes identical text across versions and collects version list per entry; Move/Ability pages carry flavor too.` |
 
 **Tools & Modes**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Type chart | ● | `src/pages/typechart/TypeChartPage.tsx full 18x18 matrix, keyboard grid nav, hover cross-highlight, focus panel, dual-type defense calculator` |
-| Compare tool | ● | `src/pages/compare/ComparePage.tsx up to 6 (MAX=6), best-stat highlight, defense breakdown, abilities, URL ?ids=, copy link` |
-| Team builder | ● | `src/pages/team/TeamPage.tsx 6 slots, 18-type defensive matrix, soft-spot alerts, STAB coverage/gaps, recruit suggestions, avg stats, ?ids=` |
-| Damage calculator | ○ |  |
-| Moves / Items / Abilities dex | ● | `src/pages/moves/MovesPage.tsx searchable/filterable/sortable move dex + MoveDetailPage.tsx; also AbilitiesPage.tsx and ItemsPage.tsx` |
-| Who's-that-Pokémon | ● | `src/pages/quiz/QuizPage.tsx Who's That Pokémon silhouette: normal 4-choice + hard type-in modes, streak/best persistence, gen filter, cry on reveal` |
-| Command palette | ● | `src/components/CommandPalette.tsx Ctrl/Cmd-K or '/' opens dialog searching Pokémon/moves/abilities/pages with arrow+enter nav` |
+| Type chart | ● 3 | `TypeChartPage.tsx full 18x18 matrix with roving-tabindex grid nav (arrows/Home/End at lines 172-183), hover cross-highlight, per-type focus panel (offense+defense), dual-type defense calculator with URL state + matching-Pokemon list.` |
+| Compare tool | ● 3 | `ComparePage.tsx compares up to 6, stat rows aligned with best-value flag + proportional bars, BST/height/weight/abilities and a defenses row with weak/resist/immune tally; URL ?ids=, copy-link, quick-pick chips, 'Add my team'.` |
+| Team builder | ● 3 | `TeamPage.tsx: 6 slots, full 18-type defensive matrix per member with weak/res counts and 3+-member soft-spot alerts, STAB offensive coverage/gaps, gap-patching recruit suggestions that avoid stacking a shared x4, avg base stats, legendary count, shareable ?ids= + load/classic team. Exceptional.` |
+| Damage calculator | ○ 0 |  |
+| Moves / Items / Abilities dex | ● 3 | `MovesPage.tsx full standalone move dex: search + type/damage-class/generation filters + sortable columns with aria-sort (line 229), effect text, links to MoveDetailPage (mechanics/meta/stat changes/flavor/learners); plus Items and Abilities dexes.` |
+| Who's-that-Pokémon | ● 3 | `QuizPage.tsx Who's-That-Pokemon: silhouette reveal, Normal (4 choices, keys 1-4) and Hard (type-in with NFD-normalized guess, line 45/158) modes, per-gen pool filter, non-repeating pool, streak/best(localStorage)/session scoring, cry on reveal, art-error retry, aria-live.` |
+| Command palette | ● 3 | `CommandPalette.tsx opens on Cmd/Ctrl-K or '/' (line 55, input-field guarded); searches Pokemon+moves+abilities+pages via rankSearch, grouped results with sprites, arrow/enter nav, role=dialog/combobox/listbox with aria-activedescendant, focus restore.` |
 
 **Polish & Platform**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Favorites | ● | `src/lib/store.ts favoritesStore (localStorage, useSyncExternalStore, line 40); FavButton.tsx toggle; FavoritesPage.tsx with sort` |
-| Dark/light theming | ● | `src/lib/store.ts cycleTheme system/dark/light (line 85) + data-theme; tokens.css light overrides; per-type --accent atmosphere on detail pages` |
-| Keyboard navigation | ● | `Palette '/' & Ctrl-K; DetailPage ArrowLeft/Right prev-next; QuizPage 1-4/Enter; TypeChartPage grid arrow keys; skip-link in App.tsx` |
-| Responsive design | ● | `Multiple @media breakpoints across styles + page CSS, mobile burger menu (Nav.tsx), viewport-fit=cover, prefers-reduced-motion` |
-| Export / sharing | ○ |  |
+| Favorites | ● 3 | `lib/store.ts favoritesStore via useSyncExternalStore + localStorage with validation; FavButton on card/detail; FavoritesPage.tsx adds sort (added/id/name/bst), 'Add all to compare', and an armed confirm clear-all.` |
+| Dark/light theming | ● 3 | `store.ts cycleTheme system/dark/light writing data-theme; tokens.css full light overrides via oklab color-mix; per-type --accent atmosphere drives detail hero/cards/move/ability accents; index.html theme-color+color-scheme metas.` |
+| Keyboard navigation | ● 3 | `'/' and Cmd/Ctrl-K palette; DetailPage ArrowLeft/Right prev/next species (form-field guarded); QuizPage 1-4/Enter; TypeChartPage full arrow/Home/End grid nav; skip-link in App.tsx; consistent input-field guards.` |
+| Responsive design | ● 3 | `Per-page @media breakpoints across all page CSS (home.css 560px reflow, team.css two breakpoints), mobile burger menu in Nav.tsx, viewport-fit=cover, clamp()-based padding tokens, global prefers-reduced-motion reset in base.css.` |
+| Export / sharing | ◔ 1 | `src/pages/team/TeamPage.tsx line 192 copyShareLink and src/pages/compare/ComparePage.tsx line 156 copyLink expose dedicated 'Copy share link' buttons that share a constructed team/comparison artifact via URL — a working but shallow sharing feature; no CSV/JSON/image/Showdown data export exists.` |
 
 ## Vendored source
 

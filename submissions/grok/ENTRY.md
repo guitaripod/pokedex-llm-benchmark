@@ -2,10 +2,11 @@
 
 # Grok
 
-> A feature-rich client-side React 19 + TypeScript + Tailwind 4 Pokédex that fetches live from PokeAPI with progressive batch loading, in-session caching, and a virtualized grid. It goes well beyond browsing with a Team Lab, comparison, damage calc, PNG/Showdown export, and custom stat visualization.
+> A compact (~2,800 LOC) client-side React 19 + TypeScript + Tailwind 4 Pokédex that fetches live from PokeAPI with progressive batch loading and a hand-rolled virtualized grid. It is cleanly organized and visually polished, with a genuinely deep Team Lab (its standout), but is undermined by a broken generation filter, filters that halt data loading, and a reachable whole-app crash.
 
 | | |
 |---|---|
+| **Benchmark score** | **53.2 / 100** |
 | **Model** | Grok (xAI, Q3-2026 build) |
 | **Effort** | default |
 | **Built** | 2026-07-01 |
@@ -15,87 +16,89 @@
 | **Stack** | react · typescript · vite · tailwind |
 | **Data strategy** | live-api |
 | **Source** | 3,104 LOC · 24 files · 7+8 deps |
-| **Feature coverage** | 20 / 30 (+5 partial) |
+| **Feature depth** | 43 / 90 (16/30 features solid or better) |
 
 ## Scorecard
 
-| Completeness | Code quality | Architecture | UX polish |
+| Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 8 | 7 | 6.5 | 8 |
+| 6.5 | 6 | 7.5 | 4.5 |
 
-_Scored 0–10 from source; see [RUBRIC.md](../../RUBRIC.md)._
+_Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Broad coverage: full national dex, multi-type/gen/advanced filters, shareable URLs, shiny, cries, favorites plus caught/shiny tracking, and PNG + Showdown import/export.
-- Team Lab depth: multiple persistent saved teams, coverage analysis, smart suggestions, and an interactive damage-calc battle preview with level/power sliders.
-- Custom SVG stat radar and animated stat bars; virtualized grid with ResizeObserver-driven column recalculation.
-- Polished UX: Framer Motion transitions, skeleton loaders, mobile bottom-sheet modal, sonner toasts, type-colored badges.
+- Team Lab is exceptionally broad: multiple persistent named teams, Showdown import/export, type-based suggestions, coverage analysis, PNG team image, and an interactive damage-calc battle preview with sliders
+- Custom SVG stat radar plus animated stat bars (dual visualization), and a from-scratch ResizeObserver-driven virtualized grid
+- Clean separation into hooks (usePokedexData/useFavorites/useTeams/useUrlState), lib (damage/analysis/showdown/export), and components; in-session Map cache
+- Polished UX: framer-motion transitions, skeleton loaders, mobile bottom-sheet modal, sonner toasts, type-colored badges, favorites + caught/shiny tracking
 
 ## Weaknesses
 
-- Naive data strategy: 2 live requests per Pokémon (detail + species), no persistent cache across reloads, no edge/CDN layer.
-- Several features are shallow: abilities lack effect text, learnsets are truncated samples, flavor is a single entry, and type-matchups use only the primary type so dual-type multipliers are wrong.
-- Evolution branches are flattened into a single misleading linear chain.
-- Minor rot: unused computeTeamCoverage/getTypeEffectiveness in analysis.ts, scattered `any` typing, and inline comments despite the extract-not-comment ideal.
+- Generation filter is broken: ensureDataForGen loads only up to a gen's first id and canShowLoadMore requires gen==='all', so gens 2-9 show ~1 Pokémon and offer no way to load the rest (the 'Load more to reveal this generation' hint points to a button that does not exist in gen view)
+- Applying any search or type/advanced filter sets canShowLoadMore=false, halting infinite loading — so filters only ever operate on the already-loaded subset
+- Clicking an evolution stage that is not yet loaded opens the modal on a bare {id,name} stub; getSprite dereferences stub.sprites without guarding, throwing and tripping the ErrorBoundary that replaces the ENTIRE app
+- Correctness gaps: dual-type defensive matchups use the primary type only; evolution branches are flattened into a false linear chain; Showdown export hardcodes EVs/nature for every Pokémon
+- Dead architecture/code: AppStateContext/AppStateProvider wrap the app but are never consumed (App reimplements caught/shiny/compare); analysis.ts ships unused computeTeamCoverage/getTypeEffectiveness; scattered any/as any; inline comments
+- Abilities (names only), learnsets (truncated sample), and flavor (single entry) are shallow
 
 ## Standout
 
-The Team Lab combines multiple persistent saved teams, coverage analysis, smart suggestions, Showdown import/export, and an interactive damage-calc battle preview with sliders — far beyond a basic Pokédex.
+The evolution-chain click handler openModals a {id,name} stub for any stage not yet loaded, and getSprite reads p.sprites.other without guarding p.sprites — so a very common action (open Pikachu on a fresh load, click Pichu at id 172) throws a TypeError and the ErrorBoundary swaps the whole app for a 'Something went wrong' screen.
 
-## Feature coverage detail
+## Feature depth detail
 
-Legend: ● present · ◐ partial · ○ absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ absent (0)
 
 **Browse & Discovery**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ● | `src/hooks/usePokedexData.ts: totalAvailable=1025; loadBatch/loadMore/ensureDataForGen progressively fetch every id live from PokeAPI (loadInitial 80, loadMore 60-at-a-time up to 1025).` |
-| Instant search | ● | `src/App.tsx filtered useMemo (lines 166-172): name.toLowerCase().includes(term) || String(id).includes(term), over allPokemon, driven by useDeferredValue(search).` |
-| Type filter | ● | `src/components/Filters.tsx renders 18 type toggles; App.tsx toggleType/activeTypes Set; filter uses Array.from(activeTypes).some() (multi-select OR).` |
-| Generation filter | ● | `src/App.tsx updateGen + GEN_RANGES (types/pokemon.ts) gens 1-9 with id ranges; ensureDataForGen loads batches up to the gen's start offset.` |
-| Sorting | ● | `src/App.tsx result.sort + SORT_OPTIONS (types/pokemon.ts): id-asc/desc, name-asc/desc, highest HP, highest BST.` |
-| Advanced filters | ● | `src/App.tsx onlySpecial (is_legendary||is_mythical), minBst>=500, abilityFilter substring over p.abilities; all wired via src/components/Filters.tsx.` |
-| Shareable filter URLs | ● | `src/hooks/useUrlState.ts toSearchParams/parseFromUrl + history.replaceState sync; App.tsx hydrates state from urlState once on first load (hydratedRef).` |
+| National Dex | ◕ 2 | `src/hooks/usePokedexData.ts totalAvailable=1025; loadInitial(80)+loadMore(60) via IntersectionObserver progressively fetch the full range in the unfiltered view. Full dex reachable but live-fetched (2 req/Pokémon), no persistent cache — solid, not exceptional.` |
+| Instant search | ◔ 1 | `src/App.tsx filtered useMemo (166-172) name+id substring with useDeferredValue. Only searches already-loaded Pokémon, and applying a search sets canShowLoadMore=false (App.tsx:280) which halts infinite loading — so it can never reach unloaded ids. Shallow/loaded-subset only.` |
+| Type filter | ◔ 1 | `src/components/Filters.tsx 18 color toggles; App.tsx multi-select OR (activeTypes.some). Same loaded-subset limit: any active type sets canShowLoadMore=false (App.tsx:280), halting further loads; also OR-only, no AND.` |
+| Generation filter | ◔ 1 | `src/hooks/usePokedexData.ts:201 ensureDataForGen target=range[0] loads only UP TO a gen's first id, and canShowLoadMore requires currentGen==='all' (App.tsx:280) so no load path exists in gen view — gens 2-9 render ~1 Pokémon on fresh load. Present but broken.` |
+| Sorting | ◕ 2 | `src/types/pokemon.ts SORT_OPTIONS + App.tsx result.sort: id asc/desc, name asc/desc, highest HP, highest BST. Cycled via button; applied to the filtered set. Meets id+name+>=1 stat.` |
+| Advanced filters | ◕ 2 | `src/App.tsx + Filters.tsx: legendary||mythical toggle, BST>=500 toggle, ability substring (abilities.some). Three real functional filters; BST is a fixed 500 toggle (not a range) and all limited to loaded data.` |
+| Shareable filter URLs | ◕ 2 | `src/hooks/useUrlState.ts toSearchParams/parseFromUrl sync q/types/gen/sort/fav/special/bst/ability via history.replaceState; App.tsx hydrates once (hydratedRef). Broad param coverage; no deep-link to an open Pokémon.` |
 
 **Detail Depth**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ● | `src/types/pokemon.ts getSprite prefers other['official-artwork'].front_default; App.tsx modal renders large artwork img.` |
-| Shiny toggle | ● | `src/App.tsx shinyMode (grid, header Sparkles toggle) + modalShiny (per-detail toggle); getSprite(p, shiny) returns official-artwork front_shiny.` |
-| Cry playback | ● | `src/App.tsx playCry: new Audio(p.cries.latest||legacy).play() with error toast fallback; CRY button in modal.` |
-| Stat visualization | ● | `src/components/StatBar.tsx horizontal bars + src/components/StatRadar.tsx custom SVG hexagonal radar with grid polygons, axes, animated data polygon and per-axis value labels.` |
-| Abilities with effects | ◐ | `src/App.tsx lines 758-768 list ability names + (hidden) flag only; no ability effect/description text is fetched or displayed.` |
-| Evolution chains | ● | `src/hooks/usePokedexData.ts fetchEvolutionChain walks chain deriving conditions (level/item/trigger/happiness/time); App.tsx renders clickable sprite chain with conditions — but branches are flattened into one linear list.` |
-| Move learnsets | ◐ | `src/hooks/usePokedexData.ts levelUpMoves.slice(0,8) + fullMoves.slice(0,12); App.tsx shows 'Level-up Moves' and a truncated 'Sample Learnset' with method label — not a full by-method (TM/egg/tutor) list.` |
-| Defensive matchups | ◐ | `src/App.tsx openModal calls fetchTypeMatchups(pokemon.types[0].type.name) — primary type only; dual-type defensive multipliers are never combined (usePokedexData.ts only reads one type's damage_relations).` |
-| Breeding data | ● | `src/App.tsx Pokédex Data panel (lines 688-733): gender_rate ratio, egg_groups, hatch_counter*255 steps, base_happiness, growth_rate; no EV yield.` |
-| Alternate forms | ○ |  |
-| Pokédex entries | ◐ | `src/hooks/usePokedexData.ts finds the first flavor_text_entries entry with language 'en' (line 88); single English entry shown, no per-version selector.` |
+| Official artwork | ◕ 2 | `src/types/pokemon.ts getSprite prefers sprites.other['official-artwork'].front_default with fallbacks to front_default then raw github sprite; App.tsx renders it large in the modal. Standard, correct.` |
+| Shiny toggle | ◕ 2 | `src/types/pokemon.ts getSprite resolves official-artwork front_shiny then front_shiny; App.tsx has per-Pokémon modalShiny toggle plus a global grid shinyMode. Works in both places.` |
+| Cry playback | ◕ 2 | `src/App.tsx playCry uses cries.latest||cries.legacy via new Audio(url) with error listener + toast fallback; CRY button gated on availability. Solid.` |
+| Stat visualization | ● 3 | `src/components/StatBar.tsx animated framer-motion bars (normalized /255) for all six stats PLUS src/components/StatRadar.tsx hand-rolled SVG radar (grid polygons, axes, spring-animated data polygon, vertex dots, per-axis label+value) alongside a BST total. Dual visualization, above average.` |
+| Abilities with effects | ◔ 1 | `src/App.tsx:758-768 lists ability names + (hidden) flag only; no effect/description text is ever fetched or shown. Shallow.` |
+| Evolution chains | ◕ 2 | `src/hooks/usePokedexData.ts fetchEvolutionChain recursively walks the chain deriving conditions (Lv/item/trigger/happiness/time); App.tsx renders a clickable sprite chain that re-opens the modal. Real depth, but branches are flattened into one linear steps[] with '->' between every node (Eevee/Wurmple render as a false linear sequence) — flawed 2.` |
+| Move learnsets | ◔ 1 | `src/hooks/usePokedexData.ts builds levelUpMoves.slice(0,8) + fullMoves.slice(0,12) with a method label; App.tsx shows 'Level-up Moves' and a truncated 'Sample Learnset' — a truncated sample, not a full by-method (TM/egg/tutor) list.` |
+| Defensive matchups | ◔ 1 | `src/App.tsx:230-231 openModal calls fetchTypeMatchups(pokemon.types[0].type.name) — primary type only; usePokedexData.ts reads a single type's damage_relations, so dual-type defensive multipliers are never combined (wrong for two-type Pokémon).` |
+| Breeding data | ◕ 2 | `src/App.tsx Pokédex Data panel (688-733): egg groups, gender ratio from gender_rate (incl Genderless), hatch steps (hatch_counter*255), base happiness, growth rate, capture rate. Missing EV yield (never fetched).` |
+| Alternate forms | ○ 0 |  |
+| Pokédex entries | ◔ 1 | `src/hooks/usePokedexData.ts:88 picks the first flavor_text_entries entry with language 'en'; App.tsx shows one entry, no per-version/game selector. Shallow.` |
 
 **Tools & Modes**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Type chart | ○ |  |
-| Compare tool | ● | `src/App.tsx compareList (up to 4) + showCompare grid modal with sprite/types/BST; shallow — renders only p.stats.slice(0,3), no diff highlighting.` |
-| Team builder | ● | `src/components/TeamLab.tsx + src/hooks/useTeams.ts: 6 slots, multiple persistent saved teams (localStorage), coverage analysis, smart suggestions, favorites integration.` |
-| Damage calculator | ● | `src/lib/damage.ts calculateDamage (Gen damage formula, type effectiveness via full TYPE_CHART, crit, 85-100% roll); TeamLab.tsx Quick Battle Preview with level & power sliders.` |
-| Moves / Items / Abilities dex | ○ |  |
-| Who's-that-Pokémon | ○ |  |
-| Command palette | ○ |  |
+| Type chart | ○ 0 |  |
+| Compare tool | ◕ 2 | `src/App.tsx compareList (up to 4, added from modal) grid shows sprite, both types, BST and stats.slice(0,3) side-by-side with remove/clear. Functional but thin: only 3 of 6 stats and no diff/best-value highlighting.` |
+| Team builder | ● 3 | `src/components/TeamLab.tsx + src/hooks/useTeams.ts: 6 slots, MULTIPLE persistent named teams (create/rename/delete/switch, localStorage), smart suggestions (suggestForTeam type+BST scoring), coverage analysis, Showdown import (real parser) + export, PNG team image, and an interactive damage-calc battle preview with level/power sliders. Exceptional breadth well beyond a basic team builder.` |
+| Damage calculator | ◕ 2 | `src/lib/damage.ts calculateDamage uses a real gen formula; getEffectiveness correctly multiplies across BOTH defending types via a full 18-type TYPE_CHART; TeamLab.tsx Quick Battle Preview with level/power sliders. Simplified/self-labeled approx (no phys/special split, no STAB, base stats not actual, crit/boost params unwired).` |
+| Moves / Items / Abilities dex | ○ 0 |  |
+| Who's-that-Pokémon | ○ 0 |  |
+| Command palette | ○ 0 |  |
 
 **Polish & Platform**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Favorites | ● | `src/hooks/useFavorites.ts localStorage-backed Set; App.tsx favorites-only view + header count; plus caught/shiny-caught Sets persisted to localStorage.` |
-| Dark/light theming | ◐ | `src/types/pokemon.ts TYPE_COLORS drive type-colored badges/filter buttons only; app is dark-only (#0a0c14), no light/dark toggle and the detail view is not type-themed.` |
-| Keyboard navigation | ● | `src/App.tsx onKey (lines 85-101): '/' focuses search, Esc closes modal/Team Lab, Cmd/Ctrl+K toggles Team Lab. NOTE: no ArrowLeft/ArrowRight handling — modal prev/next is on-screen-button-only, contrary to the first-pass claim.` |
-| Responsive design | ● | `src/App.tsx uses sm: breakpoints throughout and a mobile bottom-sheet modal (items-end + rounded-t-3xl); VirtualPokemonGrid.tsx ResizeObserver recalculates column count from container width.` |
-| Export / sharing | ● | `src/lib/export.ts canvas PNG card (exportPokemonCard) + team image (exportTeamImage); src/lib/showdown.ts exportTeamToShowdown/parseShowdownTeam wired to Export/Import buttons in TeamLab.tsx.` |
+| Favorites | ◕ 2 | `src/hooks/useFavorites.ts persists a Set to localStorage with toggle/isFavorite; App.tsx favorites-only view, hearts on card+modal, header count, plus bonus caught/shiny-caught Sets persisted separately. Solid + bonus collection tracking.` |
+| Dark/light theming | ◔ 1 | `src/index.css + types/pokemon.ts TYPE_COLORS: single hardcoded dark theme (#0a0c14) with type-colored badges/filters; no light/dark or theme toggle, detail view not type-themed. Shallow.` |
+| Keyboard navigation | ◔ 1 | `src/App.tsx:85-101 onKey: '/' focuses search, Esc closes modal/Team Lab, Cmd/Ctrl+K toggles Team Lab. No ArrowLeft/Right modal navigation (prev/next is on-screen-button only), no roving tabindex. A few shortcuts only.` |
+| Responsive design | ◕ 2 | `src/App.tsx sm: breakpoints throughout, mobile bottom-sheet modal (items-end + rounded-t-3xl + max-h-[85dvh]), horizontally snap-scrolling type row; VirtualPokemonGrid.tsx ResizeObserver recomputes column count from width. Genuinely mobile-usable.` |
+| Export / sharing | ◕ 2 | `src/lib/export.ts exportPokemonCard renders an 800x400 canvas PNG (title/types/stats/sprite) + exportTeamImage; src/lib/showdown.ts exportTeamToShowdown (clipboard) + parseShowdownTeam (file import) wired in TeamLab.tsx. Works, but Showdown export hardcodes EVs '252 HP/4 Atk/252 Spe'+Jolly for every mon and the PNG layout is basic.` |
 
 ## Vendored source
 

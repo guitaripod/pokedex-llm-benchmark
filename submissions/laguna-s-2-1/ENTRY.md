@@ -2,100 +2,99 @@
 
 # Laguna S-2.1
 
-> A Preact + Vite SPA aiming at a comprehensive Pokédex, with a genuinely rich per-Pokémon detail page (tabbed overview/moves/sprites/encounters/lore/evolution, stat radar, per-Pokémon 18-type defensive chart, shiny toggle, cry player, breeding, evolution tree) and working secondary dexes for moves/items/abilities/types. However the flagship browse-all grid ships broken via four undefined references, the intended static prebuild pipeline is non-functional, and compare/team-builder/favorites-viewer are all broken by missing or mis-wired code.
+> A Preact + Vite + Tailwind SPA that builds and deploys (npm run build exits 0) and ships a genuinely rich per-Pokemon detail page and working secondary dexes for moves/items/abilities/types. But the flagship 'browse all Pokemon' grid hard-crashes via four undefined references, several tools (compare, favorites page, team analysis, evolution chain) are broken by mis-wired code, and the intended static-data pipeline is non-functional so every page live-fetches hundreds-to-thousands of PokeAPI resources.
 
 | | |
 |---|---|
-| **Model** | Laguna S-2.1 (unknown (codename), S-2.1) |
+| **Benchmark score** | **37.3 / 100** |
+| **Model** | Laguna S-2.1 (unknown) |
 | **Effort** | default |
 | **Built** | 2026-07-21 |
 | **Live** | <https://pokedex-laguna-s-2-1.guitaripod.workers.dev> |
 | **Source repo** | <https://github.com/guitaripod/pokedex-laguna-s-2-1> |
 | **Platform** | Cloudflare Workers |
-| **Stack** | vanilla · typescript · vite · tailwind |
+| **Stack** | preact · typescript · vite · tailwind |
 | **Data strategy** | live-api |
 | **Source** | 9,208 LOC · 34 files · 0+17 deps |
-| **Feature coverage** | 14 / 30 (+11 partial) |
+| **Feature depth** | 38 / 90 (13/30 features solid or better) |
 
 ## Scorecard
 
-| Completeness | Code quality | Architecture | UX polish |
+| Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 6 | 3 | 3 | 5 |
+| 3 | 3 | 4 | 2 |
 
-_Scored 0–10 from source; see [RUBRIC.md](../../RUBRIC.md)._
+_Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Very rich detail page: TypeDefenseChart across 18 attacking types, StatRadar, evolution tree with conditions, learnsets with version-group selector, breeding, flavor entries, shiny toggle, cries
-- Working paginated/searchable secondary dexes (937 moves, items, abilities, 18x18 type matrix) with real detail pages
-- Comprehensive TypeScript type layer and a large concurrency-controlled PokéAPI client; consistent Tailwind styling with dark mode and type-colored theming
-- Sensible module/file organization and readable components
+- Rich, functional detail page: tabbed overview/moves/sprites/encounters/lore/evolution, stat radar, correct dual-type defensive TypeDefenseChart across 18 types, shiny toggle, cry player, breeding, version-tagged flavor text — all utils it depends on exist so it renders robustly
+- Complete secondary dexes with real detail pages (MoveDetailPage/AbilityDetailPage fetch and show effects, meta, learned-by) and a correct, complete 18x18 type-effectiveness matrix
+- Large, consistent TypeScript type layer and a concurrency-controlled PokeAPI client; clean pages/components/lib/types module separation; authentic 18-type color system used throughout
 
 ## Weaknesses
 
-- Core national-dex browse grid crashes: PokemonListPage references filterPokemon/sortPokemon/paginatePokemon/TYPES it never imports, and `vite build` runs no typecheck so it ships
-- Broken data architecture: build-data.mjs/build-moves.mjs use TS syntax under a .mjs extension (unrunnable), no prebuilt data exists, and every page live-fetches ~2376 PokéAPI resources on load
-- Multiple mis-wirings: ComparePage/TeamBuilder import a nonexistent fetchPokemonDetails (compare selection throws), team members carry no types/stats so analysis is always empty, and FavoritesPage reads a never-written localStorage key so favorites are never shown
-- List dexes fake their metadata (moves/items/abilities cards hardcode type='normal'/status/null power), so list-level type/category filtering and sorting are meaningless
+- Core national-dex browse route throws ReferenceError on render (filterPokemon/sortPokemon/paginatePokemon/TYPES never imported) — a build with no typecheck shipped it
+- Multiple broken features on primary paths: ComparePage selection throws (fetchPokemonDetails unimported), FavoritesPage reads a never-written key (always empty), TeamBuilder analysis always 0/empty (members carry no types/stats), evolution chain renders only the base species (guard keys off root evolution_details which is always empty), dark-mode manual toggle is a no-op for most utilities (Tailwind v4/class-variant mismatch), '/' keyboard shortcut never fires
+- Broken data architecture: build-data.mjs/build-moves.mjs use TS syntax under .mjs (SyntaxError, unrunnable), no prebuilt data exists, dexes fake list metadata (all moves badged type='normal'), and dynamic imports are ineffective (single bundle)
 
 ## Standout
 
-Per-Pokémon TypeDefenseChart computing defensive effectiveness across all 18 attacking types, complemented by a full 18x18 type-effectiveness matrix on the Types page.
+The evolution tab looks implemented (recursive EvolutionNode, ~20 parsed condition types) but is silently broken: it gates child rendering on node.evolution_details.length>0, which is always empty for a chain root, so every Pokemon's evolution tab shows a single Pokemon and no chain (verified: 1 of 3 nodes render).
 
-## Feature coverage detail
+## Feature depth detail
 
-Legend: ● present · ◐ partial · ○ absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ absent (0)
 
 **Browse & Discovery**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ◐ | `HomePage.tsx:26-63 & PokemonListPage.tsx:37-64 live-fetch full 1351 pokemon + 1025 species; browse-all grid crashes (PokemonListPage.tsx:73/102/136 reference undefined filterPokemon/paginatePokemon/TYPES); no prebuilt data (public/ has only empty favicon), ~2376 live API calls per load` |
-| Instant search | ◐ | `Header.tsx:14 binds '/', HomePage.tsx:71-77 handleSearch jumps to /pokemon/:name; data.ts:341 filterPokemon exists but list-page search lives on the broken PokemonListPage (filterPokemon not imported there)` |
-| Type filter | ◐ | `PokemonCard FilterBar multi-type + data.ts:365 filterPokemon types.every(); only rendered on PokemonListPage.tsx which throws on undefined TYPES/filterPokemon` |
-| Generation filter | ◐ | `FilterBar generation select (gen 1-9) + data.ts:369 filterPokemon generation; only on the broken PokemonListPage` |
-| Sorting | ◐ | `PokemonCard SortSelect + data.ts:394 sortPokemon (id/name/bst/height/weight); sortPokemon referenced but not imported in PokemonListPage.tsx:79` |
-| Advanced filters | ◐ | `data.ts:373-389 filterPokemon supports rarity + minBST/maxBST; only rarity has UI in FilterBar, no min-BST control, and it sits on the broken list page` |
-| Shareable filter URLs | ◐ | `App.tsx:44-63 routes /pokemon/page/:page etc. + PokemonCard.tsx:343 ShareButton copies window.location.href; active filters/search/sort kept in local state, never encoded in URL` |
+| National Dex | ◔ 1 | `PokemonListPage.tsx:73,79,102,136 use filterPokemon/sortPokemon/paginatePokemon/TYPES that are never imported (only TYPE_ORDER is) — paginatePokemon runs in the render body so /pokemon/ throws ReferenceError on every render. Only curated HomePage sections (featured/starters/legendary) render; no working full dex. Data is live-fetched (~2376 API calls), no prebuilt data (public/ empty favicon only).` |
+| Instant search | ◔ 1 | `HomePage.tsx:71-77 & Header.tsx:23-28 navigate to /pokemon/:name on submit (no instant filtering/autocomplete). The real instant-filter search lives on the crashing PokemonListPage. data.ts:341 filterPokemon exists but isn't wired to a working page.` |
+| Type filter | ◔ 1 | `FilterBar multi-type UI (PokemonCard.tsx:610-624) + data.ts:365 types.every(); rendered only inside PokemonListPage which throws (undefined TYPES/filterPokemon), so type filtering never runs.` |
+| Generation filter | ◔ 1 | `FilterBar generation select (PokemonCard.tsx:626-640) + data.ts:369 generation filter; only on the broken PokemonListPage.` |
+| Sorting | ◔ 1 | `SortSelect + data.ts:394 sortPokemon (id/name/bst/height/weight) present but sortPokemon isn't imported on PokemonListPage.tsx:79 (crashes). Secondary dexes sort by name only (moves/abilities hardcode metadata so bst/power sorts are meaningless).` |
+| Advanced filters | ◔ 1 | `data.ts:373-389 supports rarity + minBST/maxBST, but only rarity has UI (no min-BST control) and it sits on the broken PokemonListPage.` |
+| Shareable filter URLs | ◔ 1 | `App.tsx:44-63 gives real /pokemon/:id and /pokemon/page/:page routes; PokemonCard.tsx:343 ShareButton copies window.location.href. Filters/search/sort held in local state, never encoded in the URL, so filtered views aren't shareable.` |
 
 **Detail Depth**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ● | `PokemonDetailPage.tsx:231-246 renders buildSpriteBlock.official_artwork at w-48 with onError fallback to raw GitHub URL` |
-| Shiny toggle | ● | `PokemonDetailPage.tsx:119,233,249-258 showShiny toggle swaps official_artwork_shiny; sprites tab also lists shiny variants` |
-| Cry playback | ● | `PokemonCard CryPlayer plays new Audio(POKEMON_CRY_URL(id)); wired at PokemonDetailPage.tsx:259` |
-| Stat visualization | ● | `PokemonCard StatBar (bars) + StatRadar (SVG radar); PokemonDetailPage.tsx:267,332-337` |
-| Abilities with effects | ● | `AbilityListPage.tsx:126-127 AbilityDetailPage shows real short+full effect_entries; detail overview lists abilities with hidden badge (list cards use placeholder metadata)` |
-| Evolution chains | ● | `PokemonDetailPage.tsx:734-824 EvolutionTree/EvolutionNode + getEvolutionDetails render chain, branches and conditions` |
-| Move learnsets | ● | `PokemonDetailPage.tsx:456-509 renderMoves groups by learn method with version-group selector; per-move data fetched via MoveRow (661)` |
-| Defensive matchups | ● | `PokemonDetailPage.tsx:360-368 TypeDefenseChart computes per-Pokemon defensive effectiveness across 18 attacking types; TypeMatchupPage.tsx:64 getEffectiveness tool` |
-| Breeding data | ● | `PokemonDetailPage.tsx:371-394 renders egg groups, gender ratio, hatch steps, is_baby from data.ts:286 buildBreedingData (no EV yield)` |
-| Alternate forms | ○ |  |
-| Pokédex entries | ● | `PokemonDetailPage.tsx:598-620 renderLore + data.ts:253 buildFlavorTextBlock render version-tagged Pokedex entries` |
+| Official artwork | ◕ 2 | `PokemonDetailPage.tsx:231-246 renders official_artwork at w-48 with onError fallback to raw GitHub URL; renderSprites (511-556) exposes official/home/dream-world/showdown/front/back + shiny variants from data.ts:210 buildSpriteBlock. Multi-source and solid; no zoom/side-by-side (note: showdown_animated aliases showdown front_default).` |
+| Shiny toggle | ◕ 2 | `PokemonDetailPage.tsx:233,249-258 Shiny ON/OFF toggle swaps official_artwork_shiny (with fallback); Sprites tab lists shiny variants too. Works as expected.` |
+| Cry playback | ◕ 2 | `CryPlayer (PokemonCard.tsx:451-455) plays new Audio(POKEMON_CRY_URL(id)) (.ogg latest, types/index.ts:954) on click; wired at PokemonDetailPage.tsx:259. Functional single-click cry, no latest/legacy toggle.` |
+| Stat visualization | ◕ 2 | `PokemonDetailPage.tsx:332-337 color-by-value StatBar bars + StatRadar SVG hexagon (PokemonCard.tsx:157-255) with grid rings/axes/labels. Two viz forms; radar uses a -rotate-90 + counter-rotate label hack and per-Pokemon max normalization (Math.max(...values,100)) that make shape non-comparable/labels quirky.` |
+| Abilities with effects | ◕ 2 | `PokemonDetailPage.tsx:344-357 lists abilities with Hidden badge linking to AbilityDetailPage (AbilityListPage.tsx:96-185) which shows real short+full effect_entries, generation, and pokemon-with-ability list. Effect text is one click away, not inline.` |
+| Evolution chains | ◔ 1 | `BROKEN: EvolutionNode (PokemonDetailPage.tsx:765,781) gates evolves_to rendering on node.evolution_details.length>0, but the PokeAPI chain root always has evolution_details=[] (buildEvolutionChain preserves it, data.ts:116). Verified empirically: only 1 of 3 chain nodes renders — every Pokemon shows just its base species, no evolutions. (Separately, speciesMap holds only the current species so pokemon_id/sprite are null for others.)` |
+| Move learnsets | ◕ 2 | `PokemonDetailPage.tsx:456-509 renderMoves groups by learn method with a version-group selector and type/category/power/accuracy/pp/level columns. Thorough, but each MoveRow (661) fires its own /move/{name} fetch — an N+1 request storm against live PokeAPI; default version-group scarlet-violet can be empty for older mons until reselected.` |
+| Defensive matchups | ◕ 2 | `TypeDefenseChart (TypeBadge.tsx:149-157) multiplies effectiveness across both defending types (total *= matrix[attacker][defender]) and sorts; matrix built from 18 live type fetches (PokemonDetailPage.tsx:638-658). Correct dual-type defensive math.` |
+| Breeding data | ◕ 2 | `PokemonDetailPage.tsx:371-393 shows egg groups, gender ratio (getGenderSymbol from gender_rate), steps-to-hatch (getEggSteps from hatch_counter), is_baby via data.ts:286 buildBreedingData. Missing EV yield (stat effort values are available but unused).` |
+| Alternate forms | ○ 0 |  |
+| Pokédex entries | ◕ 2 | `PokemonDetailPage.tsx:598-620 renderLore maps all English flavor_text_entries with per-version labels via data.ts:253 buildFlavorTextBlock (cleans \n/\f/\r). Per-version entries shown; not deduped/grouped by version-group.` |
 
 **Tools & Modes**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Type chart | ● | `TypePage.tsx:47-62 buildTypeEffectivenessMatrix renders full 18x18 effectiveness matrix over TYPE_ORDER.slice(0,18)` |
-| Compare tool | ◐ | `ComparePage.tsx two slots with side-by-side stat bars, but selectPokemon (59,70) calls undefined fetchPokemonDetails (only fetchPokemon imported at :7) so selection throws` |
-| Team builder | ◐ | `TeamBuilderPage.tsx 6 slots + localStorage 'pokedex-team'; members stored as bare list rows {id,name,url}, so getTeamStats (98-119) p.types/p.stats always empty; imports nonexistent fetchPokemonDetails at :7` |
-| Damage calculator | ○ |  |
-| Moves / Items / Abilities dex | ● | `MoveListPage.tsx 937 moves with search/sort/paginate + MoveDetailPage full data; ItemListPage + AbilityListPage similar (list cards show placeholder type='normal'/status/null power, detail pages fetch real data)` |
-| Who's-that-Pokémon | ○ |  |
-| Command palette | ○ |  |
+| Type chart | ◕ 2 | `TypePage.tsx:179-222 'Effectiveness Matrix' tab renders a full 18x18 grid from all 18 types' damage_relations (built at :47-63), color-coded by multiplier. Correct and complete but static (plain divs, no hover/interaction).` |
+| Compare tool | ◔ 1 | `ComparePage.tsx renders two slots + side-by-side stat bars, but selectPokemon (:59,70) calls fetchPokemonDetails which is NOT imported (only fetchPokemon at :7) — selecting a result throws ReferenceError, so the comparison never populates.` |
+| Team builder | ◔ 1 | `TeamBuilderPage.tsx: 6 slots + localStorage 'pokedex-team' assembly/add/remove works and renders artwork, but members are stored as bare {id,name} rows so getTeamStats (:98-117) reads p.types/p.stats which are always undefined — Type Coverage empty and Total BST/HP always 0; type badges never render; moveInTeam is dead (no reorder UI). imports nonexistent fetchPokemonDetails at :7.` |
+| Damage calculator | ○ 0 |  |
+| Moves / Items / Abilities dex | ◕ 2 | `MoveListPage.tsx 937 moves + ItemListPage + AbilityListPage with client search/sort/pagination; MoveDetailPage (:107-257) is rich (power/accuracy/pp/priority/effect/flavor/meta/learned-by). But list views fake metadata — MoveListPage.tsx:34 hardcodes type:'normal'/damage_class:'status'/power:null for every move (all list badges wrong); AbilityListPage.tsx:32 similar.` |
+| Who's-that-Pokémon | ○ 0 |  |
+| Command palette | ○ 0 |  |
 
 **Polish & Platform**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Favorites | ◐ | `init.ts:60-86 persists favorites under 'pokedex-settings' via toggleFavorite + FavoriteButton on detail works, but FavoritesPage.tsx:19 reads never-written key 'pokedex-favorites' (and hardcodes types:[]) so the collection page is always empty` |
-| Dark/light theming | ● | `Header.tsx:88 ThemeToggle (PokemonCard.tsx:716) + init.ts:43 applyTheme (dark/light/system) + bg-type-* badges (PokemonCard.tsx:616)` |
-| Keyboard navigation | ◐ | `Header.tsx:14-20 binds only '/' to focus search; Random button labeled (R) has no key handler; no arrow browse` |
-| Responsive design | ● | `Tailwind responsive grids (grid-cols-2..xl:grid-cols-6) across pages + Header.tsx mobile hamburger menu (aria-label Toggle menu)` |
-| Export / sharing | ○ |  |
+| Favorites | ◔ 1 | `init.ts:70-92 toggleFavorite persists under 'pokedex-settings' and the detail-page FavoriteButton reflects/persists state, but FavoritesPage.tsx:19 reads a never-written key 'pokedex-favorites' (and hardcodes types:[]) so the collection page is always empty.` |
+| Dark/light theming | ◕ 2 | `Authentic 18-type palette (tailwind.config.js + global.css @theme, bg-type-* utilities) is complete and used everywhere. Dark mode partially broken: compiled CSS shows dark: utilities as @media(prefers-color-scheme:dark) with zero :where(.dark) — Tailwind v4 without @config/@custom-variant, so ThemeToggle's .dark class only flips 3 hand-written global.css rules (body/.pokemon-card/.stat-bar), not the many dark: utilities. Manual toggle from a light OS looks inconsistent.` |
+| Keyboard navigation | ◔ 1 | `Header.tsx:14 binds '/' but the guard `e.target !== document.activeElement` is essentially always false during keydown (target IS the active element), so the shortcut never focuses search; Random button labeled '(R)' has no key handler; no arrow browse. Non-functional attempt.` |
+| Responsive design | ◕ 2 | `Responsive grids throughout (grid-cols-2 → sm/md/lg/xl:grid-cols-6), Header.tsx:91-143 hamburger mobile menu (aria-label Toggle menu), container mx-auto px-4, sticky sidebar. Usable at phone widths.` |
+| Export / sharing | ○ 0 |  |
 
 ## Vendored source
 

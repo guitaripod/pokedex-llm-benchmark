@@ -28,15 +28,24 @@ for (const s of manifest.submissions) {
   if (!s.metrics) errors.push(`${tag}: missing metrics (run compute-metrics.mjs)`);
   if (s.features && s.features.length) {
     if (s.features.length !== TOTAL)
-      errors.push(`${tag}: ${s.features.length} feature verdicts, expected ${TOTAL}`);
+      errors.push(`${tag}: ${s.features.length} feature grades, expected ${TOTAL}`);
     for (const f of s.features) {
       if (!validIds.has(f.id)) errors.push(`${tag}: unknown feature id "${f.id}"`);
-      if (!["present", "partial", "absent"].includes(f.status))
-        errors.push(`${tag}: bad status "${f.status}" for ${f.id}`);
+      if (!Number.isInteger(f.grade) || f.grade < 0 || f.grade > 3)
+        errors.push(`${tag}: bad grade "${f.grade}" for ${f.id} (want integer 0-3)`);
     }
     const ids = new Set(s.features.map((f) => f.id));
     for (const need of validIds)
-      if (!ids.has(need)) errors.push(`${tag}: feature "${need}" not scored`);
+      if (!ids.has(need)) errors.push(`${tag}: feature "${need}" not graded`);
+
+    const AXES = ["codeQuality", "architecture", "uxDesign", "robustness"];
+    if (!s.scores) errors.push(`${tag}: graded features but no axis scores`);
+    else
+      for (const k of AXES) {
+        const v = s.scores[k];
+        if (typeof v !== "number" || v < 0 || v > 10)
+          errors.push(`${tag}: axis "${k}" = ${v} (want number 0-10)`);
+      }
   }
 }
 

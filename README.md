@@ -2,127 +2,141 @@
 
 # Pokédex — LLM Coding Benchmark
 
-**One prompt, many models.** Every model gets the *identical* one-shot prompt and must build and deploy a complete Pokédex web app fully autonomously — no iteration, no human help. This repo collects each model's submission, its live Cloudflare deployment, and an apples-to-apples scorecard so the outputs can be compared feature-by-feature.
+**One prompt, many models.** Every model gets the *identical* one-shot prompt and must build and deploy a complete Pokédex web app fully autonomously — no iteration, no human help. This repo collects each model's submission, its live Cloudflare deployment, and an apples-to-apples scorecard that grades **how well** each feature is built, not just whether it exists.
 
 > Build a pokedex. Use all the data available on pokeapi to build out the UI. Make a web app. Host it on cloudflare. You have gh and wrangler available. Make it fleshed out and beautiful and production tier. Work autonomously until complete. Build as much functionality as you can with the data and then some. Make the greatest pokedex ever built. call it pokedex-<model>-<effort>. Work fully autonomously.
 
 Only the trailing name token changes per run (it encodes the model + effort). Read the full framing in **[THE_BRIEF.md](THE_BRIEF.md)** and how submissions are scored in **[RUBRIC.md](RUBRIC.md)**.
 
-- **7 submissions** across 4 named providers (plus 1 codename entry), scored against **30 canonical Pokédex features**.
+- **7 submissions** across 4 named providers (plus 1 codename entry), graded on **30 Pokédex features** by depth plus four craft axes.
 - Every submission ships a **live Cloudflare deployment** (click any demo link) and its **vendored source** under [`submissions/`](submissions/).
 - The tables below are generated from [`submissions.json`](submissions.json) — the single source of truth.
 
 ## 🏆 Leaderboard
 
-| # | Model | Effort | Coverage | Assessed | Stack | Source LOC | Deps | Live |
-|---|-------|--------|----------|----------|-------|-----------:|-----:|------|
-| 🥇 | **Fable 5** | ultracode | 28 / 30 | 9.1 | react/ts&nbsp;·&nbsp;vite | 11,058 | 6+5 | [demo](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) |
-| 🥈 | **GLM 5.2** | max | 21+4◐ / 30 | 7.8 | vanilla/js | 6,523 | 0+1 | [demo](https://pokedex-glm52-max.guitaripod.workers.dev) |
-| 🥉 | **Fable 5** | low | 21+3◐ / 30 | 7.8 | vanilla/js | 1,379 | 0+0 | [demo](https://pokedex-fable-5-low.guitaripod.workers.dev) |
-| 4 | **Grok** | default | 20+5◐ / 30 | 7.4 | react/ts&nbsp;·&nbsp;vite | 3,104 | 7+8 | [demo](https://pokedex-a7l.pages.dev) |
-| 5 | **Opus 4.8** | low | 21 / 30 | 8.3 | react/ts&nbsp;·&nbsp;vite | 2,395 | 3+10 | [demo](https://pokedex-opus-4-8-low.guitaripod.workers.dev) |
-| 6 | **Laguna S-2.1** | default | 14+11◐ / 30 | 4.3 | vanilla/ts&nbsp;·&nbsp;vite | 9,208 | 0+17 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
-| 7 | **DeepSeek** | default | 8+5◐ / 30 | 6.0 | vanilla/js | 1,535 | 0+1 | [demo](https://pokedex-deepseek-v4.pages.dev) |
+| # | Model | Effort | Bench | Feature depth | Code · Arch · UX · Robust | Stack | LOC | Live |
+|---|-------|--------|:-----:|:-------------:|:-------------------------:|-------|----:|------|
+| 🥇 | **Fable 5** | ultracode | **90.0** | 81 / 90 | 9 · 9 · 9 · 9 | react/ts&nbsp;·&nbsp;vite | 11,058 | [demo](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) |
+| 🥈 | **GLM 5.2** | max | **69.7** | 61 / 90 | 8 · 8 · 7 · 6 | vanilla/js | 6,523 | [demo](https://pokedex-glm52-max.guitaripod.workers.dev) |
+| 🥉 | **Opus 4.8** | low | **69.3** | 53 / 90 | 9 · 8 · 9 · 8 | react/ts&nbsp;·&nbsp;vite | 2,395 | [demo](https://pokedex-opus-4-8-low.guitaripod.workers.dev) |
+| 4 | **Fable 5** | low | **65.7** | 52 / 90 | 8 · 8 · 8 · 7 | vanilla/js | 1,379 | [demo](https://pokedex-fable-5-low.guitaripod.workers.dev) |
+| 5 | **Grok** | default | **53.2** | 43 / 90 | 6.5 · 6 · 7.5 · 4.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | [demo](https://pokedex-a7l.pages.dev) |
+| 6 | **DeepSeek** | default | **40.7** | 22 / 90 | 7 · 6 · 7 · 6 | vanilla/js | 1,535 | [demo](https://pokedex-deepseek-v4.pages.dev) |
+| 7 | **Laguna S-2.1** | default | **37.3** | 38 / 90 | 3 · 3 · 4 · 2 | preact/ts&nbsp;·&nbsp;vite | 9,208 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
 
-*Coverage = fully-implemented features (`◐` = partial, half-weighted for ranking). Assessed = mean of the four rubric scores (0–10). LOC counts hand-written source only — generated PokéAPI data, `node_modules` and build output are excluded.*
+*Bench (0–100) = 60% feature depth + 40% craft axes. **Feature depth** grades each of the 30 features 0–3 (absent → shallow/broken → solid → exceptional), so a few excellent features outscore many stubs. **Code · Arch · UX · Robust** are the four 0–10 craft axes. LOC counts hand-written source only. See [RUBRIC.md](RUBRIC.md).*
 
-## Feature matrix
+## Feature depth matrix
 
-Legend: ● present · ◐ partial · ○ absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow / broken (1) · ○ absent (0)
 
-| Feature | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [Grok](https://pokedex-a7l.pages.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) | [DeepSeek](https://pokedex-deepseek-v4.pages.dev) |
+| Feature | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [Grok](https://pokedex-a7l.pages.dev) | [DeepSeek](https://pokedex-deepseek-v4.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | **Browse & Discovery** | | | | | | | |
-| National Dex | ● | ● | ● | ● | ● | ◐ | ● |
-| Instant search | ● | ● | ● | ● | ● | ◐ | ● |
-| Type filter | ● | ◐ | ● | ● | ● | ◐ | ◐ |
-| Generation filter | ● | ● | ● | ● | ● | ◐ | ○ |
-| Sorting | ● | ● | ● | ● | ● | ◐ | ○ |
-| Advanced filters | ● | ○ | ● | ● | ○ | ◐ | ○ |
-| Shareable filter URLs | ● | ○ | ◐ | ● | ○ | ◐ | ○ |
+| National Dex | ● | ● | ● | ● | ◕ | ◕ | ◔ |
+| Instant search | ● | ● | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Type filter | ● | ◔ | ◕ | ◕ | ◔ | ◔ | ◔ |
+| Generation filter | ● | ● | ◕ | ◕ | ◔ | ○ | ◔ |
+| Sorting | ● | ◕ | ◕ | ◕ | ◕ | ○ | ◔ |
+| Advanced filters | ◕ | ○ | ○ | ◕ | ◕ | ○ | ◔ |
+| Shareable filter URLs | ● | ◔ | ○ | ◔ | ◕ | ○ | ◔ |
 | **Detail Depth** | | | | | | | |
-| Official artwork | ● | ● | ● | ● | ● | ● | ● |
-| Shiny toggle | ● | ● | ● | ● | ● | ● | ● |
-| Cry playback | ● | ● | ● | ● | ● | ● | ○ |
-| Stat visualization | ● | ● | ● | ● | ● | ● | ● |
-| Abilities with effects | ● | ● | ● | ◐ | ● | ● | ◐ |
-| Evolution chains | ● | ● | ● | ● | ● | ● | ◐ |
-| Move learnsets | ● | ● | ● | ◐ | ● | ● | ○ |
-| Defensive matchups | ● | ● | ● | ◐ | ● | ● | ● |
-| Breeding data | ● | ● | ● | ● | ● | ● | ◐ |
-| Alternate forms | ● | ◐ | ● | ○ | ● | ○ | ○ |
-| Pokédex entries | ● | ● | ◐ | ◐ | ● | ● | ◐ |
+| Official artwork | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Shiny toggle | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Cry playback | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ |
+| Stat visualization | ◕ | ● | ● | ◕ | ● | ◕ | ◕ |
+| Abilities with effects | ● | ◕ | ● | ◕ | ◔ | ◔ | ◕ |
+| Evolution chains | ● | ● | ● | ● | ◕ | ◔ | ◔ |
+| Move learnsets | ● | ● | ● | ● | ◔ | ○ | ◕ |
+| Defensive matchups | ● | ● | ● | ● | ◔ | ◕ | ◕ |
+| Breeding data | ◕ | ◕ | ● | ● | ◕ | ◔ | ◕ |
+| Alternate forms | ● | ◔ | ◕ | ◕ | ○ | ○ | ○ |
+| Pokédex entries | ● | ◕ | ● | ◔ | ◔ | ◔ | ◕ |
 | **Tools & Modes** | | | | | | | |
-| Type chart | ● | ● | ● | ○ | ● | ● | ○ |
-| Compare tool | ● | ◐ | ◐ | ● | ● | ◐ | ○ |
-| Team builder | ● | ● | ○ | ● | ○ | ◐ | ○ |
-| Damage calculator | ○ | ○ | ○ | ● | ○ | ○ | ○ |
-| Moves / Items / Abilities dex | ● | ● | ○ | ○ | ● | ● | ○ |
+| Type chart | ● | ● | ● | ● | ○ | ○ | ◕ |
+| Compare tool | ● | ◕ | ◕ | ◕ | ◕ | ○ | ◔ |
+| Team builder | ● | ● | ○ | ○ | ● | ○ | ◔ |
+| Damage calculator | ○ | ○ | ○ | ○ | ◕ | ○ | ○ |
+| Moves / Items / Abilities dex | ● | ◕ | ● | ○ | ○ | ○ | ◕ |
 | Who's-that-Pokémon | ● | ○ | ○ | ○ | ○ | ○ | ○ |
-| Command palette | ● | ◐ | ○ | ○ | ○ | ○ | ○ |
+| Command palette | ● | ◔ | ○ | ○ | ○ | ○ | ○ |
 | **Polish & Platform** | | | | | | | |
-| Favorites | ● | ● | ● | ● | ○ | ◐ | ○ |
-| Dark/light theming | ● | ● | ● | ◐ | ● | ● | ● |
-| Keyboard navigation | ● | ● | ● | ● | ○ | ◐ | ○ |
-| Responsive design | ● | ● | ● | ● | ● | ● | ● |
-| Export / sharing | ○ | ○ | ○ | ● | ○ | ○ | ○ |
-| **Full coverage** | **28** | **21** | **21** | **20** | **21** | **14** | **8** |
+| Favorites | ● | ● | ○ | ◕ | ◕ | ○ | ◔ |
+| Dark/light theming | ● | ● | ● | ◕ | ◔ | ◕ | ◕ |
+| Keyboard navigation | ● | ◕ | ○ | ◕ | ◔ | ◔ | ◔ |
+| Responsive design | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Export / sharing | ◔ | ○ | ○ | ○ | ◕ | ○ | ○ |
+| **Feature depth / 90** | **81** | **61** | **53** | **52** | **43** | **22** | **38** |
 
 ## Submissions
 
-#### Fable 5 — ultracode  ·  28/30 features
+#### Fable 5 — ultracode
 
-A remarkably complete React SPA Pokédex that precomputes the entire dataset into static JSON shards at build time and serves them from Cloudflare, with client-side fuzzy search and no runtime API. 28 of 30 checklist features are implemented with real depth — detail pages, learnsets, evolution trees, type chart, team builder, compare, quiz minigame, command palette, and theming.
+Bench **90.0** · feature depth 81/90 · 28/30 features solid+
+
+A remarkably complete React/TypeScript SPA Pokedex that precomputes the entire PokeAPI dataset into per-entity static JSON shards at build time (scripts/build-data.mjs, 639 lines) and serves them from Cloudflare with fully client-side fuzzy search and zero runtime API. Code is strongly-typed, modular (dedicated lib modules, custom hooks, useSyncExternalStore stores), and free of comment rot; feature depth is genuine across detail pages, learnsets, evolution trees, type chart, team builder, compare, quiz, and command palette.
 
 [**Live demo**](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-fable-5-ultracode) · [vendored code & full scorecard](submissions/fable-5-ultracode/ENTRY.md)
 
 ---
 
-#### GLM 5.2 — max  ·  21/30 features
+#### GLM 5.2 — max
 
-A broad, modular vanilla-JS single-page Pokedex served by a Cloudflare Worker that proxies PokeAPI with edge caching and a composite pokemon+species endpoint. It covers the national dex plus rich detail pages (about/stats/evolution/moves/sprites/defenses/locations/forms) and standalone dexes for types, abilities, moves, items, berries, natures, generations, compare, team builder, and favorites.
+Bench **69.7** · feature depth 61/90 · 22/30 features solid+
+
+A broad, well-organized vanilla-JS Pokedex on a Cloudflare Worker that proxies and edge-caches PokeAPI, including a smart server-side composite pokemon+species endpoint. It covers an unusually wide feature surface (detail tabs, type chart, team builder with real defensive coverage, compare, moves/abilities/generations dexes, favorites, theming, responsive) at genuine depth, but several features are undermined by cache-ordering and filter bugs.
 
 [**Live demo**](https://pokedex-glm52-max.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-glm52-max) · [vendored code & full scorecard](submissions/glm-5.2-max/ENTRY.md)
 
 ---
 
-#### Fable 5 — low  ·  21/30 features
+#### Opus 4.8 — low
 
-A polished single-page vanilla-JS Pokédex with a distinctive dark 'terminal' aesthetic, served as static assets on Cloudflare Workers. Data (1025 species + 326 forms, plus abilities, types, evolution chains, moves) is prebuilt from PokéAPI into static JSON at build time, with only per-Pokémon learnsets fetched live. It covers the core dex deeply (search, filters, sorting, rich detail pages, type matrix, compare, favorites) without any framework or build step.
+Bench **69.3** · feature depth 53/90 · 21/30 features solid+
 
-[**Live demo**](https://pokedex-fable-5-low.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-fable-5-low) · [vendored code & full scorecard](submissions/fable-5-low/ENTRY.md)
-
----
-
-#### Grok  ·  20/30 features
-
-A feature-rich client-side React 19 + TypeScript + Tailwind 4 Pokédex that fetches live from PokeAPI with progressive batch loading, in-session caching, and a virtualized grid. It goes well beyond browsing with a Team Lab, comparison, damage calc, PNG/Showdown export, and custom stat visualization.
-
-[**Live demo**](https://pokedex-a7l.pages.dev) · [source](https://github.com/guitaripod/pokedex) · [vendored code & full scorecard](submissions/grok/ENTRY.md)
-
----
-
-#### Opus 4.8 — low  ·  21/30 features
-
-A focused, production-grade React/TypeScript Pokédex on Cloudflare Workers covering all 1025 Pokémon with instant client-side search/filter/sort over a precomputed index, and unusually deep, polished detail pages. It goes broad-and-deep on the core dex/detail/type/compare surface but deliberately omits interactive power-tools (team builder, damage calc, minigame, command palette, favorites, export).
+A polished, tightly-built React + TypeScript + Vite Pokedex on Cloudflare Workers that leans into depth over breadth: fewer than a handful of runtime deps, a prebuilt 1025-entry index for instant client-side search/filter/sort, and rich detail pages (correct dual-type matchups, branching evolutions, per-game learnsets, hand-rolled SVG radar, three secondary dexes). It deliberately skips the 'app-shell' features (favorites, URL state, team builder, damage calc, minigame, command palette, keyboard nav, export) in favor of building the core dex features well.
 
 [**Live demo**](https://pokedex-opus-4-8-low.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-opus-4-8-low) · [vendored code & full scorecard](submissions/opus-4-8-low/ENTRY.md)
 
 ---
 
-#### Laguna S-2.1  ·  14/30 features
+#### Fable 5 — low
 
-A Preact + Vite SPA aiming at a comprehensive Pokédex, with a genuinely rich per-Pokémon detail page (tabbed overview/moves/sprites/encounters/lore/evolution, stat radar, per-Pokémon 18-type defensive chart, shiny toggle, cry player, breeding, evolution tree) and working secondary dexes for moves/items/abilities/types. However the flagship browse-all grid ships broken via four undefined references, the intended static prebuild pipeline is non-functional, and compare/team-builder/favorites-viewer are all broken by missing or mis-wired code.
+Bench **65.7** · feature depth 52/90 · 22/30 features solid+
 
-[**Live demo**](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-laguna-s-2-1) · [vendored code & full scorecard](submissions/laguna-s-2-1/ENTRY.md)
+A polished single-page vanilla-JS Pokédex with a distinctive dark terminal aesthetic, served as static assets on Cloudflare Workers. Data (1025 species + 326 forms plus abilities, types, evolution chains, moves) is prebuilt from PokéAPI into static JSON, with only per-Pokémon learnsets fetched live. It covers the core dex deeply with no framework and no build step, and is defensively coded (escaping, image fallbacks, try/catch, retry/backoff).
+
+[**Live demo**](https://pokedex-fable-5-low.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-fable-5-low) · [vendored code & full scorecard](submissions/fable-5-low/ENTRY.md)
 
 ---
 
-#### DeepSeek  ·  8/30 features
+#### Grok
 
-A single-view vanilla-JS Pokedex (no framework, ~590 lines app.js + ~800 lines CSS) served as a Cloudflare Pages app, with a Pages Functions proxy that forwards requests to PokeAPI and layers on CDN caching. It delivers a browsable national-dex grid with search, a rich detail modal (stats, abilities, evolution, defensive type matchups, shiny toggle, breeding-ish metadata), and a polished dark, type-accented UI, but ships no secondary tools (compare, team builder, damage calc, moves dex, minigame) and no persistence or URL state.
+Bench **53.2** · feature depth 43/90 · 16/30 features solid+
+
+A compact (~2,800 LOC) client-side React 19 + TypeScript + Tailwind 4 Pokédex that fetches live from PokeAPI with progressive batch loading and a hand-rolled virtualized grid. It is cleanly organized and visually polished, with a genuinely deep Team Lab (its standout), but is undermined by a broken generation filter, filters that halt data loading, and a reachable whole-app crash.
+
+[**Live demo**](https://pokedex-a7l.pages.dev) · [source](https://github.com/guitaripod/pokedex) · [vendored code & full scorecard](submissions/grok/ENTRY.md)
+
+---
+
+#### DeepSeek
+
+Bench **40.7** · feature depth 22/90 · 8/30 features solid+
+
+A tightly-built vanilla-JS single-page Pokédex (588-line app.js + CSS + a Cloudflare Pages Functions edge proxy) that does a focused set of things well: full national dex with infinite scroll, name/number search, a polished type-themed dark UI, and a rich detail modal (stats, abilities, evolution, dual-type matchups, breeding meta, shiny toggle). It ships roughly eight solid features and stops there — the bulk of the 30-feature space (sort, generation/advanced filters, shareable URLs, favorites, compare, team builder, damage calc, moves, cries, minigame, command palette, export) is entirely absent.
 
 [**Live demo**](https://pokedex-deepseek-v4.pages.dev) · [source](https://github.com/guitaripod/pokedex-deepseek-v4) · [vendored code & full scorecard](submissions/deepseek-v4/ENTRY.md)
+
+---
+
+#### Laguna S-2.1
+
+Bench **37.3** · feature depth 38/90 · 13/30 features solid+
+
+A Preact + Vite + Tailwind SPA that builds and deploys (npm run build exits 0) and ships a genuinely rich per-Pokemon detail page and working secondary dexes for moves/items/abilities/types. But the flagship 'browse all Pokemon' grid hard-crashes via four undefined references, several tools (compare, favorites page, team analysis, evolution chain) are broken by mis-wired code, and the intended static-data pipeline is non-functional so every page live-fetches hundreds-to-thousands of PokeAPI resources.
+
+[**Live demo**](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-laguna-s-2-1) · [vendored code & full scorecard](submissions/laguna-s-2-1/ENTRY.md)
 
 ## Adding a model
 
@@ -132,16 +146,16 @@ New model, same brief? One command vendors the repo, computes metrics, and wires
 node scripts/add-submission.mjs <github-repo-url> --model "<Name>" --effort <level>
 ```
 
-Then score it against the checklist and regenerate. Full walkthrough: **[docs/adding-a-model.md](docs/adding-a-model.md)**.
+Then grade it against the checklist and regenerate. Full walkthrough: **[docs/adding-a-model.md](docs/adding-a-model.md)**.
 
 ## Repository layout
 
 | Path | What |
 |------|------|
-| [`submissions.json`](submissions.json) | Single source of truth: metadata, metrics, feature verdicts, scores. |
+| [`submissions.json`](submissions.json) | Single source of truth: metadata, metrics, per-feature depth grades, axis scores. |
 | [`submissions/<id>/`](submissions/) | Each model's vendored source + `ENTRY.md` scorecard. |
 | [`THE_BRIEF.md`](THE_BRIEF.md) | The exact task every model was given. |
-| [`RUBRIC.md`](RUBRIC.md) | Scoring methodology and the feature checklist. |
+| [`RUBRIC.md`](RUBRIC.md) | Scoring model: depth grades, craft axes, and the composite. |
 | [`docs/`](docs/) | Methodology, feature checklist, how to add a model. |
 | [`scripts/`](scripts/) | `compute-metrics` · `gen-entries` · `gen-readme` · `add-submission` · `validate`. |
 

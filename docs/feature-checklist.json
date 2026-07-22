@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Canonical feature space for the Pokédex brief. Every submission is scored present | partial | absent against each item. These are the columns of the comparison matrix and the objective spine of the rubric.",
+  "note": "Canonical feature space for the Pokédex brief. Every submission grades each feature 0-3 by depth (0 absent, 1 shallow/broken, 2 solid, 3 exceptional); the sum is the feature-depth score. The `counts` line is the bar for a working (grade 2) implementation. See RUBRIC.md.",
   "categories": [
     {
       "id": "browse",

@@ -64,9 +64,11 @@ function detectStack(dir, pkg) {
 
   let framework = "vanilla";
   if (has("react") || has("react-dom")) framework = "react";
+  else if (has("preact")) framework = "preact";
   else if (has("vue")) framework = "vue";
   else if (has("svelte")) framework = "svelte";
   else if (has("solid-js")) framework = "solid";
+  else if (has("lit")) framework = "lit";
 
   const language = detectLanguage(dir);
 

@@ -2,10 +2,11 @@
 
 # Fable 5 — low
 
-> A polished single-page vanilla-JS Pokédex with a distinctive dark 'terminal' aesthetic, served as static assets on Cloudflare Workers. Data (1025 species + 326 forms, plus abilities, types, evolution chains, moves) is prebuilt from PokéAPI into static JSON at build time, with only per-Pokémon learnsets fetched live. It covers the core dex deeply (search, filters, sorting, rich detail pages, type matrix, compare, favorites) without any framework or build step.
+> A polished single-page vanilla-JS Pokédex with a distinctive dark terminal aesthetic, served as static assets on Cloudflare Workers. Data (1025 species + 326 forms plus abilities, types, evolution chains, moves) is prebuilt from PokéAPI into static JSON, with only per-Pokémon learnsets fetched live. It covers the core dex deeply with no framework and no build step, and is defensively coded (escaping, image fallbacks, try/catch, retry/backoff).
 
 | | |
 |---|---|
+| **Benchmark score** | **65.7 / 100** |
 | **Model** | Fable 5 (Anthropic, 5) |
 | **Effort** | low |
 | **Built** | 2026-07-02 |
@@ -15,87 +16,87 @@
 | **Stack** | vanilla · javascript · none · hand-rolled css |
 | **Data strategy** | prebuilt-static + live-api |
 | **Source** | 1,379 LOC · 5 files · 0+0 deps |
-| **Feature coverage** | 21 / 30 (+3 partial) |
+| **Feature depth** | 52 / 90 (22/30 features solid or better) |
 
 ## Scorecard
 
-| Completeness | Code quality | Architecture | UX polish |
+| Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 7 | 8 | 8 | 8 |
+| 8 | 8 | 8 | 7 |
 
-_Scored 0–10 from source; see [RUBRIC.md](../../RUBRIC.md)._
+_Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Broad and deep core coverage: 20 present features including full national dex with forms, multi-select type AND filtering, 9 sort modes, animated stats, abilities with effects, branching evolution chains, defensive matchups, breeding data, type matrix, shiny/cries/artwork
-- Sound data architecture: robust prebuild pipeline (build-data.mjs with retry/backoff + concurrency pool) yields single-origin static JSON, infinite-scroll grid via IntersectionObserver, SPA routing on Workers assets
-- Clean, readable vanilla JS with consistent HTML-escaping (esc()), no framework bloat, no dead code; follows the no-inline-comment discipline
-- Strong UX polish: type-driven accent theming, boot/scanline/LED terminal styling, keyboard nav, responsive breakpoint + clamp/minmax fluid grids, prefers-reduced-motion support
+- Broad, genuinely deep core coverage: full national dex with forms via a robust concurrency-pool prebuild pipeline, multi-select AND type filter, 9 sorts, correct dual-type defensive matchups, full 18x18 type matrix with per-type profiles, branching evolution chains, comprehensive breeding data, and a rich tabbed learnset UI
+- Sound architecture: prebuilt static JSON for single-origin boot, IntersectionObserver chunked infinite scroll over 1351 entries, hash SPA router on Workers assets, retry/backoff + concurrency in build scripts
+- Clean, consistent vanilla JS with pervasive HTML-escaping (esc()), image onerror fallbacks, and no framework bloat or dead code; follows the no-inline-comment discipline
+- Strong, distinctive UX: type-driven accent theming, boot/scanline/LED terminal styling, keyboard nav, fluid clamp/minmax grids, and prefers-reduced-motion support
 
 ## Weaknesses
 
-- Six higher-effort features absent: team-builder, damage calculator, standalone moves-dex, minigame, command palette, and any export/share-data capability
-- Shareable URLs are shallow — deep links work for detail/type/compare/favorites but dex filter/search state is never serialized to the URL (query string is explicitly discarded)
-- Flavor text stores only the single last English entry rather than per-version-group entries; compare is limited to two fixed slots; no light/dark theme toggle
-- README claims 'zero API dependency' but learnsets are fetched live from pokeapi.co at runtime, so detail pages' move pools break offline / if PokéAPI is down
+- Six higher-effort features fully absent: team-builder, damage calculator, standalone moves-dex, minigame, command palette, and any export/share-data capability
+- Move pool (a core detail feature) is fetched LIVE from pokeapi.co at runtime and uses only the latest version-group method, so detail pages degrade to 'UPLINK FAILED' offline or if PokéAPI is down — directly contradicting the README's 'zero API dependency' claim
+- Shareable URLs are shallow: filter/search/sort and compare selections are never serialized (query string explicitly discarded); flavor text keeps only the single last English entry; compare limited to two fixed slots; no light/dark theme toggle
+- Single responsive breakpoint and no automated tests; generated data is not committed, so the app is blank until build scripts are re-run
 
 ## Standout
 
-The prebuild-to-static-JSON strategy paired with a chunked IntersectionObserver infinite-scroll grid lets a 1351-entry dex boot from a single origin and render smoothly with no framework and no runtime data dependency for the core browsing experience.
+defensiveEffectiveness (app.js:51-64) computes combined dual-type defensive multipliers correctly by iterating attacking types and multiplying 2/0.5/0 per defending type, then bucketing into 4x/2x/half/quarter/0x — accurate type math that many submissions get wrong.
 
-## Feature coverage detail
+## Feature depth detail
 
-Legend: ● present · ◐ partial · ○ absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ absent (0)
 
 **Browse & Discovery**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ● | `public/data/pokedex.json: verified 1351 entries = 1025 default + 326 forms; DEX rendered via dexView()/filteredDex() with chunked infinite scroll (app.js:92-176)` |
-| Instant search | ● | `app.js:101-104 filteredDex matches name/label and #/number (species too); debounced 160ms input (app.js:180-183)` |
-| Type filter | ● | `app.js:97 multi-select AND ([...state.types].every); 18 type chips at app.js:156-158,188-192` |
-| Generation filter | ● | `app.js:96 p.gen filter; gen field non-null for all 1351 entries; GEN I-IX select app.js:140-143` |
-| Sorting | ● | `app.js:108-118 nine sorts (id,name,total/BST,hp,attack,defense,speed,height,weight); select app.js:150-152` |
-| Advanced filters | ● | `app.js:98-100 rarity filter legendary/mythical/baby; select app.js:144-149` |
-| Shareable filter URLs | ◐ | `Hash router deep-links detail/types/compare/favorites (app.js:588-603); but query string discarded (app.js:593 hash.slice(1).split('?')) and dex filter/search state lives only in in-memory state — not restorable from URL` |
+| National Dex | ● 3 | `scripts/build-data.mjs:46-50,169 fetch pokemon+species at limit=100000, filter/sort all; app.js:92-176 filteredDex()+chunked IntersectionObserver infinite scroll over full 1025+326-form dex. Robust prebuild pipeline with retry/backoff.` |
+| Instant search | ◕ 2 | `app.js:101-104 filteredDex matches name slug/label and #/species number; debounced 160ms (app.js:180-183). Client-side over in-memory DEX; plain substring, no fuzzy/ranking.` |
+| Type filter | ◕ 2 | `app.js:97 multi-select AND ([...state.types].every); 18 colored chips app.js:156-158,188-192. AND-only, no OR mode.` |
+| Generation filter | ◕ 2 | `app.js:96,140-143 Gen I-IX select on p.gen; gen derived per-species via generation endpoint (build-data.mjs:73-77). Standard dropdown.` |
+| Sorting | ◕ 2 | `app.js:108-118,150-152 nine sorts (id,name,BST,hp,atk,def,speed,height,weight). Exceeds ask but single-direction only, no asc/desc toggle.` |
+| Advanced filters | ◕ 2 | `app.js:98-100,144-149 rarity dropdown legendary/mythical/baby + FORMS toggle (app.js:154,187), composing with type/gen/sort. Real but only the rarity axis; no stat-range/ability/learnset filters.` |
+| Shareable filter URLs | ◔ 1 | `app.js:588-603 hash router deep-links detail/types/compare/favorites, but query string explicitly discarded (app.js:593) and filter/search/sort + compare selection (module-global cmp) never serialized. Detail deep-links work; shareable filtered view absent.` |
 
 **Detail Depth**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ● | `app.js:23 artUrl uses PokeAPI official-artwork; hero art app.js:287; card art app.js:127 with sprite fallback` |
-| Shiny toggle | ● | `app.js:390-400 shiny toggle swaps official-artwork/shiny and showdown anim gif` |
-| Cry playback | ● | `app.js:205-212 playCry fetches cries .ogg from PokeAPI cries repo; cry button app.js:291 (1350 species have cry flag)` |
-| Stat visualization | ● | `app.js:316-322 animated stat bars (rAF width animation app.js:383-385) with BST total; no radar chart` |
-| Abilities with effects | ● | `app.js:328-332 lists abilities + hidden tag, short_effect text from abilities.json (verified 373 entries)` |
-| Evolution chains | ● | `app.js:214-241 evoChainHTML handles branches (frontier flatMap) with condition text via evoConditionText (app.js:66-86); evolution.json has 541 chains` |
-| Move learnsets | ● | `app.js:404-448 loadMoves groups by method (level-up/machine/egg/tutor) with pwr/acc/pp/effect columns; learnset fetched LIVE from pokeapi.co at runtime and merged with moves.json (937 moves)` |
-| Defensive matchups | ● | `app.js:51-64 defensiveEffectiveness; grouped 4x/2x/½/¼/0 at app.js:255-262,337-341` |
-| Breeding data | ● | `app.js:345-357 egg groups, hatch cycles+steps, growth rate, gender ratio bar (app.js:264-270); EV yield app.js:323` |
-| Alternate forms | ● | `app.js:364-374 Forms & Variants panel over p.varieties; FORMS ON/OFF dex toggle app.js:154,187; 326 alt forms in data` |
-| Pokédex entries | ◐ | `app.js:301 shows single p.flavor string; build-data.mjs:35-38 pickFlavor stores only the LAST English flavor entry, not per-version-group entries; data confirms flavor is a plain string` |
+| Official artwork | ◕ 2 | `app.js:23 official-artwork URL; hero full-res art with floaty animation + rotating ring (style.css:257-273), sprite onerror fallback (app.js:287). Solid, standard presentation.` |
+| Shiny toggle | ◕ 2 | `app.js:390-400 shiny toggle swaps official-artwork/shiny and the showdown animated gif. Works on detail for both static and anim sprite.` |
+| Cry playback | ◕ 2 | `app.js:205-212,291 playCry fetches .ogg from PokeAPI cries repo, volume .4, button on/off state, catch on failure. Works.` |
+| Stat visualization | ◕ 2 | `app.js:316-323,383-385 six base-stat bars with double-rAF width animation + BST total + EV yield line. Bars only, no radar, but animated and clean.` |
+| Abilities with effects | ◕ 2 | `app.js:328-332 lists all abilities with Hidden tag + short_effect from prebuilt abilities.json (build-data.mjs:106-114). Effect text present; no cross-linking to other holders.` |
+| Evolution chains | ● 3 | `app.js:214-241 evoChainHTML does true BFS branching over frontier.flatMap; evoConditionText app.js:66-86 renders ~15 conditions (level/item/held-item/friendship/affection/beauty/known-move/location/time/trade/rain/gender/trigger). Handles Eevee-style branches; best-in-class here.` |
+| Move learnsets | ● 3 | `app.js:404-448 loadMoves groups by method into tabs (level-up/machine/egg/tutor) with LV/MOVE/TYPE/CAT/PWR/ACC/PP/EFFECT columns, counts, sorting; merges live pokeapi.co moveset with prebuilt moves.json. Rich; caveat: fetched live at runtime, only latest version-group method (app.js:412).` |
+| Defensive matchups | ● 3 | `app.js:51-64 defensiveEffectiveness correctly multiplies dual-type relations (2/0.5/0), bucketed into 4x/2x/half/quarter/0x at app.js:255-262,337-341. Verified correct combined dual-type math.` |
+| Breeding data | ● 3 | `app.js:264-270,345-357,323 egg groups, hatch cycles + computed steps ((n+1)*255), growth rate, habitat, color, EV yield, and gender-ratio bar with genderless handling. Covers all checklist breeding fields.` |
+| Alternate forms | ◕ 2 | `app.js:364-374,154,187 Forms & Variants panel over species.varieties (megas/regionals/gmax) with current highlight + cross-nav, plus dex FORMS toggle; 326 forms in data. No category labeling beyond the name slug.` |
+| Pokédex entries | ◔ 1 | `build-data.mjs:35-38 pickFlavor stores only the LAST English flavor entry as a plain string; app.js:301 renders that single p.flavor. No per-version-group entries.` |
 
 **Tools & Modes**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Type chart | ● | `app.js:460-473 full 18x18 attack->defense matrix in typesView; plus per-type combat profile app.js:474-504 (offensive+defensive relations)` |
-| Compare tool | ◐ | `app.js:514-577 head-to-head stat-by-stat with win highlighting, but only two fixed slots (cmp.a/cmp.b) — two-fixed-slot compare treated as partial per rubric` |
-| Team builder | ○ |  |
-| Damage calculator | ○ |  |
-| Moves / Items / Abilities dex | ○ |  |
-| Who's-that-Pokémon | ○ |  |
-| Command palette | ○ |  |
+| Type chart | ● 3 | `app.js:450-505 typesView renders full 18x18 attack->defense matrix with color-coded cells, plus clickable per-type combat profiles (offensive + defensive relations) and a member grid. Interactive and complete.` |
+| Compare tool | ◕ 2 | `app.js:514-577 head-to-head with search pickers, per-stat win highlighting, mirrored bars, BST. Well done but only two fixed slots (cmp.a/cmp.b), no 3+ or coverage analysis.` |
+| Team builder | ○ 0 |  |
+| Damage calculator | ○ 0 |  |
+| Moves / Items / Abilities dex | ○ 0 |  |
+| Who's-that-Pokémon | ○ 0 |  |
+| Command palette | ○ 0 |  |
 
 **Polish & Platform**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Favorites | ● | `app.js:18,39-49 localStorage 'pokedex-favs' Set; nav count badge; favoritesView app.js:579-586; card/detail star toggles` |
-| Dark/light theming | ● | `Dynamic per-type theming wired throughout: --accent set from type color on detail (app.js:247-249) and type view; type-colored badges/cards/chips/matrix. Fixed dark terminal theme, no light/dark toggle (grep confirms none)` |
-| Keyboard navigation | ● | `app.js:616-629 '/' focus search, R random, ArrowLeft/Right browse prev/next default species; guards against input focus` |
-| Responsive design | ● | `style.css:450-458 @media max-width:900px collapses hero/compare/nav; auto-fill/auto-fit minmax grids + clamp() throughout (style.css:100,177,243,297,303); prefers-reduced-motion handling` |
-| Export / sharing | ○ |  |
+| Favorites | ◕ 2 | `app.js:18,39-49,579-586 localStorage 'pokedex-favs' Set with nav count badge, favoritesView, star toggles on cards and detail. Complete, persistent, standard.` |
+| Dark/light theming | ◕ 2 | `app.js:247-249 --accent set from primary type via color-mix on detail/type views; type-colored badges/cards/chips/matrix throughout. Cohesive but a fixed dark terminal theme only — no light/dark toggle (grep confirms none).` |
+| Keyboard navigation | ◕ 2 | `app.js:616-629 '/' focuses search, R random, ArrowLeft/Right browse prev/next default species, with input-focus guard. Covers the ask; no help overlay.` |
+| Responsive design | ◕ 2 | `style.css:100,176-178,297,303,450-462 auto-fill/auto-fit minmax grids + clamp(), single @media max-width:900px breakpoint collapsing hero/compare/nav, overflow-x scroll for matrix/move tables, prefers-reduced-motion. Usable to phone widths.` |
+| Export / sharing | ○ 0 |  |
 
 ## Vendored source
 

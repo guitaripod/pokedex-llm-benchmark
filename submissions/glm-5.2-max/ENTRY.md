@@ -2,10 +2,11 @@
 
 # GLM 5.2 — max
 
-> A broad, modular vanilla-JS single-page Pokedex served by a Cloudflare Worker that proxies PokeAPI with edge caching and a composite pokemon+species endpoint. It covers the national dex plus rich detail pages (about/stats/evolution/moves/sprites/defenses/locations/forms) and standalone dexes for types, abilities, moves, items, berries, natures, generations, compare, team builder, and favorites.
+> A broad, well-organized vanilla-JS Pokedex on a Cloudflare Worker that proxies and edge-caches PokeAPI, including a smart server-side composite pokemon+species endpoint. It covers an unusually wide feature surface (detail tabs, type chart, team builder with real defensive coverage, compare, moves/abilities/generations dexes, favorites, theming, responsive) at genuine depth, but several features are undermined by cache-ordering and filter bugs.
 
 | | |
 |---|---|
+| **Benchmark score** | **69.7 / 100** |
 | **Model** | GLM 5.2 (Zhipu AI, 5.2) |
 | **Effort** | max |
 | **Built** | 2026-07-08 |
@@ -15,87 +16,85 @@
 | **Stack** | vanilla · javascript · none · hand-rolled css |
 | **Data strategy** | edge-proxy |
 | **Source** | 6,523 LOC · 20 files · 0+1 deps |
-| **Feature coverage** | 21 / 30 (+4 partial) |
+| **Feature depth** | 61 / 90 (22/30 features solid or better) |
 
 ## Scorecard
 
-| Completeness | Code quality | Architecture | UX polish |
+| Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 8 | 7.5 | 8 | 7.5 |
+| 8 | 8 | 7 | 6 |
 
-_Scored 0–10 from source; see [RUBRIC.md](../../RUBRIC.md)._
+_Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Strong feature breadth: 21 features present including full 18x18 type chart, team defensive coverage, evolution chains with detailed conditions, learnsets, stat calculator, and multi-view dexes beyond the checklist (items/berries/natures/locations)
-- Sound architecture: Worker edge-caches PokeAPI via caches.default, exposes a composite /pokemon/:id endpoint to cut round-trips, and the client layer adds in-memory cache + in-flight request dedup
-- Clean, consistent code organization: per-view ES modules, a pub/sub store for favorites/teams/theme persisted to localStorage, shared utils/data modules, comment-free per the house style
-- Genuine UX touches: type-gradient cards, Pokemon-of-the-day featured card, skeleton image loading, toasts, modals, shiny toggle, cries playback, dark/light theming, responsive hamburger nav
+- Clean modular architecture: hash router + per-view modules, an api layer with in-memory cache AND in-flight request dedup, a pub/sub store, and a Worker composite /api/pokemon/:id that merges pokemon+species server-side with caches.default
+- Real correctness in the hard parts: dual-type defensive multipliers, full 18x18 live type chart, recursive evolution chains with exhaustive conditions, and team defensive coverage all compute correctly
+- High polish breadth: featured Pokemon-of-the-day, interactive stat calculator, 60-tile sprite grid, toasts/modals/skeletons, full dark+light token palettes and three responsive breakpoints
 
 ## Weaknesses
 
-- Type filter is effectively broken in the natural flow: clicking a type on a fresh load filters against an empty cachedTypesCache and shows 'No Pokemon found', only recovering after an (expensive) stat-sort enrichment of all 1025
-- Default dex grid cards render no type badges at all until enrichment runs, which never happens on the default id-sort view — a visible polish gap
-- Several features are partial-only: compare is fixed 2-way, forms reuses the base sprite for every form and only detects mega by name, and the 'command palette' is just a Pokemon search overlay
-- Missing shareable-url state encoding, export, damage calculator, advanced attribute filters, and any minigame
+- The flagship dex type filter is deadlocked by default: it reads a cache only populated by an enrichment step that never runs when the filtered set is empty, so selecting a type shows 'No Pokemon found' until an unrelated stat-sort first enriches all 1025
+- Silent data loss: the abilities dex filter drops every hyphenated ability name (~40% of abilities); the forms tab renders the base sprite for all forms and is non-navigable
+- Scalability/feedback gaps: stat sorting fires 1025 unthrottled fetches with no progress UI; default grid cards never show type badges because enrichment is gated behind filtering/sorting
 
 ## Standout
 
-The Cloudflare Worker composite endpoint (pokemon+species fetched in parallel and cached under a synthetic composite.local cache key) plus client-side request dedup is a thoughtful data-fetch strategy that most submissions skip.
+The type-filter enrichment-cache deadlock (pokedex.js:97-101 vs loadMore early-return at line 140) — a subtle ordering bug that leaves a core, prominently-placed feature silently broken on first use despite the rest of the dex working.
 
-## Feature coverage detail
+## Feature depth detail
 
-Legend: ● present · ◐ partial · ○ absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ absent (0)
 
 **Browse & Discovery**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ● | `api.js getAllPokemonRefs limit 1025 + pokedex.js infinite-scroll grid (IntersectionObserver sentinel); data.js TOTAL_POKEMON=1025` |
-| Instant search | ● | `pokedex.js applyFilters name/number over in-memory refs + app.js setupGlobalSearch overlay (ensureSearchList), both client-side` |
-| Type filter | ◐ | `pokedex.js setupFilters type chips + applyFilters filter against cachedTypesCache (line 98/204); cache is empty on a fresh type-only click so it shows 'No Pokemon found' until a stat sort triggers enrichCards(refs) — confirmed bug` |
-| Generation filter | ● | `pokedex.js gen buttons + data.js getGenById id-range filter (works without enrichment)` |
-| Sorting | ● | `pokedex.js sort-select id/name immediate; hp/atk/def/spa/spd/speed/total via enrichCards(refs) fetching stats` |
-| Advanced filters | ○ |  |
-| Shareable filter URLs | ○ |  |
+| National Dex | ● 3 | `api.js getAllPokemonRefs limit 1025; pokedex.js IntersectionObserver infinite scroll PAGE_SIZE 60; data.js TOTAL_POKEMON=1025; plus deterministic Pokemon-of-the-day featured card (loadFeatured) and Random button. Full dex, not truncated.` |
+| Instant search | ● 3 | `app.js global cmd-K/'/' overlay with debounce, sprite previews, number+name match, Enter-to-select; pokedex.js #dex-search re-renders grid. Two client-side surfaces over all 1025 refs, no server round-trip. Matching is substring-only (startsWith redundant with includes) but polished.` |
+| Type filter | ◔ 1 | `pokedex.js:97-101 filters on cachedTypesCache which is only populated by enrichCards; enrichCards runs inside loadMore (line 140) which returns early when filtered is empty. Selecting a type on a fresh session deadlocks to 'No Pokemon found' until a stat-sort first enriches all refs. Broken by default.` |
+| Generation filter | ● 3 | `pokedex.js gen buttons + data.js getGenById pure id-range filter (works without enrichment), PLUS dedicated generations.js that fetches generation/:id for all 9 gens and shows region + species/move/ability/type counts with clickable per-gen species browse. Two working surfaces, one on authoritative gen data.` |
+| Sorting | ◕ 2 | `pokedex.js sort-select: id/name instant; hp/atk/def/spa/spd/speed/total via enrichCards(refs) which fires 1025 unthrottled getPokemon fetches through Promise.all with no progress feedback. Functionally complete but a request storm gated on enrichment.` |
+| Advanced filters | ○ 0 |  |
+| Shareable filter URLs | ◔ 1 | `app.js hash router deep-links every page and /pokemon/:id (navigate on hashchange+load), but no filter/search/sort/active-tab/compare state is encoded in the URL (no URLSearchParams). Route-level sharing only.` |
 
 **Detail Depth**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ● | `data.js getOfficialArtwork (official-artwork); detail.js header sprite + renderSpritesTab full sprite grid` |
-| Shiny toggle | ● | `detail.js #shiny-toggle swaps getShinySprite; renderSpritesTab includes shiny front/back + official-artwork shiny` |
-| Cry playback | ● | `detail.js cry-btn new Audio(pokemon.cries.latest||legacy).play() with playing state` |
-| Stat visualization | ● | `detail.js renderStatsTab base-stat bars w/ getStatColor + stat calculator; compare.js renderStatComparison dual bars (bars, no radar)` |
-| Abilities with effects | ● | `views/abilities.js dedicated dex w/ getEffectText + detail modal listing Pokemon; detail.js about tab lists abilities/hidden/slot` |
-| Evolution chains | ● | `detail.js renderEvolutionTab recursive chain + renderEvoDetails (level/item/trade/happiness/time/gender/branch conditions)` |
-| Move learnsets | ● | `detail.js renderMovesTab from version_group_details, filter by game/method, sorted by method+level, lazy move enrichment` |
-| Defensive matchups | ● | `detail.js renderTypeDefensesTab multiplies type damage_relations for weak/resist/immune (4x/2x/1/2x/1/4x/0x) + offensive coverage` |
-| Breeding data | ● | `detail.js about tab egg_groups/gender_rate/hatch_counter*256 steps; renderStatsTab EV yield from stat.effort` |
-| Alternate forms | ◐ | `detail.js renderFormsTab uses pokemon.forms (rarely >1) and renders base pokemon.id sprite for every form (line 994); only name-based 'mega' pill; no species varieties/regional/gmax` |
-| Pokédex entries | ● | `detail.js about tab renders last 5 en flavor_text_entries per version; pokedex.js featured card also shows a flavor entry` |
+| Official artwork | ● 3 | `data.js getOfficialArtwork on detail header; detail.js renderSpritesTab builds up to 60 tiles across default/back/shiny, per-generation version sprites, and shiny official artwork with onerror fallbacks.` |
+| Shiny toggle | ◕ 2 | `detail.js:134 #shiny-toggle swaps sprite; renderSpritesTab has shiny front/back + shiny official art. Flaw: header toggle swaps high-res official art for the small pixel getShinySprite(id) instead of shiny official artwork — resolution/consistency downgrade.` |
+| Cry playback | ◕ 2 | `detail.js:139-150 cry-btn plays new Audio(cries.latest||legacy) with 'playing' state and ended/error listeners. Real playback; single button, no latest/legacy toggle.` |
+| Stat visualization | ● 3 | `detail.js renderStatsTab: color-coded base-stat bars (getStatColor) + total + EV yield (stat.effort) + interactive min/max stat calculator over level/nature/IV/EV; compare.js dual comparison bars. No radar but deep.` |
+| Abilities with effects | ◕ 2 | `abilities.js dedicated dex with getEffectText, hidden badges, per-ability Pokemon modal + detail about-tab list. Bug: abilities.js:24 filter '!a.name.includes("-")' silently drops every hyphenated ability (speed-boost, water-absorb, etc.), hiding ~40% of entries.` |
+| Evolution chains | ● 3 | `detail.js renderEvolutionTab recursively walks the chain, renders all evolves_to branches, and renderEvoDetails covers level/item/trade/held-item/time/location/happiness/beauty/affection/known_move(-type)/gender/rain/party/relative_physical_stats/upside-down. Comprehensive; rendered linearly not as a visual tree.` |
+| Move learnsets | ● 3 | `detail.js renderMovesTab flattens version_group_details into a table with game + method filters, sorted by method+level, lazy move enrichment. Enrichment caps at first 100 unique moves so some stat columns show '—', but method/level/game data complete.` |
+| Defensive matchups | ● 3 | `detail.js renderTypeDefensesTab fetches each type's damage_relations and multiplies from-multipliers across both types (verified x2/x0.5/x0), yielding 4x/2x/1x/0.5x/0.25x/0x buckets plus offensive coverage. Dual-type combination correct.` |
+| Breeding data | ◕ 2 | `detail.js about-tab: egg_groups, gender_rate via getGenderRate (M/F %), hatch_counter*256 steps, growth rate; stats-tab EV yield. All data points correct but scattered as generic info cards, no crafted breeding panel or egg moves.` |
+| Alternate forms | ◔ 1 | `detail.js renderFormsTab only shown if pokemon.forms.length>1 (rarely true); detail.js:994 hardcodes the base pokemon.id sprite for EVERY form and attaches no click handler, so cards show identical wrong sprites and are non-navigable.` |
+| Pokédex entries | ◕ 2 | `detail.js about-tab renders the last 5 English flavor_text_entries labeled by version (newline-cleaned); featured card surfaces one entry. Real per-version text but only latest 5, not full history.` |
 
 **Tools & Modes**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Type chart | ● | `views/types.js renderTypeMatrix full 18x18 table + clickable cells with per-matchup detail + individual type breakdown grid` |
-| Compare tool | ◐ | `views/compare.js two fixed panels (left/right) with VS layout + stat comparison + win highlighting; no 3+ Pokemon` |
-| Team builder | ● | `views/team.js 6 slots, multiple named teams (store teams API), renderCoverage per-type defensive weak/resist/immune counts across team` |
-| Damage calculator | ○ |  |
-| Moves / Items / Abilities dex | ● | `views/moves.js searchable dex w/ type/class filter + sort (power/acc/pp/name/id) + detail modal w/ effect text and learned-by grid` |
-| Who's-that-Pokémon | ○ |  |
-| Command palette | ◐ | `app.js keydown '/' and cmd/ctrl+K open #search-overlay, but it only searches Pokemon and jumps to detail — no command/action/route execution` |
+| Type chart | ● 3 | `types.js renderTypeMatrix builds a full 18x18 table from live type damage_relations, color-coded clickable cells with per-matchup detail, plus an individual-type breakdown grid (strong/weak-to/resists/immune-to/half/cannot-hit).` |
+| Compare tool | ◕ 2 | `compare.js two fixed left/right panels, searchable picker modal, VS layout, renderStatComparison dual bars with per-stat and total winner highlighting. Works well but strictly 2-way.` |
+| Team builder | ● 3 | `team.js 6 slots with multiple named teams (store create/delete/switch, persisted); renderCoverage fetches each member's types and computes per-attacking-type weak/resist/immune counts across the team via dual-type damage_relations. Correct defensive analysis + multi-team management.` |
+| Damage calculator | ○ 0 |  |
+| Moves / Items / Abilities dex | ◕ 2 | `moves.js standalone dex: name search, type/class filters, 6 sorts, detail modal with effect text + learned-by grid. Filter regex keeps all moves, but enrichment caps at 400 of ~900+, so type/class filtering and power/pp sorting are incomplete beyond the enriched subset.` |
+| Who's-that-Pokémon | ○ 0 |  |
+| Command palette | ◔ 1 | `app.js cmd/ctrl+K and '/' open a search overlay, but it only searches/navigates Pokemon — no command actions (go-to-page, toggle-theme, etc.). Palette-adjacent quick-nav, not a real command palette.` |
 
 **Polish & Platform**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Favorites | ● | `store.js localStorage pokedex_favorites Set + views/favorites.js dedicated page w/ search, type filter, sort, clear-all; fav buttons wired app-wide via store 'favorites' event` |
-| Dark/light theming | ● | `styles.css :root[data-theme=dark] and [data-theme=light] var blocks + store.toggleTheme persisted to localStorage; type-gradient cards throughout` |
-| Keyboard navigation | ● | `app.js global '/' & cmd/ctrl+K open search (INPUT/TEXTAREA guard), Escape closes overlay, Enter selects first result; limited to search overlay (no grid arrow-nav)` |
-| Responsive design | ● | `styles.css @media max-width 1024/768/480; nav-menu-toggle hamburger in index.html toggled in app.js setupNav` |
-| Export / sharing | ○ |  |
+| Favorites | ● 3 | `store.js persists pokedex_favorites Set with pub/sub 'favorites' event; favorites.js dedicated page with search, type filter (enriches its small set so it works), sort, clear-all; fav hearts across grid/detail stay in sync via app.js listener.` |
+| Dark/light theming | ● 3 | `styles.css defines full :root[data-theme=dark] and [data-theme=light] token palettes (bg/text/accent/shadow/glass/skeleton); store.toggleTheme persists to localStorage and sets data-theme; pervasive TYPE_COLORS gradient theming.` |
+| Keyboard navigation | ◕ 2 | `app.js global '/' and cmd/ctrl+K open search (guarded against INPUT/TEXTAREA), Escape closes, Enter selects first result. Solid but limited to the search overlay — no grid arrow nav or other hotkeys.` |
+| Responsive design | ● 3 | `styles.css three real breakpoints (@media 1024/768/480): fixed hamburger nav drawer (app.js setupNav), grid reflow to auto-fill minmax, toolbar stacking, single-column team/compare. Usable to phone widths.` |
+| Export / sharing | ○ 0 |  |
 
 ## Vendored source
 

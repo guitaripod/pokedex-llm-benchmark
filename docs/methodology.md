@@ -23,10 +23,10 @@ This keeps the whole repo a few MB while preserving exactly what each model *wro
 
 Two passes, both reading source (not the README, which oversells):
 
-1. **Assessment** — for each submission, an agent greps and reads the vendored source and marks all 30 checklist features `present | partial | absent`, with a file-level evidence pointer per verdict, plus the four rubric scores and a written assessment.
-2. **Adversarial verification** — a second agent re-checks every `present`/`partial` claim against the code (downgrading hallucinated features) and spot-checks `absent` ones (upgrading overlooked implementations). It typically flips a handful of statuses per submission.
+1. **Grading** — for each submission, an agent greps and reads the vendored source and grades all 30 checklist features `0–3` by depth (absent → shallow/broken → solid → exceptional), with a file-level evidence pointer per grade, plus the four craft axes and a written assessment.
+2. **Adversarial calibration** — a second agent re-checks every grade against the code: downgrading stubs/truncations/broken features that were called solid, upgrading genuinely deep work that was undersold, and sanity-checking the axis scores (especially robustness against any crash/correctness issues). It typically adjusts a handful of grades per submission.
 
-The corrected verdicts, scores, and prose are what land in `submissions.json`; each `ENTRY.md` is generated from them.
+The calibrated grades, scores, and prose are what land in `submissions.json`; each `ENTRY.md` is generated from them.
 
 ## Honest caveats
 

@@ -14,15 +14,15 @@ This clones the repo, copies **source only** into `submissions/<id>/` (stripping
 
 `--id` is derived from model + effort (e.g. `sonnet-5-high`); pass `--id` to override. Run `node scripts/add-submission.mjs` with no args for all flags.
 
-## 2. Score it against the checklist
+## 2. Grade it against the checklist
 
 Fill the new entry in [`submissions.json`](../submissions.json), reading the vendored source (not the README):
 
-- **`features`** — one verdict per id in [`docs/feature-checklist.json`](feature-checklist.json), each `{ "id", "status": "present|partial|absent", "evidence": "<file>" }`. All 30 must be present.
-- **`scores`** — `{ completeness, codeQuality, architecture, uxPolish }`, each 0–10 (see [RUBRIC.md](../RUBRIC.md)).
+- **`features`** — one grade per id in [`docs/feature-checklist.json`](feature-checklist.json), each `{ "id", "grade": 0-3, "evidence": "<file + what makes it that grade>" }`. All 30 must be graded (0 absent, 1 shallow/broken, 2 solid, 3 exceptional).
+- **`scores`** — `{ codeQuality, architecture, uxDesign, robustness }`, each 0–10 (see [RUBRIC.md](../RUBRIC.md)).
 - **`assessment`** — `{ summary, strengths[], weaknesses[], standout }`.
 
-Verify each `present` claim against the actual handler/component — the rubric is source-grounded and adversarially checked. See any existing entry as a template.
+Judge depth, not presence, against the actual handler/component, and calibrate against the existing submissions so grades mean the same thing across the field — the scoring is source-grounded and adversarially calibrated. See any existing entry as a template.
 
 ## 3. Regenerate and validate
 

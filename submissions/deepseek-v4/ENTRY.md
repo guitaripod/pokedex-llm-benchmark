@@ -2,10 +2,11 @@
 
 # DeepSeek
 
-> A single-view vanilla-JS Pokedex (no framework, ~590 lines app.js + ~800 lines CSS) served as a Cloudflare Pages app, with a Pages Functions proxy that forwards requests to PokeAPI and layers on CDN caching. It delivers a browsable national-dex grid with search, a rich detail modal (stats, abilities, evolution, defensive type matchups, shiny toggle, breeding-ish metadata), and a polished dark, type-accented UI, but ships no secondary tools (compare, team builder, damage calc, moves dex, minigame) and no persistence or URL state.
+> A tightly-built vanilla-JS single-page Pokédex (588-line app.js + CSS + a Cloudflare Pages Functions edge proxy) that does a focused set of things well: full national dex with infinite scroll, name/number search, a polished type-themed dark UI, and a rich detail modal (stats, abilities, evolution, dual-type matchups, breeding meta, shiny toggle). It ships roughly eight solid features and stops there — the bulk of the 30-feature space (sort, generation/advanced filters, shareable URLs, favorites, compare, team builder, damage calc, moves, cries, minigame, command palette, export) is entirely absent.
 
 | | |
 |---|---|
+| **Benchmark score** | **40.7 / 100** |
 | **Model** | DeepSeek (DeepSeek, V4) |
 | **Effort** | default |
 | **Built** | 2026-07-01 |
@@ -15,87 +16,87 @@
 | **Stack** | vanilla · javascript · none · hand-rolled css |
 | **Data strategy** | edge-proxy |
 | **Source** | 1,535 LOC · 4 files · 0+1 deps |
-| **Feature coverage** | 8 / 30 (+5 partial) |
+| **Feature depth** | 22 / 90 (8/30 features solid or better) |
 
 ## Scorecard
 
-| Completeness | Code quality | Architecture | UX polish |
+| Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 4 | 7 | 6 | 7 |
+| 7 | 6 | 7 | 6 |
 
-_Scored 0–10 from source; see [RUBRIC.md](../../RUBRIC.md)._
+_Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Clean, readable vanilla JS with a sensible promise-caching layer, delegated event handlers, infinite scroll, and graceful error/timeout/fallback handling (15s init timeout, sprite onerror fallbacks)
-- Genuinely polished detail modal: animated stat bars, computed 0/¼/½/2/4x defensive matchups from live type data, clickable evolution chain, shiny artwork swap, gender/egg-group/catch-rate meta
-- Sound edge-friendly architecture: Pages Functions proxy sets Cache-Control s-maxage=604800 so PokeAPI responses are CDN-cached, avoiding client-side CORS and rate limits
-- Cohesive dynamic type-based theming (per-card accents, per-type detail gradients/badges) and a responsive 2-breakpoint layout
+- Clean, consistent, comment-free code with sensible helpers ($/$$, padNum, clamp) and clear section structure; no dead code or copy-paste
+- Correct dual-type defensive matchup math with immunity override, plus good defensive coverage: init timeout race, image onerror fallbacks, guarded species fetch, and try/catch around effectiveness rendering
+- Genuinely polished UX: card fade-in stagger, animated stat bars, modal slide-in, hover scale, toast, loading/empty states, and cohesive per-type theming across cards and detail header
+- Edge-proxy architecture with proper cache headers (s-maxage=604800) and client-side promise-dedup caching
 
 ## Weaknesses
 
-- Type filter is effectively broken as a dex-wide feature: it filters only against Pokemon whose detail was already lazily fetched for a rendered card, so most of the dex is invisible to it
-- Narrow feature breadth: 8 present / 5 partial / 17 absent — no compare, team builder, damage calc, moves dex, type chart, forms, minigame, favorites, export, sort, generation filter, or shareable URLs
-- No persistence and no URL/routing state, so no deep-linking, no shareable views, and no remembered preferences
-- Detail depth is thin in places: abilities lack effect text, evolution drops branches and shows no methods, flavor shows a single entry, breeding omits hatch cycles and EV yield
+- Type-filter is architecturally broken — it filters only the already-scrolled subset because there's no prebuilt type index; live per-card type fetches (N+1) drive both this bug and slow card population
+- Evolution only follows evolves_to[0], silently dropping every branched line (Eevee, Wurmple, Slowpoke, Tyrogue) and showing no evolution conditions
+- A failed evolution-chain fetch runs openDetail's catch, wiping an already-rendered detail modal instead of degrading gracefully
+- Thin on data depth (single flavor entry, ability names without effect text, no version selector) and covers only ~8 of 30 features
 
 ## Standout
 
-The Cloudflare Pages Functions catch-all proxy (functions/api/[[path]].ts) that transparently re-exposes the entire PokeAPI under /api with aggressive s-maxage CDN caching and an added timeout/error envelope — a clean way to sidestep CORS and rate limits without any build-time data baking.
+cacheWithResolve (app.js:66-74) stores the in-flight promise so concurrent callers dedupe to one fetch — a nice touch, but it's also the root of the type-filter bug: a pending promise is an object without .types, so it silently fails the filter check just like uncached entries.
 
-## Feature coverage detail
+## Feature depth detail
 
-Legend: ● present · ◐ partial · ○ absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ absent (0)
 
 **Browse & Discovery**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ● | `app.js:57-64 fetchAllPokemon fetches pokemon?limit=100000&offset=0 and maps every result (id+name) into state.allPokemon; grid renders the full list` |
-| Instant search | ● | `app.js:86-103 getFilteredPokemon matches name substring or exact numeric id; debounced 200ms input handler app.js:481-492; clear button app.js:493` |
-| Type filter | ◐ | `renderTypeFilters app.js:106-142 builds all 18 multi-select buttons, but getFilteredPokemon app.js:95-101 filters against state.pokemonCache which is populated only per-rendered card (fetchCardTypes app.js:177,212), so it filters only already-loaded Pokemon, not the full dex` |
-| Generation filter | ○ |  |
-| Sorting | ○ |  |
-| Advanced filters | ○ |  |
-| Shareable filter URLs | ○ |  |
+| National Dex | ◕ 2 | `app.js:57-64 fetchAllPokemon fetches pokemon?limit=100000 and maps every result (id+name) into state.allPokemon; full ~1302 list with load-more (app.js:505) + IntersectionObserver infinite scroll (app.js:511-517) + result counts (app.js:187-188). Works, but cards fetch types one-by-one live (fetchCardTypes app.js:212) instead of from baked data, so solid not exceptional.` |
+| Instant search | ◕ 2 | `getFilteredPokemon app.js:86-94 client-side substring name match OR exact numeric id on fully-loaded state.allPokemon; debounced 200ms input app.js:481-492 + clear button app.js:493-502. No fuzzy/number-range, so solid not best-in-class.` |
+| Type filter | ◔ 1 | `renderTypeFilters app.js:106-142 builds all 18 multi-select chips, but getFilteredPokemon app.js:95-101 filters against state.pokemonCache populated only per-rendered card; pending promises are objects without .types so they also fail the filter. Effectively filters only the already-scrolled subset, never the full dex — present but broken as a dex filter.` |
+| Generation filter | ○ 0 |  |
+| Sorting | ○ 0 |  |
+| Advanced filters | ○ 0 |  |
+| Shareable filter URLs | ○ 0 |  |
 
 **Detail Depth**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ● | `Official-artwork PNGs on cards (app.js:192) with sprite fallback, and detail modal (app.js:269,291)` |
-| Shiny toggle | ● | `Shiny artwork URL app.js:270; shiny-toggle button app.js:294; delegated handler app.js:469-477 swaps #detailArtwork src between normal/shiny` |
-| Cry playback | ○ |  |
-| Stat visualization | ● | `app.js:314-333 renders per-stat bars with fill %, color per stat, total row; animateStats app.js:364-372 animates fills via CSS transition (style.css:641-647)` |
-| Abilities with effects | ◐ | `app.js:335-343 lists ability names and a Hidden badge but fetches no ability effect/description text` |
-| Evolution chains | ◐ | `renderEvolution app.js:374-408 walks the chain but only evolves_to[0] (drops branches) and shows no evolution methods/conditions; nodes are clickable` |
-| Move learnsets | ○ |  |
-| Defensive matchups | ● | `renderEffectiveness app.js:410-449 fetches type damage_relations and computes defensive multipliers (0/¼/½/2/4x) per Pokemon, rendered in effectiveness grid` |
-| Breeding data | ◐ | `app.js:282-311 shows gender ratio (gender_rate), egg groups, and catch rate, but no hatch/egg cycles and no EV yield` |
-| Alternate forms | ○ |  |
-| Pokédex entries | ◐ | `app.js:272-273 picks a single first English flavor_text entry; no version-grouped list of Pokedex entries` |
+| Official artwork | ◕ 2 | `Official-artwork PNGs on cards (app.js:192) with sprite onerror fallback (app.js:201), and 200px detail artwork (app.js:269,291) with hover scale (style.css:506). No zoom/multi-sprite gallery, so a 2.` |
+| Shiny toggle | ◕ 2 | `Shiny official-artwork URL app.js:270; toggle button app.js:294 with delegated handler app.js:469-477 swaps #detailArtwork src and relabels. Real working toggle but detail-only (cards not toggleable).` |
+| Cry playback | ○ 0 |  |
+| Stat visualization | ◕ 2 | `app.js:314-333 per-stat bars with fill %, per-stat color, BST total row; animateStats app.js:364-372 double-rAF triggers CSS width transition (style.css:641-647). Bars only, no radar; polished so a solid 2.` |
+| Abilities with effects | ◔ 1 | `app.js:335-343 lists ability names with a Hidden badge but fetches no ability effect/description text — thin.` |
+| Evolution chains | ◔ 1 | `renderEvolution app.js:374-408 walks the chain but only node.evolves_to[0], dropping every branch (Eevee/Wurmple/Slowpoke); shows no evolution methods/conditions. Nodes are clickable, but branch-drop is a correctness gap → shallow.` |
+| Move learnsets | ○ 0 |  |
+| Defensive matchups | ◕ 2 | `renderEffectiveness app.js:410-449 fetches each type's damage_relations and correctly multiplies defensive multipliers across both types (0/¼/½/2/4×) with no_damage overriding to 0, sorted and color-coded. Dual-type combination is correct; flat list omits neutral types and weakness/resist grouping, so solid not exceptional.` |
+| Breeding data | ◔ 1 | `app.js:282-311 shows correct gender-ratio math (gender_rate), egg groups, and catch rate as meta tiles, but no egg cycles/hatch time, compatibility, or EV yield — thin.` |
+| Alternate forms | ○ 0 |  |
+| Pokédex entries | ◔ 1 | `app.js:272-273 picks a single first English flavor_text entry; no version-grouped list of Pokédex entries — thin.` |
 
 **Tools & Modes**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Type chart | ○ |  |
-| Compare tool | ○ |  |
-| Team builder | ○ |  |
-| Damage calculator | ○ |  |
-| Moves / Items / Abilities dex | ○ |  |
-| Who's-that-Pokémon | ○ |  |
-| Command palette | ○ |  |
+| Type chart | ○ 0 |  |
+| Compare tool | ○ 0 |  |
+| Team builder | ○ 0 |  |
+| Damage calculator | ○ 0 |  |
+| Moves / Items / Abilities dex | ○ 0 |  |
+| Who's-that-Pokémon | ○ 0 |  |
+| Command palette | ○ 0 |  |
 
 **Polish & Platform**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Favorites | ○ |  |
-| Dark/light theming | ● | `Dynamic type-based theming: card accent + border from primary type (app.js:224-225), detail header gradients from primaryColor (app.js:288-289), type-colored badges; fixed dark palette in :root (style.css:2-50); no light/dark toggle` |
-| Keyboard navigation | ○ |  |
-| Responsive design | ● | `style.css:783-798 @media max-width 700px and 799-803 max-width 420px reflow to smaller/2-col grids, stack header, resize modal/artwork; auto-fill minmax grids style.css:281` |
-| Export / sharing | ○ |  |
+| Favorites | ○ 0 |  |
+| Dark/light theming | ◕ 2 | `Cohesive type-themed styling: per-card accent bar + border from primary type (app.js:224-225), detail header radial/linear gradients from primaryColor (app.js:288-289), type-colored badges; fixed dark palette in :root (style.css:2-50). Satisfies the type-themed branch but NO dark/light toggle, so a 2.` |
+| Keyboard navigation | ◔ 1 | `app.js:464-466 Escape-to-close-modal handler + focusable search input; no arrow/tab grid navigation, focus trap, or tabindex management — present but thin.` |
+| Responsive design | ◕ 2 | `auto-fill minmax grids (style.css:281) plus @media 700px (stack header, 140px cards, 2-col meta, resized modal/artwork) and 420px (2-col grid, smaller chips) at style.css:783-803 — genuinely usable on phone widths.` |
+| Export / sharing | ○ 0 |  |
 
 ## Vendored source
 

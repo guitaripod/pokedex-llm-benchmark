@@ -5,46 +5,52 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
+// Composite weighting — how much the final benchmark score leans on graded
+// feature depth vs. the four craft/robustness axes. Tweak here; everything
+// downstream (leaderboard, ranking) follows.
+const COVERAGE_WEIGHT = 0.6;
+const AXES_WEIGHT = 0.4;
+
 export function render(manifest, checklist) {
-const MARK = { present: "●", partial: "◐", absent: "○", unknown: "·" };
-const TOTAL_FEATURES = checklist.categories.reduce(
-  (n, c) => n + c.features.length,
-  0,
-);
+const GRADE_MARK = { 3: "●", 2: "◕", 1: "◔", 0: "○" };
+const AXIS_KEYS = ["codeQuality", "architecture", "uxDesign", "robustness"];
+const TOTAL_FEATURES = checklist.categories.reduce((n, c) => n + c.features.length, 0);
+const MAX_QUALITY = TOTAL_FEATURES * 3;
 
-const status = (sub, fid) => {
+const gradeOf = (sub, fid) => {
   const f = (sub.features || []).find((x) => x.id === fid);
-  return f ? f.status : "unknown";
+  return f && typeof f.grade === "number" ? f.grade : 0;
+};
+const scored = (sub) => sub.features && sub.features.length && sub.scores;
+
+const featureQuality = (sub) => {
+  let sum = 0;
+  for (const c of checklist.categories)
+    for (const f of c.features) sum += gradeOf(sub, f.id);
+  return sum;
+};
+const solidCount = (sub) => {
+  let n = 0;
+  for (const c of checklist.categories)
+    for (const f of c.features) if (gradeOf(sub, f.id) >= 2) n += 1;
+  return n;
+};
+const axesAvg = (sub) =>
+  sub.scores ? AXIS_KEYS.reduce((a, k) => a + sub.scores[k], 0) / AXIS_KEYS.length : null;
+
+const bench = (sub) => {
+  if (!scored(sub)) return null;
+  const cov = (featureQuality(sub) / MAX_QUALITY) * 100;
+  const ax = axesAvg(sub) * 10;
+  return COVERAGE_WEIGHT * cov + AXES_WEIGHT * ax;
 };
 
-const coverage = (sub) => {
-  let full = 0;
-  let partial = 0;
-  for (const c of checklist.categories) {
-    for (const f of c.features) {
-      const s = status(sub, f.id);
-      if (s === "present") full += 1;
-      else if (s === "partial") partial += 1;
-    }
-  }
-  return { full, partial, score: full + partial * 0.5 };
-};
-
-const avgScore = (sub) => {
-  const s = sub.scores;
-  if (!s) return null;
-  return (s.completeness + s.codeQuality + s.architecture + s.uxPolish) / 4;
-};
-
-const fmtScore = (n) => (n == null ? "—" : n.toFixed(1));
+const fmt = (n, d = 1) => (n == null ? "—" : n.toFixed(d));
 const nbsp = (s) => s.replace(/ /g, "&nbsp;");
 
-const ranked = [...manifest.submissions].sort((a, b) => {
-  const d = coverage(b).score - coverage(a).score;
-  if (Math.abs(d) > 1e-9) return d;
-  return (avgScore(b) ?? 0) - (avgScore(a) ?? 0);
-});
-
+const ranked = [...manifest.submissions].sort(
+  (a, b) => (bench(b) ?? -1) - (bench(a) ?? -1),
+);
 const medal = (i) => (["🥇", "🥈", "🥉"][i] ?? `${i + 1}`);
 
 function providerSummary(m) {
@@ -58,51 +64,22 @@ function providerSummary(m) {
 
 function leaderboard() {
   const head =
-    "| # | Model | Effort | Coverage | Assessed | Stack | Source LOC | Deps | Live |\n" +
-    "|---|-------|--------|----------|----------|-------|-----------:|-----:|------|";
+    "| # | Model | Effort | Bench | Feature depth | Code · Arch · UX · Robust | Stack | LOC | Live |\n" +
+    "|---|-------|--------|:-----:|:-------------:|:-------------------------:|-------|----:|------|";
   const rows = ranked.map((s, i) => {
-    const cov = coverage(s);
-    const covStr =
-      s.features && s.features.length
-        ? `${cov.full}${cov.partial ? `+${cov.partial}◐` : ""} / ${TOTAL_FEATURES}`
-        : "—";
+    const axes = scored(s)
+      ? AXIS_KEYS.map((k) => s.scores[k]).join(" · ")
+      : "—";
+    const depth = scored(s) ? `${featureQuality(s)} / ${MAX_QUALITY}` : "—";
     const stack = s.stack
       ? `${s.stack.framework}/${s.stack.language === "typescript" ? "ts" : "js"}${
           s.stack.bundler !== "none" ? ` · ${s.stack.bundler}` : ""
         }`
       : "—";
     const loc = s.metrics ? s.metrics.sourceLoc.toLocaleString("en-US") : "—";
-    const deps = s.metrics
-      ? `${s.metrics.dependencies}+${s.metrics.devDependencies}`
-      : "—";
-    return `| ${medal(i)} | **${s.model}** | ${s.effort} | ${covStr} | ${fmtScore(
-      avgScore(s),
-    )} | ${nbsp(stack)} | ${loc} | ${deps} | [demo](${s.liveUrl}) |`;
+    return `| ${medal(i)} | **${s.model}** | ${s.effort} | **${fmt(bench(s))}** | ${depth} | ${axes} | ${nbsp(stack)} | ${loc} | [demo](${s.liveUrl}) |`;
   });
   return [head, ...rows].join("\n");
-}
-
-function matrix() {
-  const cols = ranked;
-  const header =
-    "| Feature | " + cols.map((s) => shortId(s)).join(" | ") + " |";
-  const sep = "|" + " --- |".repeat(cols.length + 1);
-  const lines = [header, sep];
-  for (const cat of checklist.categories) {
-    lines.push(
-      `| **${cat.label}** |` + " |".repeat(cols.length),
-    );
-    for (const f of cat.features) {
-      const cells = cols.map((s) => MARK[status(s, f.id)]);
-      lines.push(`| ${f.label} | ${cells.join(" | ")} |`);
-    }
-  }
-  const totals = cols.map((s) => {
-    const c = coverage(s);
-    return s.features && s.features.length ? `**${c.full}**` : "—";
-  });
-  lines.push(`| **Full coverage** | ${totals.join(" | ")} |`);
-  return lines.join("\n");
 }
 
 const shortId = (s) =>
@@ -110,17 +87,33 @@ const shortId = (s) =>
     s.effort !== "default" ? `·${s.effort}` : ""
   }](${s.liveUrl})`;
 
+function matrix() {
+  const cols = ranked;
+  const lines = [
+    "| Feature | " + cols.map((s) => shortId(s)).join(" | ") + " |",
+    "|" + " --- |".repeat(cols.length + 1),
+  ];
+  for (const cat of checklist.categories) {
+    lines.push(`| **${cat.label}** |` + " |".repeat(cols.length));
+    for (const f of cat.features)
+      lines.push(`| ${f.label} | ${cols.map((s) => GRADE_MARK[gradeOf(s, f.id)]).join(" | ")} |`);
+  }
+  lines.push(
+    `| **Feature depth / ${MAX_QUALITY}** | ${cols
+      .map((s) => (scored(s) ? `**${featureQuality(s)}**` : "—"))
+      .join(" | ")} |`,
+  );
+  return lines.join("\n");
+}
+
 function entryList() {
   return ranked
     .map((s) => {
-      const cov = coverage(s);
-      const a = s.assessment;
-      const line = a
-        ? a.summary
-        : "_Not yet assessed._";
-      return `#### ${s.model}${
-        s.effort !== "default" ? ` — ${s.effort}` : ""
-      }  ·  ${cov.full}/${TOTAL_FEATURES} features\n\n${line}\n\n[**Live demo**](${s.liveUrl}) · [source](${s.sourceRepo}) · [vendored code & full scorecard](submissions/${s.id}/ENTRY.md)`;
+      const line = s.assessment ? s.assessment.summary : "_Not yet assessed._";
+      const stat = scored(s)
+        ? `Bench **${fmt(bench(s))}** · feature depth ${featureQuality(s)}/${MAX_QUALITY} · ${solidCount(s)}/${TOTAL_FEATURES} features solid+`
+        : "_unscored_";
+      return `#### ${s.model}${s.effort !== "default" ? ` — ${s.effort}` : ""}\n\n${stat}\n\n${line}\n\n[**Live demo**](${s.liveUrl}) · [source](${s.sourceRepo}) · [vendored code & full scorecard](submissions/${s.id}/ENTRY.md)`;
     })
     .join("\n\n---\n\n");
 }
@@ -129,15 +122,13 @@ const generated = `<!-- GENERATED by scripts/gen-readme.mjs from submissions.jso
 
 # Pokédex — LLM Coding Benchmark
 
-**One prompt, many models.** Every model gets the *identical* one-shot prompt and must build and deploy a complete Pokédex web app fully autonomously — no iteration, no human help. This repo collects each model's submission, its live Cloudflare deployment, and an apples-to-apples scorecard so the outputs can be compared feature-by-feature.
+**One prompt, many models.** Every model gets the *identical* one-shot prompt and must build and deploy a complete Pokédex web app fully autonomously — no iteration, no human help. This repo collects each model's submission, its live Cloudflare deployment, and an apples-to-apples scorecard that grades **how well** each feature is built, not just whether it exists.
 
 > ${manifest.prompt}
 
 Only the trailing name token changes per run (it encodes the model + effort). Read the full framing in **[THE_BRIEF.md](THE_BRIEF.md)** and how submissions are scored in **[RUBRIC.md](RUBRIC.md)**.
 
-- **${manifest.submissions.length} submissions** across ${providerSummary(
-  manifest,
-)}, scored against **${TOTAL_FEATURES} canonical Pokédex features**.
+- **${manifest.submissions.length} submissions** across ${providerSummary(manifest)}, graded on **${TOTAL_FEATURES} Pokédex features** by depth plus four craft axes.
 - Every submission ships a **live Cloudflare deployment** (click any demo link) and its **vendored source** under [\`submissions/\`](submissions/).
 - The tables below are generated from [\`submissions.json\`](submissions.json) — the single source of truth.
 
@@ -145,11 +136,11 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 
 ${leaderboard()}
 
-*Coverage = fully-implemented features (\`◐\` = partial, half-weighted for ranking). Assessed = mean of the four rubric scores (0–10). LOC counts hand-written source only — generated PokéAPI data, \`node_modules\` and build output are excluded.*
+*Bench (0–100) = ${COVERAGE_WEIGHT * 100}% feature depth + ${AXES_WEIGHT * 100}% craft axes. **Feature depth** grades each of the ${TOTAL_FEATURES} features 0–3 (absent → shallow/broken → solid → exceptional), so a few excellent features outscore many stubs. **Code · Arch · UX · Robust** are the four 0–10 craft axes. LOC counts hand-written source only. See [RUBRIC.md](RUBRIC.md).*
 
-## Feature matrix
+## Feature depth matrix
 
-Legend: ${MARK.present} present · ${MARK.partial} partial · ${MARK.absent} absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow / broken (1) · ○ absent (0)
 
 ${matrix()}
 
@@ -165,16 +156,16 @@ New model, same brief? One command vendors the repo, computes metrics, and wires
 node scripts/add-submission.mjs <github-repo-url> --model "<Name>" --effort <level>
 \`\`\`
 
-Then score it against the checklist and regenerate. Full walkthrough: **[docs/adding-a-model.md](docs/adding-a-model.md)**.
+Then grade it against the checklist and regenerate. Full walkthrough: **[docs/adding-a-model.md](docs/adding-a-model.md)**.
 
 ## Repository layout
 
 | Path | What |
 |------|------|
-| [\`submissions.json\`](submissions.json) | Single source of truth: metadata, metrics, feature verdicts, scores. |
+| [\`submissions.json\`](submissions.json) | Single source of truth: metadata, metrics, per-feature depth grades, axis scores. |
 | [\`submissions/<id>/\`](submissions/) | Each model's vendored source + \`ENTRY.md\` scorecard. |
 | [\`THE_BRIEF.md\`](THE_BRIEF.md) | The exact task every model was given. |
-| [\`RUBRIC.md\`](RUBRIC.md) | Scoring methodology and the feature checklist. |
+| [\`RUBRIC.md\`](RUBRIC.md) | Scoring model: depth grades, craft axes, and the composite. |
 | [\`docs/\`](docs/) | Methodology, feature checklist, how to add a model. |
 | [\`scripts/\`](scripts/) | \`compute-metrics\` · \`gen-entries\` · \`gen-readme\` · \`add-submission\` · \`validate\`. |
 
@@ -196,12 +187,8 @@ node scripts/validate.mjs          # check the manifest + that README is in sync
 }
 
 function loadAndRender() {
-  const manifest = JSON.parse(
-    readFileSync(join(ROOT, "submissions.json"), "utf8"),
-  );
-  const checklist = JSON.parse(
-    readFileSync(join(ROOT, "docs", "feature-checklist.json"), "utf8"),
-  );
+  const manifest = JSON.parse(readFileSync(join(ROOT, "submissions.json"), "utf8"));
+  const checklist = JSON.parse(readFileSync(join(ROOT, "docs", "feature-checklist.json"), "utf8"));
   return { text: render(manifest, checklist), manifest };
 }
 

@@ -2,10 +2,11 @@
 
 # Opus 4.8 — low
 
-> A focused, production-grade React/TypeScript Pokédex on Cloudflare Workers covering all 1025 Pokémon with instant client-side search/filter/sort over a precomputed index, and unusually deep, polished detail pages. It goes broad-and-deep on the core dex/detail/type/compare surface but deliberately omits interactive power-tools (team builder, damage calc, minigame, command palette, favorites, export).
+> A polished, tightly-built React + TypeScript + Vite Pokedex on Cloudflare Workers that leans into depth over breadth: fewer than a handful of runtime deps, a prebuilt 1025-entry index for instant client-side search/filter/sort, and rich detail pages (correct dual-type matchups, branching evolutions, per-game learnsets, hand-rolled SVG radar, three secondary dexes). It deliberately skips the 'app-shell' features (favorites, URL state, team builder, damage calc, minigame, command palette, keyboard nav, export) in favor of building the core dex features well.
 
 | | |
 |---|---|
+| **Benchmark score** | **69.3 / 100** |
 | **Model** | Opus 4.8 (Anthropic, 4.8) |
 | **Effort** | low |
 | **Built** | 2026-07-03 |
@@ -15,87 +16,87 @@
 | **Stack** | react · typescript · vite · tailwind |
 | **Data strategy** | prebuilt-static + edge-proxy |
 | **Source** | 2,395 LOC · 32 files · 3+10 deps |
-| **Feature coverage** | 21 / 30 |
+| **Feature depth** | 53 / 90 (21/30 features solid or better) |
 
 ## Scorecard
 
-| Completeness | Code quality | Architecture | UX polish |
+| Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 7 | 9 | 8 | 9 |
+| 9 | 8 | 9 | 8 |
 
-_Scored 0–10 from source; see [RUBRIC.md](../../RUBRIC.md)._
+_Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Full 1025-entry national dex with instant, network-free search/filter/sort powered by a build-time index (scripts/build-index.mjs) precomputing types, gen and all base stats
-- Deep, well-executed detail pages: shiny toggle, playable cries, dual stats viz (bars + hand-rolled SVG radar), computed type defenses, branching evolution with condition text, learnsets by method+version-group, breeding/gender/EV, forms, and all deduped flavor entries
-- Clean strongly-typed code with sensible abstractions: useAsync hook, in-memory + in-flight request dedup cache (api.ts), and an edge-cached Worker proxy with a resource allow-list, Cache API and cf cacheTtl
-- Strong, cohesive visual design: type-themed gradient heroes, radar chart, float/fade/spin animations, backdrop-blur sticky filters, dark mode and responsive 2→6 column grids
+- Two-tier data architecture: prebuilt 1025-entry index (build-index.mjs) for zero-latency search/filter/sort, plus a Cloudflare Worker edge-proxy with Cache API + cf cacheTtl + resource allow-list + CORS for on-demand detail
+- Correct, dependency-free domain logic: typechart.ts produces accurate dual-type defensive multipliers (verified against canonical chart), branching recursive evolution chains, and a hand-rolled SVG hex radar
+- Clean, modular, well-typed code following a lean no-comment style: reusable ui.tsx primitives, useAsync/useTheme hooks, memoized cards, in-memory + inflight request dedup
+- High visual/interaction polish: type-themed gradients everywhere, dark/light with prefers-color-scheme, infinite scroll, float/fade animations, prev-next nav, consistent loading/error states
 
 ## Weaknesses
 
-- No interactive tooling beyond compare — team builder, damage calculator, minigame and command palette are all absent
-- No favorites, no export, and no URL-encoded shareable filter/search state (all list state is ephemeral useState)
-- Filtering is basic (type AND + generation + sort only); no advanced predicates like legendary, stat ranges or egg groups
-- Minor code smells: dead `!r.name.includes('-mega') || true` filter in ResourceListPage.tsx, and api.ts only deletes the inflight entry on success so a rejected fetch leaves a stuck promise in the map
+- Whole categories of features absent: shareable URL state, favorites, keyboard nav, command palette, team builder, damage calculator, minigame, advanced (stat-range/EV) filtering, export
+- api.ts inflight cache is not cleared on failure: a failed/!ok fetch leaves a rejected promise permanently in the inflight map, so a transient error for a resource becomes a permanent per-resource failure until full page reload
+- No React error boundary — a single thrown render (malformed API data) blanks the whole SPA
+- Minor dead code: ResourceListPage.tsx filter '(r) => !r.name.includes("-mega") || true' is a no-op; api.ts homeUrl defined but unused; accessibility is thin (no keyboard nav, decorative emoji controls)
 
 ## Standout
 
-The architecture pairing a build-time 1025-entry index (instant client-side search/filter/sort, zero round-trips) with an allow-listed, Cache-API + cf-cacheTtl edge Worker proxy for on-demand detail data — fast, resilient, and cheap.
+typechart.ts hand-implements the full 18-type chart and combines both defending types by multiplication to produce correct 4x/2x/half/quarter/0x matchups with zero data/chart libraries — the dual-type math and the 18x18 grid both check out against the canonical chart.
 
-## Feature coverage detail
+## Feature depth detail
 
-Legend: ● present · ◐ partial · ○ absent
+Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ absent (0)
 
 **Browse & Discovery**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ● | `src/data/pokemon-index.json = 1025 entries (id 1 bulbasaur → 1025 pecharunt, node-counted); loaded in src/lib/data.ts POKEDEX; PokedexPage.tsx renders full list with IntersectionObserver infinite scroll (PAGE=48)` |
-| Instant search | ● | `src/lib/data.ts searchIndex() filters POKEDEX in-memory by numeric id-contains or name substring; wired to PokedexPage.tsx input (q state) with no network round-trip` |
-| Type filter | ● | `src/pages/PokedexPage.tsx toggleType + filter types.every(t=>p.types.includes(t)) (multi-type AND) over TYPE_ORDER (18 types) from typechart.ts` |
-| Generation filter | ● | `src/pages/PokedexPage.tsx toggleGen filters on p.gen; GENERATIONS 1-9 in constants.ts; gen field precomputed in build-index.mjs (genForId ranges)` |
-| Sorting | ● | `src/pages/PokedexPage.tsx SORTS: id,name,total,hp,atk,def,spa,spd,spe,height,weight + asc/desc toggle via localeCompare/numeric` |
-| Advanced filters | ○ |  |
-| Shareable filter URLs | ○ |  |
+| National Dex | ● 3 | `src/data/pokemon-index.json node-counted at 1025 entries (id 1 bulbasaur -> 1025 pecharunt) precomputed by scripts/build-index.mjs; loaded in src/lib/data.ts (POKEDEX) and rendered in full by src/pages/PokedexPage.tsx with IntersectionObserver infinite scroll (PAGE=48), never truncated.` |
+| Instant search | ◕ 2 | `src/lib/data.ts searchIndex() does instant in-memory matching: numeric queries do exact BY_ID hit + id-contains, text queries do name substring. Zero network. Correct but plain substring, no fuzzy/multi-field ranking.` |
+| Type filter | ◕ 2 | `src/pages/PokedexPage.tsx renders all 18 TYPE_ORDER chips; multi-select AND logic types.every(t=>p.types.includes(t)). Working, standard; no offensive/coverage angle.` |
+| Generation filter | ◕ 2 | `src/pages/PokedexPage.tsx maps GENERATIONS (constants.ts, gen 1-9 with region names/colors); multi-select toggle filtering p.gen (precomputed per entry, verified gen 1..9 across index). Proper, working.` |
+| Sorting | ◕ 2 | `src/pages/PokedexPage.tsx SORTS covers id, name, total(BST), hp/atk/def/spa/spd/spe, height, weight + asc/desc toggle. Complete but commodity feature done properly.` |
+| Advanced filters | ○ 0 |  |
+| Shareable filter URLs | ○ 0 |  |
 
 **Detail Depth**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ● | `src/lib/api.ts artworkUrl() official-artwork PNG; used as hero img in PokemonDetailPage.tsx with spriteUrl onError fallback` |
-| Shiny toggle | ● | `src/pages/PokemonDetailPage.tsx shiny useState toggle switching artworkUrl/artworkShinyUrl (Normal/Shiny button)` |
-| Cry playback | ● | `src/pages/PokemonDetailPage.tsx playCry() on <audio src=pokemon.cries.latest ?? cryUrl(id)>, volume 0.4, 🔊 Cry button` |
-| Stat visualization | ● | `StatBar bars in PokemonDetailPage.tsx + src/components/StatRadar.tsx hand-rolled SVG hexagon radar chart (6 stats, gridlines/axes/labels)` |
-| Abilities with effects | ● | `PokemonDetailPage.tsx AbilityCard fetches ability/:name and renders englishText(effect_entries) with HIDDEN badge; dedicated src/pages/AbilityDetailPage.tsx route` |
-| Evolution chains | ● | `src/components/EvolutionChain.tsx recursive Branch/Node with conditionText() (level/trade/use-item/held-item/known-move/happiness/affection/time/location/gender/rain/branches)` |
-| Move learnsets | ● | `src/components/MovesTable.tsx methods level-up/machine/egg/tutor (filtered to available) + version-group selector, scrollable table linking to /moves/:name` |
-| Defensive matchups | ● | `src/components/TypeDefenses.tsx via defensiveChart() in typechart.ts, grouped 4x/2x/half/quarter/0 with multiplier badges` |
-| Breeding data | ● | `PokemonDetailPage.tsx Breeding card: gender_rate bar (♂/♀ split, Genderless case), egg_groups; plus Profile hatch_counter egg cycles and TrainingCard EV yield` |
-| Alternate forms | ● | `src/pages/PokemonDetailPage.tsx Varieties maps species.varieties to /pokemon/:vid links with sprites (returns null when only base form)` |
-| Pokédex entries | ● | `PokemonDetailPage.tsx PokedexEntries: deduped en flavor_text_entries with version labels, first 3 + show-all toggle` |
+| Official artwork | ◕ 2 | `src/lib/api.ts artworkUrl -> official-artwork PNG; PokemonDetailPage hero shows it at 224px with animate-float and onError fallback to spriteUrl. High-res but single source; homeUrl defined in api.ts but unused.` |
+| Shiny toggle | ◕ 2 | `src/pages/PokemonDetailPage.tsx shiny state swaps artworkUrl/artworkShinyUrl on the hero art via toggle button. Works but limited to the hero image only.` |
+| Cry playback | ◕ 2 | `src/pages/PokemonDetailPage.tsx audio src = pokemon.cries.latest ?? cryUrl(id); playCry() resets currentTime, sets volume 0.4, catches play() rejection. Functional single-cry playback.` |
+| Stat visualization | ● 3 | `Dual visualization: animated StatBar bars per stat (ui.tsx) plus hand-rolled SVG hexagonal StatRadar.tsx (rings at 0.25/.5/.75/1, axes, labeled vertices, filled polygon). No chart library.` |
+| Abilities with effects | ● 3 | `src/pages/PokemonDetailPage.tsx AbilityCard fetches each ability and shows English effect inline with HIDDEN badge; dedicated src/pages/AbilityDetailPage.tsx lists full effect+flavor and every Pokemon with the ability (from BY_NAME, sorted). Deep.` |
+| Evolution chains | ● 3 | `src/components/EvolutionChain.tsx recursively renders branching evolves_to trees; conditionText covers level, trade, use-item, held-item, known-move, happiness, affection, time-of-day, location, gender, needs_overworld_rain.` |
+| Move learnsets | ● 3 | `src/components/MovesTable.tsx has method tabs (level-up/machine/egg/tutor, filtered to available methods) + version-group selector, level-sorted rows linking to move pages. Full by-method per-game learnset.` |
+| Defensive matchups | ● 3 | `src/lib/typechart.ts defensiveChart multiplies effectiveness across both types; TypeDefenses.tsx groups into 4x/2x/half/quarter/0x with badges. Spot-checked chart values (ghost->normal 0, dragon->fairy 0) accurate; dual-type combination correct.` |
+| Breeding data | ● 3 | `src/pages/PokemonDetailPage.tsx covers egg groups, gender ratio as blue/pink split bar (genderless handled), hatch cycles + computed steps ((hatch+1)*255), and EV yield via TrainingCard from stat.effort. Thorough.` |
+| Alternate forms | ◕ 2 | `src/pages/PokemonDetailPage.tsx Varieties lists species.varieties (mega/gmax/regional) with sprites linking to each form's own detail page (worker allows pokemon ids >10000). Works but navigates rather than inline-comparing forms.` |
+| Pokédex entries | ● 3 | `src/pages/PokemonDetailPage.tsx PokedexEntries dedupes English flavor_text_entries, labels each by version, shows first 3 with show-all expand. Clean version-Pokedex treatment.` |
 
 **Tools & Modes**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Type chart | ● | `src/pages/TypesPage.tsx full 18x18 TYPE_ORDER matrix via effectiveness(); color-coded cells; row/col headers link to /types/:name` |
-| Compare tool | ● | `src/pages/ComparePage.tsx add/remove up to 4 via searchIndex Picker, per-stat rows + total with best value highlighted (emerald)` |
-| Team builder | ○ |  |
-| Damage calculator | ○ |  |
-| Moves / Items / Abilities dex | ● | `src/pages/ResourceListPage.tsx searchable infinite-scroll lists for move/ability/item (App.tsx routes) + MoveDetailPage/ItemDetailPage/AbilityDetailPage detail pages` |
-| Who's-that-Pokémon | ○ |  |
-| Command palette | ○ |  |
+| Type chart | ● 3 | `src/pages/TypesPage.tsx renders full 18x18 attacker-vs-defender matrix from effectiveness(), color-coded (green 2x/red half/dark 0x), every cell blank at 1x, all headers clickable to type detail pages.` |
+| Compare tool | ◕ 2 | `src/pages/ComparePage.tsx stacks up to 4 Pokemon across all 6 stats + total, highlighting the max per row with bars and a searchable picker. Works cleanly but purely stat comparison, no defensive/coverage analysis.` |
+| Team builder | ○ 0 |  |
+| Damage calculator | ○ 0 |  |
+| Moves / Items / Abilities dex | ● 3 | `src/pages/ResourceListPage.tsx powers searchable moves, items AND abilities lists; MoveDetailPage.tsx shows power/accuracy/PP/priority/class/target, effect with $effect_chance substitution, meta flags, learned-by grid. Three deep standalone dexes (+ItemDetailPage, AbilityDetailPage).` |
+| Who's-that-Pokémon | ○ 0 |  |
+| Command palette | ○ 0 |  |
 
 **Polish & Platform**
 
-| Feature | | Evidence |
+| Feature | Grade | Notes |
 |---|:---:|---|
-| Favorites | ○ |  |
-| Dark/light theming | ● | `src/hooks/useTheme.ts dark/light (localStorage + prefers-color-scheme, toggles .dark class); type-gradient heroes via TYPE_COLORS from/to/solid in constants.ts; toggle button in Layout.tsx` |
-| Keyboard navigation | ○ |  |
-| Responsive design | ● | `Tailwind grid-cols-2 → xl:grid-cols-6 in PokedexPage.tsx, sticky backdrop-blur filter bar, overflow-x-auto tables (TypesPage/MovesTable/ComparePage), sm/md/lg breakpoints throughout; scroll-to-top on route change in Layout.tsx` |
-| Export / sharing | ○ |  |
+| Favorites | ○ 0 |  |
+| Dark/light theming | ● 3 | `src/hooks/useTheme.ts persists dark/light to localStorage and honors prefers-color-scheme; layered with pervasive type-themed gradients from TYPE_COLORS (from/to/solid) on heroes/cards/badges across every surface. Both dimensions done well.` |
+| Keyboard navigation | ○ 0 |  |
+| Responsive design | ◕ 2 | `Tailwind responsive throughout: card grids scale 2->6 cols across breakpoints, sticky backdrop-blur filter bar, overflow-x nav, detail lg:col-span-2 -> stacked, logo text hidden below sm. Works to phone widths.` |
+| Export / sharing | ○ 0 |  |
 
 ## Vendored source
 

@@ -1,55 +1,59 @@
 # Rubric
 
-How submissions are scored. The goal is an **apples-to-apples** comparison of what each model actually built — grounded in the source, not the README.
+How submissions are scored. The goal is to reward **building things well**, not just building many things — an apples-to-apples read on what each model actually shipped, grounded in the source, not the README.
 
-## Two layers
+## The benchmark score
 
-### 1. Feature coverage — the objective spine
+Each submission gets a single **Bench score, 0–100**:
 
-The [30-feature checklist](docs/feature-checklist.json) defines the Pokédex feature space, distilled from the union of what the submissions attempt. Each submission is scored against **every** feature:
+```
+Bench = 60% × feature-depth  +  40% × craft-axes
+```
 
-- **● present** — fully implemented and wired into the UI.
-- **◐ partial** — started, stubbed, or half-done (e.g. a "compare" view fixed to two slots, or a type page that lists relations but isn't the interactive 18×18 grid).
-- **○ absent** — no real implementation.
+Two layers feed it, and they measure *different* things (no double-counting):
 
-**Runtime-broken code is scored at most `partial`.** A feature whose source exists but throws or renders nothing on the deployed site is `partial` (built, not working) — never `present`. This is why a submission that coded many features but crashes on load can out-cover a smaller one that fully works: coverage measures *what was built*. Click through to the live demo to separate "built and works" from "built but broken"; the assessment prose calls out which is which.
+### 1. Feature depth — graded 0–3, not counted
 
-Coverage is deliberately checklist-driven so it stays reproducible as models are added: the columns never move, only the marks. Ranking uses `present + 0.5 × partial`.
+The [30-feature checklist](docs/feature-checklist.json) defines the Pokédex feature space. Every feature is graded by **how well it's built**:
 
-Each verdict carries an **evidence** pointer (the file where the feature lives), and every verdict is produced in two passes — an assessment pass, then an **adversarial verification pass** that re-checks each claim against the code to catch README-driven false positives and overlooked implementations. See [methodology](docs/methodology.md).
+- **3 — exceptional**: deep, complete, best-in-class implementation.
+- **2 — solid**: properly implemented and actually working as a user expects.
+- **1 — shallow / broken**: present but thin, stubbed, truncated, hardcoded, *or* broken at runtime (throws / renders nothing). Code existing is not enough.
+- **0 — absent**: no real implementation.
 
-### 2. Assessment scores — the judgment layer
+The **feature-depth score** is the sum of grades (0–90), normalized into the composite. Because a stub earns a 1 and an exceptional build earns a 3, **a few excellent features outscore a pile of stubs** — twelve features at 3 (36) beat thirty at 1 (30). This is the direct answer to "counting features rewards breadth over quality."
 
-Four holistic scores, `0–10`, read off the source:
+Each grade carries an **evidence** pointer (the file, and what makes it a 3 vs a 1). Grading is done in two passes — a grading pass, then an **adversarial calibration pass** that re-checks each grade against the code, downgrading oversold stubs and upgrading undersold depth. See [methodology](docs/methodology.md).
 
-| Score | Question |
-|-------|----------|
-| **Completeness** | How much real Pokédex breadth and depth is actually implemented? |
-| **Code quality** | Structure, readability, typing, absence of rot and dead code. |
-| **Architecture** | Soundness of the data strategy, edge/caching, and build pipeline. |
-| **UX polish** | Visual and interaction quality inferable from the markup, styles, and component logic. |
+### 2. Craft axes — four orthogonal 0–10 scores
 
-These are inherently subjective — treat them as a calibrated reviewer's read, not ground truth. The feature matrix is the harder currency.
+Deliberately *not* about how many features exist — they capture how the thing is made:
 
-## What is *not* scored (and why)
+| Axis | Question |
+|------|----------|
+| **Code quality** | Structure, modularity, typing, readability; absence of rot, dead code, copy-paste. |
+| **Architecture** | Soundness of the data strategy (prebuilt / live / edge-proxy), caching, build pipeline, technical decisions. |
+| **UX & design** | Visual craft, interaction polish, animation/feedback, responsiveness, accessibility. |
+| **Robustness** | Does it work end to end — no crashes, *correct* data & logic (dual-type matchups combined right, real branching evolutions, accurate stats), error handling, deploy health. |
 
-- **Live performance / Lighthouse.** Not yet measured uniformly; it depends on deploy config as much as the model. A slot exists in the manifest for when it's run across all submissions on equal footing.
-- **Exact bundle size.** Requires building every heterogeneous app (and refetching PokéAPI data). The metrics script supports it; it's left out of v1 rather than reported unevenly.
-- **Prompt-following nuance.** The brief intentionally under-specifies, so "did it follow instructions" collapses into completeness and the free-variable choices.
+Their average is the other 40% of the Bench score. **Robustness** is what separates "built a lot but crashes on load" from "smaller but works" — a broken app scores low here *and* collects grade-1s on its broken features, so it can't rank on volume alone.
+
+## Why this shape
+
+An earlier version scored `present | partial | absent` and a separate `completeness` axis — which both measured the same thing (how much exists) and ignored quality. This model fixes both: depth is graded, and the axes are orthogonal to coverage. Nothing in the five numbers restates another.
 
 ## Objective metrics (context, not score)
 
-Reported for every submission, computed by [`scripts/compute-metrics.mjs`](scripts/compute-metrics.mjs) from the vendored source:
+Reported for every submission, computed by [`scripts/compute-metrics.mjs`](scripts/compute-metrics.mjs): source **LOC** and **file count** (hand-written source only), **dependency count**, detected **stack**, and **data strategy**. LOC is context, not merit — a tight vanilla entry and a sprawling React one are both legitimate answers to the brief.
 
-- **Source LOC** and **file count** — hand-written source only; generated PokéAPI data, `node_modules`, lockfiles, and build output are excluded.
-- **Dependency count** (runtime + dev).
-- **Detected stack** — framework, language, bundler, styling.
-- **Data strategy** — prebuilt-static, edge-proxy, live-api, or a mix.
+## What is *not* in the score (and why)
 
-LOC is context, not merit: a tight vanilla-JS entry and a sprawling React one are both legitimate answers to the brief.
+- **Live performance / Lighthouse** — not yet measured uniformly; depends on deploy config as much as the model.
+- **Exact bundle size** — requires building every heterogeneous app; left out rather than reported unevenly.
 
 ## Fairness notes
 
-- Same brief, same data source, same platform for all — see [THE_BRIEF.md](THE_BRIEF.md).
-- Effort is recorded per submission; compare same-effort entries for the cleanest model-vs-model read, and same-model/different-effort entries to isolate effort.
-- The scoring pass reads source only and is told not to trust README claims.
+- Same verbatim prompt, data source, and platform for all — see [THE_BRIEF.md](THE_BRIEF.md).
+- Grades and axes are read from source; the passes are told not to trust README claims.
+- Robustness is inferred from the code (crash paths, correctness of logic); click through to the live demos to confirm — the assessment prose flags what works and what doesn't.
+- Weights (60/40) live at the top of [`scripts/gen-readme.mjs`](scripts/gen-readme.mjs) and are trivially adjustable.
