@@ -1,6 +1,6 @@
 {
   "name": "pokedex-llm-benchmark",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "One prompt, many LLMs: each autonomously builds and deploys a Pokedex; scored on a depth + craft rubric.",
   "type": "module",
   "private": true,
