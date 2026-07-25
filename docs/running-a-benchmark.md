@@ -2,29 +2,31 @@
 
 The benchmark is a loop: **run → ingest → grade → regenerate.** A new model runs the same one-shot [brief](../THE_BRIEF.md), builds and deploys its own Pokédex fully autonomously, then gets scored and folded into the leaderboard.
 
-> **TL;DR — the easy way.** Open a Claude Code session in this repo and say: *"benchmark `<model-id>`"* (list ids with `opencode models`, e.g. `opencode/deepseek-v4-flash-free`). **The agent will ask you which variant/effort to run** (model default, `high`, `max`, … — or two efforts to compare, like the Fable 5 low-vs-ultracode pair) before it launches, since effort materially changes the result. It then runs every step below — the autonomous build, ingest, two-pass grade, regenerate, and commit. The manual four steps follow for when you're not in a session.
+> **TL;DR — the easy way.** Open a Claude Code session in this repo and say: *"benchmark `<model-id>`"* (list opencode ids with `opencode models`, e.g. `opencode/deepseek-v4-flash-free`; Anthropic models run on Claude Code, e.g. `claude-opus-5`). **The agent will ask you which variant/effort to run** (model default, `high`, `max`, `ultracode`, … — or two efforts to compare, like the Fable 5 low-vs-ultracode pair) before it launches, since effort materially changes the result. It then runs every step below — the autonomous build, ingest, two-pass grade, regenerate, and commit. The manual four steps follow for when you're not in a session.
 
 ## 1. Run — the model builds it
 
-Hand a model the canonical prompt and let it work autonomously via [opencode](https://opencode.ai) (it uses `gh` and `wrangler` itself to create a repo and deploy to Cloudflare — provisioning is part of the test):
+Hand a model the canonical prompt and let it work autonomously (it uses `gh` and `wrangler` itself to create a repo and deploy to Cloudflare — provisioning is part of the test):
 
 ```bash
-node scripts/run-benchmark.mjs --model <provider/model> --name <token> [--variant <effort>]
+node scripts/run-benchmark.mjs --model <model> --name <token> [--runner opencode|claude] [--variant <effort>]
 ```
 
-- `--model` — an opencode model id (`opencode models` to list), e.g. `opencode/deepseek-v4-flash-free`, `xai/grok-...`.
-- `--name` — the repo name token; the model is told to *"call it `pokedex-<name>`"*. Encode model + effort, e.g. `deepseek-v4-flash`, `sonnet-5-high`.
-- `--variant` — provider reasoning effort passed through to opencode (`high`, `max`, `minimal`).
+- `--model` — the model id. Prefixed ids run on [opencode](https://opencode.ai) (`opencode models` to list), e.g. `opencode/deepseek-v4-flash-free`, `xai/grok-...`; bare Anthropic ids run on Claude Code, e.g. `claude-opus-5`, `claude-fable-5`.
+- `--name` — the repo name token; the model is told to *"call it `pokedex-<name>`"*. Encode model + effort, e.g. `deepseek-v4-flash`, `opus-5-ultracode`.
+- `--runner` — which agent harness drives the run. Inferred from the model id (a `/` means opencode), so you rarely pass it.
+- `--variant` — reasoning effort passed through to the runner: opencode takes `high` / `max` / `minimal`, Claude Code takes `low` / `medium` / `high` / `xhigh` / `max` / `ultracode`.
 
-The prompt is read verbatim from `submissions.json` (only the name token is substituted). The run is fully autonomous (`opencode --auto`). Example — the free DeepSeek:
+The prompt is read verbatim from `submissions.json` (only the name token is substituted). The run is fully autonomous — `opencode --auto`, or `claude -p --dangerously-skip-permissions` for the Claude Code runner, which also writes a full stream-json transcript next to the build dir so a background run stays tailable. Examples:
 
 ```bash
 node scripts/run-benchmark.mjs --model opencode/deepseek-v4-flash-free --name deepseek-v4-flash
+node scripts/run-benchmark.mjs --model claude-opus-5 --name opus-5-ultracode --variant ultracode
 ```
 
 When it finishes, the model will have created `pokedex-<name>` on GitHub and deployed it. Sanity-check the deployment before ingesting — a run that failed to deploy is itself a (low) result, but note it.
 
-> This is how the current submissions were produced (each on a stable, tool-enabled agent). The name token is the *only* per-run change to the prompt — see [methodology](methodology.md).
+> This is how the current submissions were produced (each on a stable, tool-enabled agent — the Anthropic entries through the Claude Code runner, the rest through opencode). The name token is the *only* per-run change to the prompt — see [methodology](methodology.md).
 
 ## 2. Ingest — vendor the source
 
@@ -42,14 +44,14 @@ Scoring is pinned in [`grading/PROMPT.md`](../grading/PROMPT.md) + [`grading/sch
 **Claude Code session (recommended — how the current set was scored).** Richest and adversarially verified:
 
 ```bash
-node scripts/grade.mjs --submission <id>          # writes grading/prompts/<id>.md
+node scripts/grade.mjs --submission <id>                              # 1. grade      → grading/prompts/<id>.md
+node scripts/grade.mjs --submission <id> --verify pass1.json          # 2. calibrate  → <id>-verify.md
+node scripts/grade.mjs --submission <id> --adjudicate audit.json \
+                       --entry pass2.json                             # 3. adjudicate → <id>-adjudicate.md
+node scripts/grade.mjs --submission <id> --merge final.json           # merge the result
 ```
 
-Hand that prompt to an agent (in this project, ask Claude to grade `<id>` against it — ideally with an independent verification pass), then merge its JSON:
-
-```bash
-node scripts/grade.mjs --submission <id> --merge <grader-output.json>
-```
+Hand each prompt to the judge in turn and feed its JSON to the next step. Pass 2 alone is not enough — on both Opus 5 entries it returned pass 1 nearly unchanged. Pass 3 takes an **audit** file (`{contested, axes, logic}`: independent agents that read the source and try to refute each grade) and makes the judge rule on every dispute.
 
 **Autonomous via opencode (two-pass).** Fully hands-off — grades, then adversarially verifies, with a judge model:
 

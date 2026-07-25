@@ -56,7 +56,11 @@ function entry(sub) {
   if (sub.runtime) {
     const r = sub.runtime;
     const tick = (b) => (b ? "✓" : "✗");
-    L.push(`| **Runtime check** | **${r.verdict}** — loads ${tick(r.loadOk)} · content ${tick(r.contentOk)} · JS exceptions ${r.pageErrors} · console errors ${r.consoleErrors} · detail route ${tick(r.detailOk)} (headless, ${r.checkedAt}) |`);
+    const reach =
+      r.dexReach == null
+        ? ""
+        : ` · dex reach ${r.dexReach}/1025 by scrolling${r.dexReach < 1025 ? (r.dexPager ? ", paginated" : " — **stops there, no pager**") : ""}`;
+    L.push(`| **Runtime check** | **${r.verdict}** — loads ${tick(r.loadOk)} · content ${tick(r.contentOk)} · JS exceptions ${r.pageErrors} · console errors ${r.consoleErrors} · detail route ${tick(r.detailOk)}${reach} (headless, ${r.checkedAt}) |`);
   }
   if (sub.metrics) L.push(`| **Source** | ${sub.metrics.sourceLoc.toLocaleString("en-US")} LOC · ${sub.metrics.sourceFiles} files · ${sub.metrics.dependencies}+${sub.metrics.devDependencies} deps |`);
   if (scored) L.push(`| **Feature depth** | ${featureQuality(sub)} / ${MAX_QUALITY} (${solid}/${TOTAL} features solid or better) |`);

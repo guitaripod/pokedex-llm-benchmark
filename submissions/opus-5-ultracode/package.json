@@ -1,0 +1,42 @@
+{
+  "name": "pokedex-opus-5-ultracode",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "data": "tsx scripts/build-data.ts",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "qa": "tsx scripts/qa/visual.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.13.12",
+    "motion": "^12.23.12",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.8.2",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260722.1",
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "playwright": "^1.61.1",
+    "tailwindcss": "^4.1.13",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "wrangler": "^4.40.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260722.1": true
+  }
+}

@@ -23,7 +23,7 @@ The [30-feature checklist](docs/feature-checklist.json) defines the Pokédex fea
 
 The **feature-depth score** is the sum of grades (0–90), normalized into the composite. Because a stub earns a 1 and an exceptional build earns a 3, **a few excellent features outscore a pile of stubs** — twelve features at 3 (36) beat thirty at 1 (30). This is the direct answer to "counting features rewards breadth over quality."
 
-Each grade carries an **evidence** pointer (the file, and what makes it a 3 vs a 1). Grading is done in two passes — a grading pass, then an **adversarial calibration pass** that re-checks each grade against the code, downgrading oversold stubs and upgrading undersold depth. See [methodology](docs/methodology.md).
+Each grade carries an **evidence** pointer (the file, and what makes it a 3 vs a 1). Grading is done in passes — a grading pass, then an **adversarial calibration pass** that re-checks each grade against the code, downgrading oversold stubs and upgrading undersold depth, and (since the Opus 5 entries) an **independent audit** whose disputed grades the judge adjudicates. See [methodology](docs/methodology.md), including which entries got which.
 
 ### 2. Craft axes — four orthogonal 0–10 scores
 
@@ -48,7 +48,7 @@ Grades are LLM-judged, so the risk is **drift** — the scale shifting between s
 
 - **Fixed calibration anchors.** [`grading/PROMPT.md`](grading/PROMPT.md) pins concrete reference points from already-scored submissions ("a `3` on team-builder = Fable-ultracode's; robustness `2` = Laguna, which loads then errors on the detail route"). Every judge grades against the same yardstick — calibration is static data in the repo, not a live relative computation.
 - **Append-only.** Adding a model grades *only* the new submission against those anchors. Existing scores are immutable, so the leaderboard is reproducible and each addition is O(1) — never an O(N²) re-grade cascade.
-- **Runtime signal.** The objective [smoke test](docs/methodology.md) result is fed to the judge to ground the `robustness` axis in what actually happens on the live site, not just a code read.
+- **Runtime signal.** The objective [smoke test](docs/methodology.md) result is fed to the judge to ground the `robustness` axis in what actually happens on the live site, not just a code read — including `dexReach`, the number of species the live browse page will actually scroll to (a dex that errors nowhere but stops at 60 of 1025 is caught here).
 - **Versioned + provenance-stamped.** [`grading/config.json`](grading/config.json) carries a `rubricVersion`; every submission records `grading.gradedBy / gradedOn / rubricVersion`. Drift is *detectable*, and re-grading the whole set is a deliberate version bump — not an accident. Scores across different rubric versions aren't directly comparable.
 
 ## Objective metrics (context, not score)

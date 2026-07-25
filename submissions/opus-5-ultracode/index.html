@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0e14" />
+    <title>Pokédex — the complete National Dex</title>
+    <meta
+      name="description"
+      content="Every Pokémon, move, ability, item, location and encounter across all nine generations. Advanced search, team builder, damage calculator and type coverage tools."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="preload" href="/fonts/SpaceGrotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/data/meta.json" as="fetch" crossorigin />
+    <link rel="preload" href="/data/pokemon-index.json" as="fetch" crossorigin />
+    <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Pokédex — the complete National Dex" />
+    <meta
+      property="og:description"
+      content="Every Pokémon, move, ability, item and encounter across all nine generations."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

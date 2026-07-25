@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync, rmSync, mkdtempSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, rmSync, mkdtempSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -55,17 +55,46 @@ const EXCLUDES = [
   .join(" ");
 execSync(`rsync -a ${EXCLUDES} ${clone}/ ${dest}/`);
 
-let dataNote;
-const dataDir = join(dest, "public", "data");
-if (existsSync(dataDir)) {
-  const mb = Number(execSync(`du -sm ${dataDir}`).toString().split("\t")[0]);
-  if (mb > 2) {
-    const files = execSync(`find ${dataDir} -type f | wc -l`).toString().trim();
-    rmSync(dataDir, { recursive: true, force: true });
-    dataNote = `${mb} MB of generated PokéAPI JSON (public/data, ${files} files) stripped from the vendored source; regenerate with the submission's build script.`;
-    console.log(`  stripped generated public/data (${mb} MB)`);
-  }
+/// Every directory in the tree, deepest-first, with its size in MB.
+function dirsBySize(root) {
+  return execSync(`du -m -a ${root} | awk -F'\\t' '$1 > 2'`, { encoding: "utf8" })
+    .trim()
+    .split("\n")
+    .filter(Boolean)
+    .map((l) => {
+      const [mb, path] = l.split("\t");
+      return { mb: Number(mb), path };
+    })
+    .filter((d) => d.path !== root && existsSync(d.path) && statSync(d.path).isDirectory())
+    .sort((a, b) => a.path.length - b.path.length);
 }
+
+/// Models vendor PokéAPI into their own repos in whatever shape they like —
+/// generated JSON shards, the upstream CSV dump, sprite dumps. None of it is
+/// what the model *wrote*, so strip any bulk data directory and record how to
+/// get it back.
+function stripBulkData(root) {
+  const notes = [];
+  for (const { mb, path } of dirsBySize(root)) {
+    if (!existsSync(path)) continue;
+    const files = execSync(`find ${path} -type f | wc -l`, { encoding: "utf8" }).trim();
+    const dataFiles = execSync(
+      `find ${path} -type f \\( -name '*.json' -o -name '*.csv' -o -name '*.png' -o -name '*.ogg' \\) | wc -l`,
+      { encoding: "utf8" },
+    ).trim();
+    if (Number(files) === 0 || Number(dataFiles) / Number(files) < 0.9) continue;
+    const rel = path.slice(root.length + 1);
+    if (rel === "node_modules" || rel.includes("node_modules")) continue;
+    rmSync(path, { recursive: true, force: true });
+    notes.push(`${mb} MB of PokéAPI data (${rel}, ${files} files)`);
+    console.log(`  stripped bulk data ${rel} (${mb} MB)`);
+  }
+  return notes.length
+    ? `${notes.join(" and ")} stripped from the vendored source — it is data, not model-written code; regenerate with the submission's own build script (the original repo keeps it).`
+    : undefined;
+}
+
+const dataNote = stripBulkData(dest);
 
 const readLive = () => {
   if (opts.live) return opts.live;
@@ -77,10 +106,23 @@ const readLive = () => {
     );
     if (m) return m[0];
     const name = readFileSync(p, "utf8").match(/"name"\s*:\s*"([^"]+)"/);
-    if (f.endsWith("jsonc") && name) return `https://${name[1]}.workers.dev`;
+    if (f.endsWith("jsonc") && name) return reachable(`https://${name[1]}.workers.dev`);
   }
   return "";
 };
+
+/// A worker name alone cannot yield the deployment URL — workers.dev subdomains
+/// are account-scoped. Only accept a guessed URL if it actually answers.
+function reachable(url) {
+  try {
+    const code = execSync(`curl -s -o /dev/null -w '%{http_code}' -m 15 ${url}`, { encoding: "utf8" }).trim();
+    if (Number(code) < 400) return url;
+    console.log(`  guessed live URL ${url} answered ${code} — leaving liveUrl empty, pass --live`);
+  } catch {
+    console.log(`  guessed live URL ${url} is unreachable — leaving liveUrl empty, pass --live`);
+  }
+  return "";
+}
 
 const analysis = analyzeSubmission(dest);
 const entry = {

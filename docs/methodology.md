@@ -26,11 +26,17 @@ Two passes, both reading source (not the README, which oversells):
 1. **Grading** — for each submission, an agent greps and reads the vendored source and grades all 30 checklist features `0–3` by depth (absent → shallow/broken → solid → exceptional), with a file-level evidence pointer per grade, plus the four craft axes and a written assessment.
 2. **Adversarial calibration** — a second agent re-checks every grade against the code: downgrading stubs/truncations/broken features that were called solid, upgrading genuinely deep work that was undersold, and sanity-checking the axis scores (especially robustness against any crash/correctness issues). It typically adjusts a handful of grades per submission.
 
+3. **Independent audit + adjudication** (added for the two Opus 5 entries) — the calibration pass can rubber-stamp: on both Opus 5 submissions it returned the first pass essentially unchanged, and on one it left 22 features graded `3`. So a third stage runs a fan-out of ten independent agents (five feature groups, four craft axes, one core-logic correctness check) whose brief is to *refute* each grade against the source and the live deployment; every dispute then goes back to the judge, which verifies the auditor's specific claims and sets the final grade. The judge rejects disputes where the auditor is wrong, so this is adjudication, not a second opinion winning by default. Assemble the prompts with `scripts/grade.mjs --verify` and `--adjudicate`.
+
 The calibrated grades, scores, and prose are what land in `submissions.json`; each `ENTRY.md` is generated from them.
+
+**This is an unequal-rigor seam, and it matters when reading the board.** `opus-5-low` and `opus-5-ultracode` went through the audit; the seven earlier entries did not. The audit only ever moved grades *down* (81 → 55 and 89 → 77 on feature depth), so the two Opus 5 scores are conservative relative to the rest of the leaderboard, not inflated. Closing the seam means bumping `rubricVersion` and re-grading every submission with the audit stage — a deliberate, breaking re-score, per [RUBRIC.md](../RUBRIC.md#staying-comparable-as-models-are-added).
 
 ## Runtime verification
 
 The `robustness` axis can't rest on a code read alone — so [`scripts/smoke.mjs`](../scripts/smoke.mjs) loads each submission's **live deployment** in headless Chromium (Playwright) and records an objective `runtime` signal: whether the page renders real content, counts of console errors and uncaught JS exceptions, and whether a detail route navigates without new errors → a `clean | errors | broken` verdict. It's run once per submission and the result is stored in the manifest (like every other measured value); the grader is shown it so `robustness` reflects what actually happens on the site. This is what objectively separates "built but errors at runtime" (e.g. Laguna — it loads, then throws on the detail route) from "smaller but works."
+
+It also measures **`dexReach`**: it finds the browse route, scrolls it to exhaustion, and counts the distinct species a user can actually reach. A Pokédex can throw zero errors and still hand you a fraction of the dex — `opus-5-low` looks clean by every other signal but stops at 60 of 1025 because its infinite-scroll observer attaches before the sentinel mounts, while `opus-5-ultracode` reaches all 1025 through a virtualized grid. Console-error counting cannot see that difference; this can, and it feeds both the `national-dex` grade and `robustness`.
 
 ## Honest caveats
 
@@ -40,6 +46,8 @@ The `robustness` axis can't rest on a code read alone — so [`scripts/smoke.mjs
 - **Effort labels are self-reported and not cross-comparable.** They come from the run setup (the model's own reasoning-effort setting), not measured compute — and an Anthropic "ultracode" is not the same knob as an opencode `--variant high`. Compare same-provider/same-tool efforts (e.g. the two Fable 5 entries) for the cleanest read.
 - **Provenance is recorded per submission** (`provenance`: one-shot, autonomous, self-provisioned, verified). All current entries are owner-confirmed legit one-shot runs; `deepseek-v4-flash` additionally carries the full harness trail (it deployed but did not self-create its repo, so its source was published for the record).
 - **Assessment scores are subjective.** The feature matrix is the reproducible layer; the 0–10 scores are a calibrated reviewer's read.
+- **Grading rigor is not yet uniform.** The two Opus 5 entries were graded with the three-pass flow (audit + adjudication); the seven earlier entries were graded two-pass. Since the audit only removed grades, this understates the Opus 5 entries relative to the others — see the seam note above.
+- **The judge and two entries share a model family.** `opus-5-low` / `opus-5-ultracode` were judged by Opus 5 (the earlier seven, by Opus 4.8). Self-preference was the reason the audit stage exists; as a cross-check, `opus-5-low` was also graded end-to-end by Opus 4.8, which independently landed on feature depth 64 vs Opus 5's 65 on the same pass — and the audit then cut both to 55.
 - **No live performance numbers yet.** Perf/bundle depend on deploy config; a uniform pass is future work (the manifest has room for it).
 - **Dates** are the repo's build/push date, a proxy for when the run happened — not a controlled release timeline.
 

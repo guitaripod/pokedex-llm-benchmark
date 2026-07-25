@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pokedex-opus-5-low",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "observability": { "enabled": true }
+}

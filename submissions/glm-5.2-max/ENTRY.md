@@ -17,7 +17,7 @@
 | **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
 | **Stack** | vanilla · javascript · none · hand-rolled css |
 | **Data strategy** | edge-proxy |
-| **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ (headless, 2026-07-22) |
+| **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ · dex reach 1025/1025 by scrolling (headless, 2026-07-25) |
 | **Source** | 6,523 LOC · 20 files · 0+1 deps |
 | **Feature depth** | 61 / 90 (22/30 features solid or better) |
 

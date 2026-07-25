@@ -17,7 +17,7 @@
 | **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
 | **Stack** | react · typescript · vite · tailwind |
 | **Data strategy** | live-api |
-| **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ (headless, 2026-07-22) |
+| **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ · dex reach 30/1025 by scrolling, paginated (headless, 2026-07-25) |
 | **Source** | 2,406 LOC · 27 files · 7+7 deps |
 | **Feature depth** | 38 / 90 (16/30 features solid or better) |
 

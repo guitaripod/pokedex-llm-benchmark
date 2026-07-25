@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
-import { readFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, mkdirSync, existsSync, createWriteStream } from "node:fs";
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
+import { createInterface } from "node:readline";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(readFileSync(join(ROOT, "submissions.json"), "utf8"));
@@ -16,25 +17,39 @@ for (let i = 0; i < args.length; i++)
 if (!opts.model || !opts.name) {
   console.error(
     `Run the benchmark: hand a model the canonical prompt and let it build + deploy a Pokédex
-fully autonomously via opencode (it uses gh + wrangler itself).
+fully autonomously (it uses gh + wrangler itself).
 
 Usage:
-  node scripts/run-benchmark.mjs --model <provider/model> --name <token> [--variant <effort>] [--dir <path>]
+  node scripts/run-benchmark.mjs --model <model> --name <token> [--runner opencode|claude]
+                                 [--variant <effort>] [--dir <path>] [--log <path>]
 
-  --model    opencode model id, e.g. opencode/deepseek-v4-flash-free, anthropic/claude-opus-4-8
+  --model    model id. opencode ids carry a provider prefix (opencode/deepseek-v4-flash-free,
+             xai/grok-4.5); bare Anthropic ids (claude-opus-5, claude-fable-5) run on Claude Code.
   --name     name token for the repo — the model is told to "call it pokedex-<name>"
-             (encode the model + effort, e.g. deepseek-v4-flash, sonnet-5-high)
-  --variant  provider reasoning effort passed to opencode (e.g. high, max, minimal)
+             (encode the model + effort, e.g. deepseek-v4-flash, opus-5-ultracode)
+  --runner   which agent harness drives the run (default: inferred — "/" in the model id
+             means opencode, otherwise claude)
+  --variant  reasoning effort passed through to the runner
+             (opencode: high, max, minimal — claude: low, medium, high, xhigh, max, ultracode)
   --dir      working directory the model builds in (default: ~/Dev/pokedex-<name>)
+  --log      transcript path (claude runner only; default: <dir>/../pokedex-<name>-run.jsonl)
 
-Example (the free DeepSeek from opencode):
+Examples:
   node scripts/run-benchmark.mjs --model opencode/deepseek-v4-flash-free --name deepseek-v4-flash
+  node scripts/run-benchmark.mjs --model claude-opus-5 --name opus-5-ultracode --variant ultracode
 
-The run is fully autonomous (opencode --auto). When it finishes, the model will have
-created its own GitHub repo (pokedex-<name>) and deployed it to Cloudflare. Then ingest it:
+The run is fully autonomous (opencode --auto / claude --dangerously-skip-permissions). When it
+finishes, the model will have created its own GitHub repo (pokedex-<name>) and deployed it to
+Cloudflare. Then ingest it:
   node scripts/add-submission.mjs <repo-url> --model "<Name>" [--effort <e>]
 and grade it (see docs/running-a-benchmark.md).`,
   );
+  process.exit(1);
+}
+
+const runner = opts.runner || (opts.model.includes("/") ? "opencode" : "claude");
+if (!["opencode", "claude"].includes(runner)) {
+  console.error(`! unknown --runner "${runner}" (expected: opencode | claude)`);
   process.exit(1);
 }
 
@@ -48,26 +63,71 @@ if (existsSync(dir) && existsSync(join(dir, ".git"))) {
 }
 mkdirSync(dir, { recursive: true });
 
-const ocArgs = ["run", prompt, "--model", opts.model, "--auto"];
-if (opts.variant) ocArgs.push("--variant", opts.variant);
-ocArgs.push("--dir", dir, "--title", `benchmark: ${repoName}`);
+const opencodeArgs = () => {
+  const a = ["run", prompt, "--model", opts.model, "--auto"];
+  if (opts.variant) a.push("--variant", opts.variant);
+  a.push("--dir", dir, "--title", `benchmark: ${repoName}`);
+  return a;
+};
 
-console.log(`▶ Running benchmark for ${opts.model}`);
+const claudeArgs = () => {
+  const a = ["-p", prompt, "--model", opts.model];
+  if (opts.variant) a.push("--effort", opts.variant);
+  a.push("--dangerously-skip-permissions", "--verbose", "--output-format", "stream-json");
+  return a;
+};
+
+const logPath = opts.log || join(dir, "..", `${repoName}-run.jsonl`);
+
+/// Mirror the claude runner's stream-json transcript to disk and print one
+/// condensed line per event, so a background run stays tailable.
+function pipeTranscript(child) {
+  const raw = createWriteStream(logPath, { flags: "a" });
+  createInterface({ input: child.stdout }).on("line", (line) => {
+    raw.write(line + "\n");
+    let ev;
+    try {
+      ev = JSON.parse(line);
+    } catch {
+      return;
+    }
+    for (const block of ev.message?.content ?? []) {
+      if (block.type === "text" && block.text.trim())
+        console.log(`· ${block.text.trim().replace(/\s+/g, " ").slice(0, 220)}`);
+      if (block.type === "tool_use") {
+        const i = block.input ?? {};
+        const detail = i.command ?? i.file_path ?? i.pattern ?? i.url ?? i.prompt ?? "";
+        console.log(`▸ ${block.name}: ${String(detail).replace(/\s+/g, " ").slice(0, 180)}`);
+      }
+    }
+    if (ev.type === "result")
+      console.log(`= result: ${ev.subtype} · ${ev.num_turns} turns · $${(ev.total_cost_usd ?? 0).toFixed(2)}`);
+  });
+  child.stderr.pipe(process.stderr);
+}
+
+console.log(`▶ Running benchmark for ${opts.model} (runner: ${runner})`);
 console.log(`  repo name : ${repoName}`);
 console.log(`  build dir : ${dir}`);
 console.log(`  variant   : ${opts.variant || "(model default)"}`);
+if (runner === "claude") console.log(`  transcript: ${logPath}`);
 console.log(`  prompt    : ${prompt}\n`);
 
-const child = spawn("opencode", ocArgs, { stdio: "inherit", cwd: dir });
+const child =
+  runner === "opencode"
+    ? spawn("opencode", opencodeArgs(), { stdio: "inherit", cwd: dir })
+    : spawn("claude", claudeArgs(), { stdio: ["ignore", "pipe", "pipe"], cwd: dir });
+if (runner === "claude") pipeTranscript(child);
+
 child.on("exit", (code) => {
   console.log(`\n─────────────────────────────────────────────`);
   if (code === 0) {
-    console.log(`✓ opencode run finished. The model should have created "${repoName}" and deployed it.`);
+    console.log(`✓ ${runner} run finished. The model should have created "${repoName}" and deployed it.`);
     console.log(`\nNext — ingest and grade:`);
     console.log(`  node scripts/add-submission.mjs https://github.com/<owner>/${repoName} --model "<Name>" [--effort <e>]`);
     console.log(`  # then grade it — see docs/running-a-benchmark.md`);
   } else {
-    console.log(`✗ opencode run exited with code ${code}. Inspect ${dir} and the model's own repo before ingesting.`);
+    console.log(`✗ ${runner} run exited with code ${code}. Inspect ${dir} and the model's own repo before ingesting.`);
   }
   process.exit(code ?? 1);
 });

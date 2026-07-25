@@ -1,0 +1,24 @@
+{
+  "name": "Pokédex — the complete National Dex",
+  "short_name": "Pokédex",
+  "description": "Every Pokémon, move, ability, item, location and encounter across all nine generations.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0d14",
+  "theme_color": "#0a0d14",
+  "categories": ["games", "reference", "utilities"],
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Pokédex", "url": "/pokedex" },
+    { "name": "Team builder", "url": "/team" },
+    { "name": "Type chart", "url": "/types" },
+    { "name": "Damage calculator", "url": "/calc/damage" }
+  ]
+}

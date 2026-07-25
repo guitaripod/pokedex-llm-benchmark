@@ -225,7 +225,9 @@
         "pageErrors": 0,
         "detailOk": true,
         "verdict": "clean",
-        "checkedAt": "2026-07-22"
+        "checkedAt": "2026-07-25",
+        "dexReach": 1025,
+        "dexRoute": "/"
       }
     },
     {
@@ -445,7 +447,9 @@
         "pageErrors": 0,
         "detailOk": true,
         "verdict": "clean",
-        "checkedAt": "2026-07-22"
+        "checkedAt": "2026-07-25",
+        "dexReach": 1025,
+        "dexRoute": "/"
       }
     },
     {
@@ -664,7 +668,9 @@
         "pageErrors": 0,
         "detailOk": true,
         "verdict": "clean",
-        "checkedAt": "2026-07-22"
+        "checkedAt": "2026-07-25",
+        "dexReach": 1025,
+        "dexRoute": "/"
       }
     },
     {
@@ -881,7 +887,9 @@
         "pageErrors": 0,
         "detailOk": true,
         "verdict": "clean",
-        "checkedAt": "2026-07-22"
+        "checkedAt": "2026-07-25",
+        "dexReach": 1025,
+        "dexRoute": "/"
       }
     },
     {
@@ -1099,7 +1107,9 @@
         "pageErrors": 0,
         "detailOk": true,
         "verdict": "clean",
-        "checkedAt": "2026-07-22"
+        "checkedAt": "2026-07-25",
+        "dexReach": 1025,
+        "dexRoute": "/"
       }
     },
     {
@@ -1313,10 +1323,13 @@
         "loadOk": true,
         "contentOk": true,
         "consoleErrors": 0,
-        "pageErrors": 1,
+        "pageErrors": 2,
         "detailOk": false,
         "verdict": "errors",
-        "checkedAt": "2026-07-22"
+        "checkedAt": "2026-07-25",
+        "dexReach": 93,
+        "dexRoute": "/",
+        "dexPager": false
       }
     },
     {
@@ -1537,8 +1550,464 @@
         "pageErrors": 0,
         "detailOk": true,
         "verdict": "clean",
-        "checkedAt": "2026-07-22"
+        "checkedAt": "2026-07-25",
+        "dexReach": 30,
+        "dexRoute": "/pokedex",
+        "dexPager": true
       }
+    },
+    {
+      "id": "opus-5-low",
+      "model": "Opus 5",
+      "provider": "Anthropic",
+      "modelVersion": "5",
+      "effort": "low",
+      "date": "2026-07-24",
+      "sourceRepo": "https://github.com/guitaripod/pokedex-opus-5-low",
+      "liveUrl": "https://pokedex-opus-5-low.guitaripod.workers.dev",
+      "platform": "Cloudflare Workers",
+      "metrics": {
+        "sourceLoc": 4491,
+        "sourceFiles": 36,
+        "sourceBytes": 198828,
+        "dependencies": 3,
+        "devDependencies": 7
+      },
+      "stack": {
+        "framework": "react",
+        "language": "typescript",
+        "bundler": "vite",
+        "styling": "hand-rolled css"
+      },
+      "dataStrategy": "prebuilt-static + edge-proxy",
+      "features": [
+        {
+          "id": "national-dex",
+          "grade": 1,
+          "evidence": "DOWNGRADED 3→1 after verifying the auditor's runtime claim. The data is complete (live /data/index.json = 1351 rows / 1025 default; scripts/build-data.mjs has no slice or id cap), but the browse surface that delivers it is dead on cold load: src/lib/hooks.ts:57-65 creates the IntersectionObserver from sentinel.current with deps [total, step], while Dex.tsx:99 calls useInfinite BEFORE the gate at Dex.tsx:106 (`if (!index || !meta) return <Loading/>`). index.json resolves first (it is the only preloaded fetch), so total goes 0→1025 in a commit where the sentinel (Dex.tsx:256) is unmounted, the effect bails, and it never re-runs. Objective smoke test confirms /pokedex hands 60 of 1025 and stops, with 'Showing 60 of 1,025…' (Dex.tsx:257) and no pagination or Load-more fallback. A national dex that surfaces 5.8% of itself by browsing is the 'truncated / broken at runtime' anchor, not 'works as a user expects'."
+        },
+        {
+          "id": "search",
+          "grade": 2,
+          "evidence": "util.ts searchScore ranks name/number/genus/ability matches, wired client-side through a 180ms useDebounced in Dex.tsx:27-28 with no round-trip, and reused by the command palette. Solid; not exceptional (no fuzzy matching, no typo tolerance, no result grouping in the dex itself)."
+        },
+        {
+          "id": "type-filter",
+          "grade": 2,
+          "evidence": "Dex.tsx:169-178 renders all 18 type chips with any/all/exact modes (Dex.tsx:164-166) and the predicates at :57-61 are correct for each mode. Works as expected; kept at 2 because the mode itself is never reflected in the URL (an 'exact' link reopens as 'any')."
+        },
+        {
+          "id": "generation-filter",
+          "grade": 2,
+          "evidence": "Dex.tsx:184-188 builds the gen chips from meta.generations (real labels + regions) and Dex.tsx:62 filters on e.generation; multi-select and URL-synced. Regional dexes get their own page (Dexes.tsx). Solid, not deep."
+        },
+        {
+          "id": "sort",
+          "grade": 2,
+          "evidence": "Dex.tsx:12-17 offers 12 sort keys (id, name, BST, each of the 6 stats, height, weight, catch rate) with an asc/desc toggle and a correct string/number comparator at :91-95. Moves.tsx:40-48 adds click-to-sort headers. Solid."
+        },
+        {
+          "id": "advanced-filter",
+          "grade": 2,
+          "evidence": "DOWNGRADED 3→2: breadth without depth. Dex.tsx:63-74 wires nine dimensions (rarity/legendary/mythical/baby/favorite, egg group, colour, shape, habitat, growth rate, ability, min-BST) and the option lists are genuinely dataset-derived (:101-104) — comfortably above the grade-2 bar but short of exceptional: every dimension is a single-select one-line predicate through the same `Select` (:262-272), no multi-select, no exclusion, the only numeric control is a one-sided min-BST slider hardcoded max={780} (:211) while the shipped dataset contains a 1125-BST entry, nothing persists (advanced is transient state at :44, none of these params reach sync(), so the whole panel resets on navigation), the egg-group counts are static build-time species totals (build-data.mjs:430) rather than counts under the current filter, and habitat is null for ~639 of the 1025 defaults with no UI hint."
+        },
+        {
+          "id": "shareable-urls",
+          "grade": 1,
+          "evidence": "DOWNGRADED 2→1: thin and lossy, verified in source. Only Dex.tsx uses useSearchParams — Moves, Items, Abilities, Types, Dexes, Team, Compare, Tools and Guess hold their state locally, so 1 of ~10 surfaces is deep-linkable. Within Dex only 7 of 17 controls call sync() (:46-50): typeMode (:165), rarity (:198), eggGroup/colour/shape/habitat/growth/ability (:203-208) and bstMin (:211) use bare setters, so a shared link shows the recipient a different result set. Reset (:150-157) blanks the whole query string but leaves view/dir/sort/showForms untouched, so the URL then contradicts the visible page, and every write is `replace: true` (:49) so Back never undoes a filter. Present but half-wired and actively misleading."
+        },
+        {
+          "id": "artwork",
+          "grade": 3,
+          "evidence": "PokemonDetail.tsx:43,76 renders official artwork (with HOME/front fallbacks) inside a type-gradient hero, and SpritesTab (:452-503) is a full gallery: 13 named sprite slots plus every per-generation, per-game front sprite walked out of sprites.versions. Best-in-class for this feature."
+        },
+        {
+          "id": "shiny",
+          "grade": 2,
+          "evidence": "PokemonDetail.tsx:100 toggles local shiny state and :43 swaps artworkShiny/homeShiny; the sprite gallery lists shiny variants separately. Held at 2: the toggle is per-page local state that shadows the persisted store slice (store.tsx:25 shiny/setShiny is dead), and the fallback chain can land on the non-shiny sprite while the button still reads 'Shiny on'."
+        },
+        {
+          "id": "cries",
+          "grade": 2,
+          "evidence": "PokemonDetail.tsx:49-56 plays cries.latest with a legacy fallback via a reused HTMLAudioElement at 0.5 volume, and the button is hidden when no cry exists (:101). Works; no latest/legacy chooser, waveform or autoplay-failure handling."
+        },
+        {
+          "id": "stats-viz",
+          "grade": 2,
+          "evidence": "DOWNGRADED 3→2: the anchor's 3 is animated bars PLUS a hand-built SVG radar PLUS BST, and the detail stats surface has neither of the first two. ui.tsx:78-88 sets the bar width inline on first render and styles.css:244 only declares `transition: width .5s` — a transition cannot fire on initial style computation, and PokemonDetail.tsx:37 remounts the subtree to <Loading/> on every id change, so StatBars always mounts at its final width. The only radar in the app is Compare.tsx:137-176, on a different page. What remains is genuinely solid: tiered-colour bars, BST with overall rank (:95), per-stat percentile against all defaults (:253-257) and a level/IV/EV/nature calculator on the correct main-series formula (util.ts:70-76, Shedinja guard included) — though the nature control is a global ±10% (:251,291) rather than the 25 real natures already sitting unused in meta."
+        },
+        {
+          "id": "abilities",
+          "grade": 2,
+          "evidence": "Overview lists each ability with a hidden badge (PokemonDetail.tsx:160-171) linking to AbilityDetail, and Abilities.tsx is a searchable 373-entry dex with effect text (verified working end-to-end at runtime). Held at 2: the effect text is not shown inline on the Pokémon page, only one click away."
+        },
+        {
+          "id": "evolution",
+          "grade": 2,
+          "evidence": "DOWNGRADED 3→2: deep rendering, but incomplete and self-breaking. The recursive EvoTree (PokemonDetail.tsx:389-412) handles real branching (Eevee's 9 nodes, Wurmple's two arms) and evoCondition decodes ~20 triggers (:359-387) plus babyTriggerItem (:420) — worth a clean 2. Two confirmed defects keep it off 3: (a) :392 links `/pokemon/${node.species}` (a species slug) while the index is keyed by pokemon name (:21), and an unresolved slug hits `new Promise(() => {})` at :25, so ~34 species (wormadam, lycanroc, toxtricity, urshifu, basculegion, maushold, palafin…) hang on a permanent 'Loading Pokémon' spinner when clicked from the app's own tree — and the fix was in hand, since :393 already uses node.id and the route accepts numeric ids (:18-20); (b) evoCondition reads only `details[0]` (:361), so Rockruff→Lycanroc, Feebas→Milotic and the Eeveelution stone methods each show one method and silently drop the rest."
+        },
+        {
+          "id": "learnsets",
+          "grade": 1,
+          "evidence": "DOWNGRADED 2→1: the default view is defective at runtime, and I confirmed it against the live data rather than taking the auditor's word. MovesTab picks the LAST version group in meta order (PokemonDetail.tsx:306) and live meta.json orders `champions` last (order 32) — in that group PokéAPI exposes only the `train` method. I fetched 58 species from the deployment and 39 of them (Charizard, Pikachu, Gengar, Garchomp, Lucario, Greninja, Metagross, Tyranitar…) open the Moves tab with zero level-up moves, a lone 'Train' chip and 72 rows of level 0. Compounding it, :330 keys the header off the `method` STATE while :310 renders the `methods[0]` fallback, so that default view prints a 'Lv.' header over a column of '—' (:342). The underlying data is complete (25 version groups, 1481 rows for Charizard) and switching the dropdown repairs it, but the primary surface is broken by default for two-thirds of species, and build-data.mjs:124 stores machine URLs without ever resolving a TM number so the '#' column can never fill."
+        },
+        {
+          "id": "type-matchups",
+          "grade": 2,
+          "evidence": "util.ts:47-55 defenseProfile multiplies chart[atk][def] across EVERY defending type so 0×/¼×/4× compose correctly, off a chart built from live damage_relations (:35-45); I replayed the shipped types.json through it and 20/20 spot checks pass (Steel/Flying, Ground/Flying, Normal/Ghost, all Fairy/Steel/Dark quirks). Exactly the grade-2 anchor; no ability-based immunities (Levitate/Flash Fire) or inverse mode to lift it higher."
+        },
+        {
+          "id": "breeding",
+          "grade": 2,
+          "evidence": "PokemonDetail.tsx:173-193 shows egg groups, gender ratio (genderText handles genderless), egg cycles converted to steps, base happiness, growth rate, gender differences, plus EV yield and base experience in the Training panel. Complete for the checklist; no compatibility/inheritance tooling."
+        },
+        {
+          "id": "forms",
+          "grade": 2,
+          "evidence": "Every variety is indexed (1351 rows vs 1025 species), the dex has an 'Alternate forms' toggle (Dex.tsx:145), and PokemonDetail.tsx:117-124 renders a form switcher with an 'Alternate form' badge (:89). Held at 2: form-only differences aren't called out, and Picker.tsx:15 filters isDefault so Team/Compare/Tools can't reach the 326 alternate forms at all."
+        },
+        {
+          "id": "flavor-entries",
+          "grade": 2,
+          "evidence": "EntriesTab (PokemonDetail.tsx:505-516) renders one panel per version with cleaned English text from the prebuilt shard. Works as expected; no generation grouping, no version-icon chrome, no language switch."
+        },
+        {
+          "id": "type-chart",
+          "grade": 2,
+          "evidence": "DOWNGRADED 3→2: two of the three pillars hold, the third is truncated. Types.tsx:26-60 renders a genuine 18×18 matrix from buildChart with sticky headers, and :63-84 is a correct dual-type defence calculator. But the per-type roster pages I credited for the 3 hit the same dead-sentinel bug — TypeDetail.tsx:18 calls useInfinite before the three-source gate at :20, so /types/water shows 60 of 154 and never grows. What's left is a data render plus a defensive profile, which is verbatim the 2 anchor; the matrix itself has no legend, no row/column highlight (hover title only, :50), no inverse or generation-specific charts and no offensive coverage view."
+        },
+        {
+          "id": "compare",
+          "grade": 2,
+          "evidence": "DOWNGRADED 3→2, and my earlier evidence cited line ranges (225-262, 302-340) that do not exist in a 176-line file — the auditor is right about that. What is real: up to 6 entries persisted to localStorage, an 11-row stat table with the winner highlighted (Compare.tsx:70-93), a per-entry hand-built SVG radar (:137-176) and a full 18-row defensive matrix (:105-128). What keeps it off 3: :19-22 resolves entries from index.json only, so abilities/moves/evolution/breeding are never compared despite the per-Pokémon shards shipping; the radars are one SVG per entry rather than overlaid, so shape comparison is eyeballed; :144 clamps every axis at min(v,200) so Blissey's 255 HP and Shuckle's 230 Def render identical to a 200; no per-stat delta, no verdict, no shareable URL, and Picker.tsx:15 blocks alternate forms."
+        },
+        {
+          "id": "team-builder",
+          "grade": 2,
+          "evidence": "Team.tsx: 6 persisted slots with live weakness/resistance/immunity tallies per type (:26-36, correctly testing >1 then ===0 then <1 so immunities aren't double-counted), offensive coverage and average stats. Solid, but a single unnamed team with no Showdown import/export and no damage preview — the 3 anchor requires all of those."
+        },
+        {
+          "id": "damage-calc",
+          "grade": 2,
+          "evidence": "Tools.tsx:61 is the genuine main-series expression with correct nesting and flooring, STAB, effectiveness folded over both defender types including immunity, burn halving, and a crit that correctly ignores the attacker's negative and defender's positive stages (:58-59). Held at 2: koHits is computed from the BEST roll yet labelled 'Guaranteed KO in' (:67,150), stages are exposed only over ±2, the roll spread is a single 0.85 multiply rather than the 16-value table, and there is no weather/screens/items/abilities."
+        },
+        {
+          "id": "moves-dex",
+          "grade": 2,
+          "evidence": "DOWNGRADED 3→2: the moves half is excellent, the bundled feature is not complete. Moves.tsx:21-48 filters by type/class/generation and effect text with click-to-sort headers over 11 columns (verified live 80→937 rows), MoveDetail.tsx:51-97 adds real mechanics plus an effectiveness grid, and Abilities.tsx works end-to-end (60→373). But Items.tsx:36-37 has the identical dead-sentinel bug (useInfinite called before the two-source gate), measured at 72 of 2,223 items and frozen there; and build-data.mjs:95-127 never resolves machine numbers and captures no move flags (contact/sound/punch/protect) or past_values, so MoveDetail.tsx:99-103 shows version-group badges where TM/HM numbers belong."
+        },
+        {
+          "id": "minigame",
+          "grade": 2,
+          "evidence": "Guess.tsx is a real silhouette quiz — CSS-filter silhouette with a reveal, multiple-choice options, streak tracking persisted via useLocalStorage, and a length-checked random pool (:23). Solid; single mode, no difficulty tiers or cry/description rounds."
+        },
+        {
+          "id": "command-palette",
+          "grade": 2,
+          "evidence": "Palette.tsx: ⌘K overlay searching pages, Pokémon (ranked via searchScore), moves, abilities and items with arrow/enter navigation. Held at 2 by real gaps: no dialog role or focus trap, arrow selection never scrollIntoView()s inside the scroll box, and it eagerly pulls index+moves+abilities+items (~1.7MB raw) on app mount with no lean search shard."
+        },
+        {
+          "id": "favorites",
+          "grade": 2,
+          "evidence": "store.tsx:23 persists favorites to localStorage, toggled from the detail hero (PokemonDetail.tsx:102), surfaced on a dedicated Favorites page and usable as a dex filter (Dex.tsx:67). Complete; the exported isFavorite helper is dead code."
+        },
+        {
+          "id": "theming",
+          "grade": 2,
+          "evidence": "styles.css defines full dark and light token sets applied via data-theme (store.tsx:28), and 20 type colours drive card/hero gradients through color-mix. Held at 2: index.html hardcodes data-theme=\"dark\" with no pre-hydration read and no prefers-color-scheme, so light-theme users get a dark flash on every load."
+        },
+        {
+          "id": "keyboard-nav",
+          "grade": 1,
+          "evidence": "Only the ⌘K/Ctrl-K palette binding plus arrows/enter inside it (Palette.tsx). No search focus key, no random shortcut, no list traversal, no shortcut help, and zero tabIndex/role/aria anywhere in src — thin, not a real keyboard layer."
+        },
+        {
+          "id": "responsive",
+          "grade": 2,
+          "evidence": "Fluid auto-fill grids throughout, two breakpoints in styles.css (860px, 780px), tables behind .table-wrap horizontal scroll. Usable at phone widths; basic, with a 7-select filter row that stacks very tall, a 10-link nav strip with no scroll affordance, and one fixed-px SVG radar (Compare.tsx:150)."
+        },
+        {
+          "id": "export",
+          "grade": 0,
+          "evidence": ""
+        }
+      ],
+      "scores": {
+        "codeQuality": 7,
+        "architecture": 8.5,
+        "uxDesign": 6.5,
+        "robustness": 5.5
+      },
+      "assessment": {
+        "summary": "A beautifully structured, strongly typed React/Vite app on top of a genuinely excellent prebuild pipeline — and a shared hook that quietly kills its own flagship surface. scripts/build-data.mjs + lib.mjs crawl the whole PokéAPI graph behind a resumable disk cache with backoff and a bounded pool, emitting an aggregate per collection plus ~4,892 per-entity shards consumed by a 27-line promise-deduping loader (src/lib/data.ts); there are zero runtime API calls and the live meta.json confirms the full dataset (1351 pokémon / 1025 species / 937 moves / 2223 items / 373 abilities). The core logic is right where it counts: buildChart/defenseProfile compose dual-type multipliers correctly including 0×/¼×/4× (20/20 spot checks pass when replayed against the shipped types.json), statAtLevel is the exact main-series formula with the Shedinja guard, and Tools.tsx implements the real damage and Gen3+ catch expressions. Against that, src/lib/hooks.ts:57-65 builds its IntersectionObserver from sentinel.current with deps [total, step], while Dex.tsx:99, Items.tsx:36 and TypeDetail.tsx:18 all call it above their multi-source loading gates — so on every page whose `total` resolves before its last dataset, the effect fires with a null sentinel and never re-runs. The result is objectively measured: /pokedex hands 60 of 1025 and stops, /items 72 of 2,223, /types/water 60 of 154, with no pagination fallback. A second systematic hole compounds it: unresolved slugs return `new Promise(() => {})` (PokemonDetail.tsx:25 and the three other detail pages), and the app's own evolution tree links species slugs (:392) that don't exist in a pokémon-keyed index, so ~34 species spin forever instead of showing the Empty state defined one line above. The adjudication moved eight feature grades down; the auditor was right on every runtime claim I could reproduce, and only overstated the stat-calculator nature bug and the compare/advanced-filter framing.",
+        "strengths": [
+          "Prebuild pipeline is top-tier: scripts/build-data.mjs + lib.mjs crawl every species, variety, move, ability, item, type and berry with a resumable on-disk cache, negative caching of 404s, 6-attempt exponential backoff and a bounded pool of 12 — no truncation anywhere, verified against live meta.json.",
+          "Correct domain logic: util.ts:35-55 derives the 18×18 chart from live damage_relations and multiplies across both defending types; util.ts:70-76 is the exact stat formula with correct flooring order; Tools.tsx:61 and :188-190 are the real damage and Gen3+ catch-rate expressions.",
+          "Clean layering and genuine reuse — lib/{data,hooks,types,util} + components + pages + store, Panel used ~97×, one Picker shared by Team/Compare/Tools, 11 typed accessors behind a single deduping load(); 0 `any`, 0 @ts-ignore, tsc clean, no comment rot, no file over 516 LOC.",
+          "Strong visual system for a hand-rolled 340-line stylesheet: dark+light tokens, 20 type colours driving card/hero gradients via color-mix, blurred sticky nav, three-font system with mono numerics, consistent card/panel/chip/badge vocabulary across ~20 routes.",
+          "Real detail depth where it works: the sprite gallery walks every per-generation game sprite, the recursive evolution tree renders true branching with ~20 decoded triggers, and the moves/abilities dexes are deep and fully functional."
+        ],
+        "weaknesses": [
+          "useInfinite (hooks.ts:57-65) attaches its observer in an effect keyed [total, step] and bails on a null sentinel; every consumer renders the sentinel behind an early return, so /pokedex freezes at 60 of 1025, /items at 72 of 2223 and type pages at 60 — the single most-used interaction in the app, dead on cold load.",
+          "Unresolved slugs return a never-settling promise (PokemonDetail.tsx:25 and the Move/Ability/Item detail pages) instead of the Empty state at :36, and the evolution tree links species slugs (:392) that the pokémon-keyed index can't resolve — ~34 species hang on a permanent spinner, reachable from the app's own UI. No error boundary anywhere, and no list page reads useAsync's `error`.",
+          "The learnset default view is defective for two-thirds of species: MovesTab picks the last version group (`champions`, train-only), so 39 of 58 sampled Pokémon open the Moves tab with a 'Lv.' header over 72 rows of '—' and a single 'Train' chip.",
+          "URL state is half-wired: only Dex.tsx uses useSearchParams, only 7 of its 17 controls sync, every write is replace:true, and Reset blanks the query string while leaving view/sort/dir/forms intact — shared links show a different result set than the sender saw.",
+          "Accessibility is effectively absent — zero aria-*, role or tabIndex in the whole src tree; the palette and picker are overlays with no dialog semantics, focus trap or focus return; no :focus-visible, no prefers-reduced-motion, .sr and .skeleton defined and never used, and index.html hardcodes the dark theme.",
+          "Countable rot despite the clean structure: dead exports (MiniStats, Sprite, STAT_KEYS, catchRateApprox, spriteUrl), a dead persisted shiny store slice shadowed by local state, unused CSS, casts that launder unvalidated query params past the type system (Dex.tsx:32-34), and 362 inline style objects against a hand-rolled CSS system.",
+          "Architecture leaves easy wins on the table: caching is in-memory promise dedupe only with no _headers/service worker (a peer in the same field ships both), detail routes scan the 936KB index to resolve a slug, and `npm run data` is manual and absent from build/deploy while public/data is gitignored."
+        ],
+        "standout": "The data layer: a resumable, backoff-guarded PokéAPI crawler that emits ~4,892 static shards plus per-collection aggregates and is consumed by a 27-line promise-deduping loader — zero runtime API calls, the complete graph, and correct type/stat/damage math on top of it. It is a shame that a single mis-keyed useEffect in the shared infinite-scroll hook throttles that dataset to 60 rows on the page users open first."
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "detailOk": true,
+        "verdict": "clean",
+        "checkedAt": "2026-07-25",
+        "dexReach": 60,
+        "dexRoute": "/pokedex",
+        "dexPager": false
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 5 (high), three-pass (grade + adversarial verify + independent 10-agent audit adjudication)",
+        "gradedOn": "2026-07-25",
+        "rubricVersion": 1
+      },
+      "dataNote": "Generated PokéAPI JSON (public/data, ~104 MB) is gitignored by the submission itself; regenerate with `node scripts/build-data.mjs`.",
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": true,
+        "verified": "harness (scripts/run-benchmark.mjs)"
+      }
+    },
+    {
+      "id": "opus-5-ultracode",
+      "model": "Opus 5",
+      "provider": "Anthropic",
+      "modelVersion": "5",
+      "effort": "ultracode",
+      "date": "2026-07-24",
+      "sourceRepo": "https://github.com/guitaripod/pokedex-opus-5-ultracode",
+      "liveUrl": "https://pokedex-opus-5-ultracode.guitaripod.workers.dev",
+      "platform": "Cloudflare Workers",
+      "metrics": {
+        "sourceLoc": 33239,
+        "sourceFiles": 149,
+        "sourceBytes": 1181103,
+        "dependencies": 6,
+        "devDependencies": 12
+      },
+      "stack": {
+        "framework": "react",
+        "language": "typescript",
+        "bundler": "vite",
+        "styling": "tailwind"
+      },
+      "dataStrategy": "prebuilt-static + edge-proxy",
+      "features": [
+        {
+          "id": "national-dex",
+          "grade": 3,
+          "evidence": "scripts/builders/pokemon.ts:275 iterates every pokemon.csv row with no slice/limit; generated public/data holds 1351 detail shards and a 1351-entry index spanning 1025 distinct speciesIds (exactly 1025 defaults), matching upstream CSV row counts 1:1. Runtime smoke confirms 1025/1025 species reachable by scrolling /pokedex, served from a positional-tuple index (1.44 MB brotli) with a virtualised grid."
+        },
+        {
+          "id": "search",
+          "grade": 3,
+          "evidence": "src/lib/search.ts:23-85 ranks a ~5.4k-row prebuilt corpus (build: scripts/builders/search.ts) with exact/prefix/word-start/subsequence tiers, kind weighting and #dex-number matching, plus accent folding; the dex grid has its own instant text filter (filterModel.ts) and every list page exposes search. Multi-entity coverage (pokemon/move/item/ability/location/type/nature) is genuinely beyond a name box."
+        },
+        {
+          "id": "type-filter",
+          "grade": 2,
+          "evidence": "Downgraded from 3 on adjudication: the auditor's read is confirmed. The whole matcher is filterModel.ts:372-376 (any/all/exact), an 18-chip row plus a 3-way Segmented at FilterRail.tsx:105-131, one Set-lookup validation (filterModel.ts:260,273) and a two-line accent (Pokedex.tsx:111-112). No negation, no per-type result counts, no dual-type presets, and TypeDetail never deep-links into a pre-filtered dex (only generation does, Home.tsx:184); selecting 3+ types in all/exact silently yields 0 with no hint. Complete and correct, no depth axis beyond baseline = 2."
+        },
+        {
+          "id": "generation-filter",
+          "grade": 2,
+          "evidence": "Downgraded from 3: multi-select is one line (filterModel.ts:400) over a 9-chip row (FilterRail.tsx:133-145) with a 1-9 parse guard. Confirmed correctness gap the original evidence missed — scripts/builders/pokemon.ts:296 stamps `generation` from the SPECIES row for every index entry including alternate forms, though the builder reads pokemon_forms.introduced_in_version_group_id at :395 for the detail page. Verified data-src/csv/pokemon_forms.csv: raichu-alola (pokemon_id 10100) is version group 17 (Gen 7) yet its index entry is generation 1, so /pokedex?g=7&forms=1 omits every Alolan/Galarian/Hisuian/Paldean/Mega form and ?g=1&forms=1 wrongly includes them. Correct data loaded and not used."
+        },
+        {
+          "id": "sort",
+          "grade": 2,
+          "evidence": "Downgraded from 3: breadth without depth. SORTS (filterModel.ts:110-129) is 14 one-line accessors over fields the index already carries and sortEntries (:433-451) is one comparator with a dex/id tiebreak; the UI is a Select plus a rotate-180 direction button (Pokedex.tsx:195-223). Confirmed the sorted metric is never surfaced — PokemonCard.tsx:134-141 renders only a sparkline and BST, and hides even those in compact density, so sorting by capture rate / base experience / hatch counter produces an order the user cannot verify. No secondary key, no sortable headers on the grid."
+        },
+        {
+          "id": "advanced-filter",
+          "grade": 3,
+          "evidence": "filterModel.ts is a 561-line filter engine: type mode, generations, evolution stage, growth rate, habitat, shape, colour, egg group, ability, regional pokédex membership, numeric ranges, and a trait list (mega/gmax/regional/legendary/mythical/baby/fully-evolved/favourite/caught) — all allow-listed on URL read (:262-290) and rendered by a persistent FilterRail plus a mobile FilterSheet with active-chip removal. This is the deepest filter surface in the field."
+        },
+        {
+          "id": "shareable-urls",
+          "grade": 3,
+          "evidence": "Every filter, sort, mode and range round-trips through the query string (filterModel.ts readIntList/readRange/serialise) with allow-listed parsing, and moves/items/machines carry their own URL codecs; team state also shares via link (src/components/team/share.ts:35-52 base64 tuple codec). Worker HTMLRewriter injects per-route OG metadata so shared links preview correctly (verified live)."
+        },
+        {
+          "id": "artwork",
+          "grade": 3,
+          "evidence": "src/lib/sprites.ts exposes six art sources (official artwork, HOME, animated Showdown, per-generation game sprites, Dream World, icons) plus a versionSprite path; Sprite components use ordered candidate lists with fallback (heroCandidates/thumbCandidates :144-148), art style is a persisted user setting (Settings.tsx:13), and SpritesTab.tsx renders a full per-generation sprite matrix. All media is proxied through the worker with path validation and immutable 1y caching (cf-cache-status HIT verified)."
+        },
+        {
+          "id": "shiny",
+          "grade": 3,
+          "evidence": "Shiny is threaded through every sprite helper as an option (sprites.ts:15-46) rather than bolted onto one view: shiny toggles exist on the detail hero, the sprite matrix renders shiny/back/female variants side by side (SpritesTab.tsx), and the setting propagates to cards, team slots, leaderboard rows and encounter lists."
+        },
+        {
+          "id": "cries",
+          "grade": 2,
+          "evidence": "Downgraded from 3 — two of the three depth claims are false in the source. scripts/builders/pokemon.ts:340 hardcodes `hasCry: true` and :523 hardcodes `cries: { latest: true }`; only `legacy` is derived, and by the heuristic `speciesId <= 649 && isDefault` (:47), not from the cry repo — so the 'No cry recorded' state at Hero.tsx:197-203 is unreachable. Playback state is not independent: Hero.tsx:190 uses one shared `failed` flag, so a legacy error disables the latest button too (:243 vs :254). cryUrl is referenced in exactly four places; CryStage.tsx:5 is seven hardcoded bar heights pulsed by CSS, not an analyser. Works correctly dex-wide (all form ids 10001-10326 return 200) = solid, not exceptional."
+        },
+        {
+          "id": "stats-viz",
+          "grade": 3,
+          "evidence": "StatsTab renders per-stat bars with min/neutral/max ranges derived from real formulas (game.ts:155-167 statRange pairs 0IV/0EV/0.9, 31/0/1.0, 31/252/1.1), a level/nature/IV/EV control surface, BST and percentile context; grid cards carry StatSparklines and /leaderboard adds cross-dex stat ranking. Numerics verified: Blissey 714 HP at L100/31/252, Garchomp 169 Spe at L50 +nature, Shedinja's base-1 HP guard fires on real data."
+        },
+        {
+          "id": "abilities",
+          "grade": 3,
+          "evidence": "373 ability detail shards with effect text, flavour text, generation, and a full 'learned by' roster; the dex filters by ability (filterModel.ts), the detail page distinguishes slots and hidden abilities, and abilities are load-bearing in logic — game.ts:93-133 re-types the defence profile per selected ability (Levitate, Wonder Guard as c>1?c:0, Dry Skin Fire ×1.25) and team/analysis.ts:148-149 rewrites team defence through it."
+        },
+        {
+          "id": "evolution",
+          "grade": 3,
+          "evidence": "scripts/lib/evolution.ts:231-254 builds a real recursive tree from childrenOf (not a first-path walk) and :194-203 walks to the topmost ancestor with a cycle guard so cross-chain roots resolve (Meltan 428 / Melmetal 429). Verified in the generated data: eevee 8-way, wurmple->silcoon/cascoon 2x2, tyrogue 3-way, nincada->ninjask+shedinja, applin->flapple/appletun/dipplin->hydrapple. describe() (:7-122) renders ~25 trigger kinds with every qualifier column (held item, beauty, affection, known move/type, time of day, location, rain, upside-down console, relative physical stats, party species/type, trade species). EvolutionTab.tsx:88-119 recurses per child so multi-branch and multi-condition both fan out."
+        },
+        {
+          "id": "learnsets",
+          "grade": 2,
+          "evidence": "Downgraded from 3: strong data, thin interaction layer. MovesTab.tsx:50-62 groups by version group newest-first with counts, :15-19 skips tutor-only spin-offs, :69-78 gives method chips with counts, :143-228 joins the move index, :86-114 resolves TM rows to real machine item names. But the tab shows one version group AND one method at a time and ui/DataTable.tsx has sort + a show-more limit and NO text filter, so Charizard's 909 machine rows are browsed 60 at a time with no way to find a move. Confirmed dedupe bug at MovesTab.tsx:106: a level-0 (evolution-learned) row is overwritten by a later non-zero level, so the shown level depends on row order for the 829 keys carrying both."
+        },
+        {
+          "id": "type-matchups",
+          "grade": 3,
+          "evidence": "game.ts:61-67 effectiveness() multiplies the full chart across defending types so 4x/¼x/0x fall out naturally, and defenseProfile (:77-90) buckets all 18 attackers classifying immunity before >1/<1. Chart is loaded from veekun type_efficacy (324 cells, 8 zeroes verified in the emitted meta.json); ability re-typing is applied on top. Spot-checks all correct (Ice vs Dragon/Flying 4, Ground vs Steel/Flying 0, Fairy->Steel 0.5, Steel->Fairy 2)."
+        },
+        {
+          "id": "breeding",
+          "grade": 2,
+          "evidence": "Downgraded from 3: verified as a static readout. ProfileBand.tsx:107-158 is egg-group chips, an aria-labelled gender bar with a genderless branch, and five KeyRows (cycles, modern steps, pre-Gen-VIII steps via game.ts:338, base happiness, gender differences) — nothing past the raw CSV columns. No egg-move parent list despite egg rows sitting in the learnset (method id 2), no compatibility check between two species, no Ditto/undiscovered handling, and the egg-group chips (:120-127) are plain spans even though the dex already filters by ?egg= (filterModel.ts:299,407). The original evidence also padded this with TrainingPanel (:161-228), which is training/yield, not breeding."
+        },
+        {
+          "id": "forms",
+          "grade": 2,
+          "evidence": "Downgraded from 3: one half is runtime-broken. scripts/builders/pokemon.ts:397 sets `spriteId: formId !== id && !isDefaultForm ? formId : id`, feeding a pokemon_forms.id into a sprite path keyed by pokemon.id (sprites.ts:15-40). Verified the id spaces diverge: pokemon_forms.csv id 10001 = unown-b, pokemon.csv id 10001 = deoxys-attack, and generated public/data/pokemon/201.json emits Unown B with spriteId 10001 — the image exists, so Sprite never falls back and the card silently shows the wrong Pokémon across all 235 non-default form rows. The per-condition version group is also fabricated: pokemon_form_conditions.csv has no version-group column (confirmed header) and :399 stamps the form's own introducedInVersionGroupId on every condition. Held at 2 only because the varieties path is correct and rich (FormsTab.tsx:46-98 per-variety types/stats/BST/tags off real pokemon ids) and mega/gmax/regional are first-class dex filters."
+        },
+        {
+          "id": "flavor-entries",
+          "grade": 2,
+          "evidence": "Downgraded from 3: dedupe and version chips are real (DexEntriesTab.tsx:11-19, 34-43) and the sidebar extras are real (regional numbers linked to /pokedexes/:id, Pal Park, Pokéathlon, game indices), but the dex text itself has no filter, no search, no generation grouping, no per-version colour, and is ordered only by raw version id. English-only by construction (builders/pokemon.ts:227 filters to language_id ENGLISH) in an app that renders a multi-language name rail elsewhere. Two confirmed rough edges: the header count is raw not deduped (DexEntriesTab.tsx:24 — Unown advertises 22 entries and renders 12 cards) and the adjacent description block is dead because builders/pokemon.ts:509 hardcodes description: null."
+        },
+        {
+          "id": "type-chart",
+          "grade": 3,
+          "evidence": "components/types/chart.ts:37 chartForGeneration replays type_efficacy_past in descending untilGeneration order so the earliest override wins last, and :86 typesForEra narrows the attacker set so Fairy is not counted against a Gen I chart — a historically correct, era-aware 18x18 matrix (TypeMatrix.tsx, 256 lines, keyboard navigable) rather than a static table. Pre-Gen-VI Ghost/Dark-vs-Steel 0.5 is stored as a past override and correctly not applied to modern generations."
+        },
+        {
+          "id": "compare",
+          "grade": 3,
+          "evidence": "src/pages/Compare.tsx (749 lines) puts multiple species side by side across stats with per-row winner highlighting, typing and defensive profiles, abilities, breeding/training numbers and sprites, with URL-persisted selection and searchable pickers."
+        },
+        {
+          "id": "team-builder",
+          "grade": 2,
+          "evidence": "Downgraded from 3: fails 3 of the 5 components the 3-anchor names, all verified. (a) src/lib/store.ts:50/84/129/159 persists exactly one unnamed `team: (TeamSlot|null)[]` — no name field, no team list, no slot manager. (b) No Showdown interop: every `showdown` hit in src/ is the animated sprite style; team/share.ts:103-124 emits a bespoke {format:'pokedex-ultracode-team'} JSON. (c) No damage preview: components/team/* never imports calculateDamage; analysis.ts:213-217 only counts moves by damage class. What exists is genuinely strong (252/510 EV caps at analysis.ts:118-127, ability-adjusted defence profile, offensive coverage, speed tiers, persistence across reload) — a solid 2."
+        },
+        {
+          "id": "damage-calc",
+          "grade": 3,
+          "evidence": "game.ts:229 reproduces the exact cartridge nesting floor(floor(floor(2L/5+2)*power*atk/def)/50)+2 and :232-244 iterates all 16 rolls applying targets/weather/crit/STAB/type/burn/screen with pokeRound (round-half-down) at the documented steps; calc/damage.ts:40-43 makes crits ignore attacker drops and defender boosts, :32-37 breaks screens on a crit, and :114-136 convolves the full roll distribution per hit for exact nHKO probabilities. Deviations found are sub-1% (item multipliers applied as final mods with decimal rather than 4096ths)."
+        },
+        {
+          "id": "moves-dex",
+          "grade": 3,
+          "evidence": "937 move shards with type/class/power/accuracy/PP/priority, effect and short-effect text, target, flags, per-generation past values, machine mapping and a full learned-by roster (LearnedBy.tsx); src/pages/Moves.tsx (525 lines) is a sortable DataTable over the whole set with its own URL-encoded filter codec (moves/filters.ts) for type, class, generation and numeric ranges."
+        },
+        {
+          "id": "minigame",
+          "grade": 3,
+          "evidence": "src/pages/WhosThat.tsx (517 lines) plus game/quiz.ts is a real game loop: silhouette reveal with difficulty-scoped species pools, cry playback as a hint, fuzzy answer matching, streak/score tracking persisted through the store with a guarded JSON.parse (quiz.ts:263-276), and a summary round."
+        },
+        {
+          "id": "command-palette",
+          "grade": 2,
+          "evidence": "Downgraded from 3: two runtime defects confirmed in source. (1) src/components/home/commandPalette.ts dispatches a synthetic ⌘K KeyboardEvent on `window`, but AppShell.tsx:29-36 eagerly evaluates `target.closest(...)` BEFORE the ⌘K branch at :38 — event.target is window, which has no .closest, so the home hero CTA and the 404 'Search the dex' button both throw an uncaught TypeError and the palette never opens (real ⌘K and the topbar button work). (2) scripts/builders/search.ts:22-41 hardcodes a stale PAGES table: /team-builder, /damage-calculator, /stats-leaderboard, /whos-that-pokemon and /evolution are absent from src/App.tsx:44-71 (real routes are /team, /calc/damage, /leaderboard, /play/whos-that; /evolution does not exist), so 5 of 18 'Go to' rows land on the 404. The entity ranking and focus trap are real, so not a 1."
+        },
+        {
+          "id": "favorites",
+          "grade": 2,
+          "evidence": "Downgraded from 3 — the justifying claim was false. The favourite TOGGLE exists in exactly two places: the detail-page ActionBar (PokemonDetail.tsx:226-253) and the Favourites page's own grid badge (Favorites.tsx:228). Browse cards render a non-interactive Pip only (PokemonCard.tsx:81-85) and VirtualPokemonGrid.tsx:118 mounts PokemonCard with no badge prop, so nothing can be starred from /pokedex; the regional dex views expose only CaughtToggle. Also Favorites.tsx:24 hardcodes SPECIES_TOTAL = 1025 instead of dex.meta.counts.species, and Settings.tsx:455-456 divides the form-inclusive caught list by the species count so Coverage can exceed 100% and disagrees with the Favourites completion. Persisted favourites/caught, per-generation bars, type distribution and favourite/caught dex traits remain a solid 2."
+        },
+        {
+          "id": "theming",
+          "grade": 2,
+          "evidence": "Downgraded from 3: two tuned palettes with glow/plate tokens (styles/index.css:49-82), dark/light/system with a live prefers-color-scheme listener and theme-color sync, 21 type + 6 stat tokens and per-page --accent are all real, but three defects keep it off best-in-class. (1) No pre-paint bootstrap anywhere — index.html:2,6 hardcodes class=\"dark\" and theme-color #0b0e14 and applyTheme only runs when main.tsx executes, so light/system-light users flash dark on every load. (2) AppShell.tsx:251 toggles binary `theme === 'dark' ? 'light' : 'dark'`, so the top bar cannot reach 'system' and one click from system-on-dark-OS is a visual no-op. (3) Controls.tsx:5 hardcodes a near-black on-accent foreground with no luminance handling, giving ~3.3:1 for Dragon accents on solid buttons in both themes."
+        },
+        {
+          "id": "keyboard-nav",
+          "grade": 3,
+          "evidence": "Kept at 3 despite the audit's dialog finding. Genuine breadth: a real skip-to-content link (AppShell.tsx:63-65), typing-aware global ⌘K and / shortcuts, arrow-key roving in the palette, Tabs, TypeMatrix, SearchableSelect, MovePicker, PokemonPicker and GuessBox, and a proper useDialogFocus hook (a11y.ts:26-60) with Tab cycling, focus restore and scroll lock. The confirmed gap — team/PickerDialog.tsx:51 and team/TeamShareDialog.tsx:22 hand-roll scroll lock + focus restore without the Tab trap — is one nameable defect against a surface that is otherwise best-in-class, and does not outweigh it."
+        },
+        {
+          "id": "responsive",
+          "grade": 3,
+          "evidence": "Distinct mobile architecture rather than reflowed desktop: a drawer nav that auto-closes on navigation, a dedicated FilterSheet dialog replacing the persistent FilterRail, a virtualised grid that recomputes its column count from the container with a floor of 2 (VirtualPokemonGrid.tsx:63), comfortable/compact density modes, and viewport-fit=cover with safe-area handling. Runtime smoke reports no layout errors."
+        },
+        {
+          "id": "export",
+          "grade": 2,
+          "evidence": "Settings.tsx:67-73 streams collection state to a JSON file download and the import path parses through a narrowing validator rather than a bare JSON.parse; team state exports as JSON and as a base64 share link (team/share.ts:35-52,103-124). Scope stops at own-format JSON — no CSV, no Showdown text, no clipboard-friendly interchange with any other tool — so it is useful and safe but not a depth feature."
+        }
+      ],
+      "scores": {
+        "codeQuality": 9,
+        "architecture": 9.5,
+        "uxDesign": 9,
+        "robustness": 9
+      },
+      "assessment": {
+        "summary": "An exceptionally well-engineered static Pokédex: 32,737 lines across 146 files with zero `any`, zero suppression comments and zero TODO markers, strict TS gating the build, a pure-function domain layer (types, damage, stats, evolution, coverage, filtering) that never imports React, and a dependency-free build pipeline that resolves 638k learnset rows and 117k encounter rows into 6,032 static shards in 2 seconds. The core logic is not decorative — the type chart is the real veekun efficacy table with era-aware past overrides, the damage engine reproduces the cartridge's exact floor/pokeRound nesting and convolves full roll distributions for nHKO odds, the stat formulas handle both classic traps (Shedinja base-1 HP, nature applied after the floor), and evolution is a genuine recursive branching tree with cross-chain root resolution. Coverage is complete: 1025/1025 species reachable at runtime with no console errors. The adjudication pass sustained most of the auditor's downgrades because the *feature* tier has a consistent pattern the axis scores hide — a large number of surfaces are correct, complete and one step short of the depth the top anchor demands (filters that filter but never count or negate, sorts whose metric is never displayed, breeding and dex text that stop at the raw CSV columns, a team builder missing named teams, Showdown interop and damage preview). Three defects are outright bugs rather than shallowness: alternate-form sprites are keyed off the wrong id space so every one of 235 non-default form rows silently renders a different Pokémon; index-entry generation comes from the species row so generation filtering is wrong for all regional and Mega forms even though the builder already reads the correct column for the detail page; and the command palette's landing-page entry point throws an uncaught TypeError while 5 of its 18 page results 404 against a stale hardcoded route table. Still the strongest submission in the field on engineering substance — the deductions are about the last mile, not the foundation.",
+        "strengths": [
+          "Domain logic is reference-grade: exact cartridge damage nesting with pokeRound and full 16-roll KO-chance convolution, correct HP/stat formulas with the Shedinja and nature-order traps handled, and a defensive profile that re-types through the selected ability.",
+          "Data pipeline is dependency-free and fast — `node --experimental-strip-types scripts/build-data.ts` runs with no node_modules at all, emitting 6,032 files / 41.3 MB in 2.0s from a shared quoted-CSV parser that handles embedded newlines and escapes.",
+          "Zero runtime data API: the only fetch() in the client is /data/*, backed by a documented positional-tuple wire contract, an in-flight-deduping memory cache, adjacent-neighbour prefetch, and verified production cache headers (7d + 30d SWR on data, immutable 1y on media, HTMLRewriter OG injection on the shell, 33ms TTFB).",
+          "Typing and layering discipline: zero `any`, zero ts-ignore/eslint-disable across 146 files, src/lib never imports src/components, all 812 imports resolve, and lazyWithRetry handles the stale-shell chunk-404 white screen almost nobody anticipates.",
+          "Genuine feature breadth with real depth in the advanced dex filter (13 dimensions plus a trait list, all URL-allow-listed), the era-aware type chart, evolution branching, and the damage calculator."
+        ],
+        "weaknesses": [
+          "Alternate-form sprites use pokemon_forms.id in a path keyed by pokemon.id (builders/pokemon.ts:397) — Unown B renders Deoxys-Attack, and because the image exists no fallback fires; affects all 235 non-default form rows across 35 species.",
+          "Index-entry generation is taken from the species row (builders/pokemon.ts:296) while the correct pokemon_forms version group is read for the detail page, so generation filtering misplaces every regional variant and Mega.",
+          "The home hero CTA and 404 search button open the palette by dispatching a synthetic ⌘K on window, which throws in AppShell's keydown handler before reaching the ⌘K branch; the palette's page corpus is a stale hardcoded duplicate of the router with 5 dead routes.",
+          "Worker API/OG layer has a live, publicly reachable 500: COLLECTIONS[segments[0]] is an unguarded prototype-chain lookup and decodeURIComponent is called raw despite a safeDecode helper existing, so /api/constructor and /pokemon/% return uncaught exceptions.",
+          "public/sw.js hardcodes VERSION='pokedex-v1' with no build stamping while caching /data/* cacheFirst without revalidation, so the activate-purge can never fire and an installed client can serve last-deploy JSON indefinitely; package.json `build` also omits the data step while public/data is gitignored, and no builder asserts a species floor.",
+          "The render layer is not decomposed to the standard of the logic layer — 14 top-level functions exceed 300 lines (DamageCalculator ~687 with a ~455-line JSX return) — and small contract drift has already started: PokedexFile declared twice, DatasetStats three times, three parallel URL-state codecs, a bypassed focus-trap hook, 9 dead exports.",
+          "A broad band of features stop exactly at 'correct and complete': no per-type counts or negation in the type filter, sorted metrics never displayed on cards, breeding as a static CSV readout with non-clickable egg groups, English-only dex text with a non-deduped header count, no move search inside 909-row learnsets, favourites unstarrable from the browse grid, and a single unnamed team with no Showdown interop or damage preview."
+        ],
+        "standout": "The build pipeline: `node --experimental-strip-types scripts/build-data.ts` resolves 638,321 learnset rows and 117,113 encounter rows into 6,032 static shards in 2.0 seconds with no node_modules installed at all — the builders import only node:fs and node:path — and the resulting positional-tuple wire format is declared once in src/types/data.ts and shared by both the generator and the app, so the entire 1,351-Pokémon dex ships as immutable CDN JSON with zero runtime API."
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "detailOk": true,
+        "verdict": "clean",
+        "checkedAt": "2026-07-25",
+        "dexReach": 1025,
+        "dexRoute": "/pokedex"
+      },
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": true,
+        "verified": "harness (scripts/run-benchmark.mjs)"
+      },
+      "grading": {
+        "gradedBy": "Claude Code — Opus 5 (high), three-pass (grade + adversarial verify + independent 10-agent audit adjudication)",
+        "gradedOn": "2026-07-25",
+        "rubricVersion": 1
+      },
+      "dataNote": "55 MB of PokéAPI data (public/data, 6032 files) and 41 MB of the upstream PokéAPI CSV dump (data-src, 180 files) stripped from the vendored source — it is data, not model-written code; regenerate with `npm run data` (the original repo keeps the CSV dump)."
     }
   ]
 }
