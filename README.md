@@ -9,7 +9,7 @@
 Only the trailing name token changes per run (it encodes the model + effort). Read the full framing in **[THE_BRIEF.md](THE_BRIEF.md)** and how submissions are scored in **[RUBRIC.md](RUBRIC.md)**.
 
 - **9 submissions** across 4 named providers (plus 1 codename entry), graded on **30 Pokédex features** by depth plus four craft axes.
-- Every submission ships a **live Cloudflare deployment** (click any demo link) and its **vendored source** under [`submissions/`](submissions/).
+- **8 of 9** submissions still serve a **live Cloudflare deployment** (click any demo link; the one that does not is noted on its scorecard) and every one has its **vendored source** under [`submissions/`](submissions/).
 - The tables below are generated from [`submissions.json`](submissions.json) — the single source of truth.
 
 ## 🏆 Leaderboard
