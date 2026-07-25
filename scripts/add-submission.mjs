@@ -49,7 +49,7 @@ console.log(`→ vendoring source-only into submissions/${id}`);
 rmSync(dest, { recursive: true, force: true });
 const EXCLUDES = [
   ".git", "node_modules", "dist", "build", ".wrangler",
-  ".cache", ".parcel-cache", ".DS_Store",
+  ".cache", ".parcel-cache", ".DS_Store", "*.tsbuildinfo", "*.log",
 ]
   .map((e) => `--exclude=${e}`)
   .join(" ");
