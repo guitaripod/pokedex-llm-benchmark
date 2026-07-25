@@ -21,7 +21,11 @@ const repoUrl = positional[0];
 if (!repoUrl || !opts.model) {
   console.error(
     "Usage: node scripts/add-submission.mjs <github-repo-url> --model <Name> [--effort <level>]\n" +
-      "       [--id <slug>] [--provider <p>] [--version <v>] [--live <url>] [--platform <p>] [--date <YYYY-MM-DD>]",
+      "       [--id <slug>] [--provider <p>] [--version <v>] [--live <url>] [--platform <p>] [--date <YYYY-MM-DD>]\n" +
+      "       [--verified <text>] [--not-self-provisioned]\n\n" +
+      "Provenance defaults to a one-shot, autonomous, self-provisioned run verified by the harness;\n" +
+      "override with --verified (e.g. \"owner-confirmed\") and --not-self-provisioned when the model\n" +
+      "deployed but did not create its own repo.",
   );
   process.exit(1);
 }
@@ -138,6 +142,12 @@ const entry = {
   ...(dataNote ? { dataNote } : {}),
   ...analysis,
   dataStrategy: detectDataStrategy(dest),
+  provenance: {
+    oneShot: true,
+    autonomous: true,
+    selfProvisioned: !opts["not-self-provisioned"],
+    verified: opts.verified || "harness (scripts/run-benchmark.mjs)",
+  },
   features: [],
   scores: null,
   assessment: null,

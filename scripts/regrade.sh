@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
-# Drives one submission through grade passes 1 and 2 with the pinned prompts.
+# Drives one submission through the full v2 grading flow with the pinned prompts.
 # Usage: scripts/regrade.sh <submission-id> [stage]
-#   stage 12  (default) grade + adversarial verify -> /tmp/rg-<id>-p2.json
-#   stage 3   adjudicate /tmp/audit-<id>.json against p2 -> /tmp/rg-<id>-final.json
+#   all       (default) every stage below, end to end
+#   12        grade + adversarial verify        -> /tmp/rg-<id>-p2.json
+#   audit     ten independent auditors          -> /tmp/audit-<id>.json
+#   3         judge adjudicates the disputes    -> /tmp/rg-<id>-final.json
+# Merge the result with:
+#   node scripts/grade.mjs --submission <id> --merge /tmp/rg-<id>-final.json --by "<judge>"
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ID=$1
-STAGE=${2:-12}
+STAGE=${2:-all}
 MODEL=claude-opus-5
 EFFORT=high
 
@@ -30,7 +34,7 @@ judge() {
     --output-format json > "$2" 2>"/tmp/rg-$ID.err"
 }
 
-if [ "$STAGE" = "12" ]; then
+if [ "$STAGE" = "12" ] || [ "$STAGE" = "all" ]; then
   node scripts/grade.mjs --submission "$ID" >/dev/null
   judge "grading/prompts/$ID.md" "/tmp/rg-$ID-p1.raw.json"
   extract "/tmp/rg-$ID-p1.raw.json" "/tmp/rg-$ID-p1.json" pass1
@@ -38,7 +42,13 @@ if [ "$STAGE" = "12" ]; then
   node scripts/grade.mjs --submission "$ID" --verify "/tmp/rg-$ID-p1.json" >/dev/null
   judge "grading/prompts/$ID-verify.md" "/tmp/rg-$ID-p2.raw.json"
   extract "/tmp/rg-$ID-p2.raw.json" "/tmp/rg-$ID-p2.json" pass2
-else
+fi
+
+if [ "$STAGE" = "audit" ] || [ "$STAGE" = "all" ]; then
+  node scripts/audit.mjs --submission "$ID" --entry "/tmp/rg-$ID-p2.json" --model $MODEL --out "/tmp/audit-$ID.json"
+fi
+
+if [ "$STAGE" = "3" ] || [ "$STAGE" = "all" ]; then
   node scripts/grade.mjs --submission "$ID" --adjudicate "/tmp/audit-$ID.json" --entry "/tmp/rg-$ID-p2.json" >/dev/null
   judge "grading/prompts/$ID-adjudicate.md" "/tmp/rg-$ID-p3.raw.json"
   extract "/tmp/rg-$ID-p3.raw.json" "/tmp/rg-$ID-final.json" final

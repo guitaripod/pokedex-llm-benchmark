@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Audit output",
+  "description": "What one auditor returns for its scope (pass 3 of the v2 flow), and — merged across all scopes — what grade.mjs --adjudicate consumes. See grading/AUDIT.md.",
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "description": "Feature-scope auditors: one entry per feature id in scope. Logic-scope auditors reuse this shape with id set to the check name and proposedGrade as a 0-3 correctness rating.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "originalGrade", "proposedGrade", "verdict", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "originalGrade": { "type": "integer" },
+          "proposedGrade": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "verdict": { "type": "string", "enum": ["upheld", "downgrade", "upgrade"] },
+          "reason": {
+            "type": "string",
+            "description": "file:line evidence; for a downgrade, exactly what is missing against the anchor"
+          }
+        }
+      }
+    },
+    "axis": {
+      "type": "string",
+      "description": "Axis-scope auditors: the axis being re-scored",
+      "enum": ["codeQuality", "architecture", "uxDesign", "robustness"]
+    },
+    "originalScore": { "type": "number" },
+    "proposedScore": { "type": "number", "minimum": 0, "maximum": 10 },
+    "reason": { "type": "string" }
+  },
+  "oneOf": [
+    { "required": ["items"] },
+    { "required": ["axis", "originalScore", "proposedScore", "reason"] }
+  ],
+  "definitions": {
+    "merged": {
+      "description": "The merged audit file: scripts/audit.mjs writes this, scripts/grade.mjs --adjudicate reads it.",
+      "type": "object",
+      "required": ["contested", "upheld", "axes", "logic"],
+      "properties": {
+        "contested": { "type": "array", "items": { "$ref": "#/properties/items/items" } },
+        "upheld": { "type": "array", "items": { "type": "string" } },
+        "axes": { "type": "array", "items": { "type": "object" } },
+        "logic": { "type": "array", "items": { "$ref": "#/properties/items/items" } }
+      }
+    }
+  }
+}

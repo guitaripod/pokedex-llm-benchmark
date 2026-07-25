@@ -44,14 +44,22 @@ Scoring is pinned in [`grading/PROMPT.md`](../grading/PROMPT.md) + [`grading/sch
 **Claude Code session (recommended — how the current set was scored).** Richest and adversarially verified:
 
 ```bash
+scripts/regrade.sh <id>            # all three passes end to end, then merge the result:
+node scripts/grade.mjs --submission <id> --merge /tmp/rg-<id>-final.json --by "<judge>"
+```
+
+`regrade.sh` drives the pinned prompts; run a single stage with `regrade.sh <id> 12|audit|3`. What it runs, if you want the steps by hand:
+
+```bash
 node scripts/grade.mjs --submission <id>                              # 1. grade      → grading/prompts/<id>.md
 node scripts/grade.mjs --submission <id> --verify pass1.json          # 2. calibrate  → <id>-verify.md
+node scripts/audit.mjs --submission <id> --entry pass2.json           # 3. audit      → <id>-audit.json
 node scripts/grade.mjs --submission <id> --adjudicate audit.json \
-                       --entry pass2.json                             # 3. adjudicate → <id>-adjudicate.md
+                       --entry pass2.json                             # 4. adjudicate → <id>-adjudicate.md
 node scripts/grade.mjs --submission <id> --merge final.json           # merge the result
 ```
 
-Hand each prompt to the judge in turn and feed its JSON to the next step. Pass 2 alone is not enough — on both Opus 5 entries it returned pass 1 nearly unchanged. Pass 3 takes an **audit** file (`{contested, axes, logic}`: independent agents that read the source and try to refute each grade) and makes the judge rule on every dispute.
+Hand each prompt to the judge in turn and feed its JSON to the next step. **Pass 2 alone is not enough** — on both Opus 5 entries it returned pass 1 nearly unchanged, once leaving 22 of 30 features at grade `3`. The audit ([`grading/AUDIT.md`](../grading/AUDIT.md)) is what fixes that: `audit.mjs` runs ten agents that are blind to each other — five feature groups, four craft axes, one core-logic correctness check — each told to *refute* its slice against the source and the live site, and the judge then rules on every dispute. If some scopes die mid-run (session limits, API hiccups), retry just those with `audit.mjs … --only axis:` and they merge into the existing audit file.
 
 **Autonomous via opencode (two-pass).** Fully hands-off — grades, then adversarially verifies, with a judge model:
 
