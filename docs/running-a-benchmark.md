@@ -2,7 +2,7 @@
 
 The benchmark is a loop: **run → ingest → grade → regenerate.** A new model runs the same one-shot [brief](../THE_BRIEF.md), builds and deploys its own Pokédex fully autonomously, then gets scored and folded into the leaderboard.
 
-> **TL;DR — the easy way.** Open a Claude Code session in this repo and say: *"benchmark `<model-id>`"* (list opencode ids with `opencode models`, e.g. `opencode/deepseek-v4-flash-free`; Anthropic models run on Claude Code, e.g. `claude-opus-5`). **The agent will ask you which variant/effort to run** (model default, `high`, `max`, `ultracode`, … — or two efforts to compare, like the Fable 5 low-vs-ultracode pair) before it launches, since effort materially changes the result. It then runs every step below — the autonomous build, ingest, two-pass grade, regenerate, and commit. The manual four steps follow for when you're not in a session.
+> **TL;DR — the easy way.** Open a Claude Code session in this repo and say: *"benchmark `<model-id>`"* (list opencode ids with `opencode models`, e.g. `opencode/deepseek-v4-flash-free`; Anthropic models run on Claude Code, e.g. `claude-opus-5`). **The agent will ask you which variant/effort to run** (model default, `high`, `max`, `ultracode`, … — or two efforts to compare, like the Fable 5 low-vs-ultracode pair) before it launches, since effort materially changes the result. It then runs every step below — the autonomous build, ingest, three-pass grade, regenerate, and commit. The manual four steps follow for when you're not in a session.
 
 ## 1. Run — the model builds it
 
@@ -64,11 +64,17 @@ node scripts/grade.mjs --submission <id> --model <judge-model>
 ## 4. Regenerate and validate
 
 ```bash
+node scripts/smoke.mjs --submission <id>   # runtime signal from the live deployment
+node scripts/verify-live.mjs               # does each live URL still serve its vendored source?
 node scripts/compute-metrics.mjs   # refresh objective metrics
 node scripts/gen-entries.mjs       # per-submission ENTRY.md scorecards
 node scripts/gen-readme.mjs        # rebuild leaderboard + depth matrix
 node scripts/validate.mjs          # must pass before committing
 ```
+
+Run `verify-live.mjs` before trusting any runtime-derived judgment: a deployment that has drifted to a different codebase (as `grok`'s had) makes every runtime signal for that entry meaningless. When it flags one, either fix `liveUrl` or measure a local build with `smoke.mjs --submission <id> --url http://localhost:PORT`, which stamps `runtime.measuredOn`.
+
+For a whole-board re-grade after a `rubricVersion` bump, [`scripts/regrade.sh`](../scripts/regrade.sh) drives one submission through passes 1–2 (`regrade.sh <id>`) and, once you have an audit, the adjudication (`regrade.sh <id> 3`).
 
 `validate.mjs` fails if the manifest is malformed or `README.md` is stale, so CI stays honest. Commit the vendored source, the manifest change, the generated `ENTRY.md`, and the regenerated `README.md` together.
 

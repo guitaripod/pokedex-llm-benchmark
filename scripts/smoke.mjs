@@ -18,13 +18,21 @@ const targets = opts.all
   : manifest.submissions.filter((s) => s.id === opts.submission);
 
 if (!targets.length) {
-  console.error("Usage: node scripts/smoke.mjs (--submission <id> | --all)\n  Loads live deployments headless and records an objective `runtime` signal per submission.");
+  console.error(
+    "Usage: node scripts/smoke.mjs (--submission <id> | --all) [--url <override>]\n" +
+      "  Loads live deployments headless and records an objective `runtime` signal per submission.\n" +
+      "  --url measures a different origin (a local build) when the recorded deployment no longer\n" +
+      "  serves the vendored source — see scripts/verify-live.mjs; the record is stamped `measuredOn`.",
+  );
+  process.exit(1);
+}
+if (typeof opts.url === "string" && targets.length !== 1) {
+  console.error("! --url applies to a single --submission");
   process.exit(1);
 }
 
 const today = new Date().toISOString().slice(0, 10);
 
-/// Load one live deployment, capturing uncaught JS exceptions, console errors,
 /// Scroll a browse page to exhaustion and count the distinct species it will
 /// actually hand a user. Separates a working feed (paged, infinite or
 /// virtualized — all reach ~1025) from one that silently stops early.
@@ -120,9 +128,10 @@ function hasPager(page) {
     .catch(() => false);
 }
 
+/// Load one deployment, capturing uncaught JS exceptions, console errors,
 /// whether real content rendered, and whether an in-app detail route navigates
 /// cleanly. Returns the objective `runtime` record stored in the manifest.
-async function smoke(browser, sub) {
+async function smoke(browser, sub, origin) {
   const page = await browser.newPage();
   let consoleErrors = 0;
   let pageErrors = 0;
@@ -131,7 +140,7 @@ async function smoke(browser, sub) {
 
   const rec = { loadOk: false, contentOk: false, consoleErrors: 0, pageErrors: 0, detailOk: false, verdict: "broken", checkedAt: today };
   try {
-    const resp = await page.goto(sub.liveUrl, { waitUntil: "networkidle", timeout: 45000 }).catch(() => null);
+    const resp = await page.goto(origin, { waitUntil: "networkidle", timeout: 45000 }).catch(() => null);
     rec.loadOk = !!resp && resp.status() < 400;
     await page.waitForTimeout(2500);
     const text = (await page.evaluate(() => document.body?.innerText || "").catch(() => "")).trim();
@@ -147,7 +156,7 @@ async function smoke(browser, sub) {
       .catch(() => null);
     if (href) {
       const before = pageErrors;
-      await page.goto(new URL(href, sub.liveUrl).href, { waitUntil: "networkidle", timeout: 30000 }).catch(() => {});
+      await page.goto(new URL(href, origin).href, { waitUntil: "networkidle", timeout: 30000 }).catch(() => {});
       await page.waitForTimeout(2000);
       const dtext = (await page.evaluate(() => document.body?.innerText || "").catch(() => "")).trim();
       rec.detailOk = pageErrors === before && dtext.length > 100;
@@ -155,7 +164,7 @@ async function smoke(browser, sub) {
       rec.detailOk = rec.contentOk;
     }
 
-    const dex = await measureDexReach(page, sub.liveUrl);
+    const dex = await measureDexReach(page, origin);
     rec.dexReach = dex.reach || null;
     rec.dexRoute = dex.reach ? dex.route : null;
     if (dex.reach && dex.reach < 1025) rec.dexPager = dex.pager;
@@ -173,8 +182,10 @@ async function smoke(browser, sub) {
 
 const browser = await chromium.launch({ headless: true });
 for (const sub of targets) {
-  process.stdout.write(`▶ ${sub.id.padEnd(20)} ${sub.liveUrl} … `);
-  const rec = await smoke(browser, sub);
+  const origin = typeof opts.url === "string" ? opts.url : sub.liveUrl;
+  process.stdout.write(`▶ ${sub.id.padEnd(20)} ${origin} … `);
+  const rec = await smoke(browser, sub, origin);
+  if (origin !== sub.liveUrl) rec.measuredOn = `local build of the vendored source (${origin}) — the recorded deployment does not serve this source`;
   sub.runtime = rec;
   console.log(
     `${rec.verdict.toUpperCase()} (load=${rec.loadOk} content=${rec.contentOk} console=${rec.consoleErrors} jsErr=${rec.pageErrors} detail=${rec.detailOk} dexReach=${rec.dexReach ?? "?"}@${rec.dexRoute ?? "?"})`,

@@ -49,9 +49,19 @@ test("gradeOf defaults missing feature to 0", () => {
   assert.equal(gradeOf({ features: [{ id: "search", grade: 3 }] }, "search"), 3);
 });
 
-test("real manifest: Fable-5-ultracode benches 90.0", () => {
+test("real manifest: a real entry's bench matches the formula recomputed from its own grades", () => {
   const sub = manifest.submissions.find((s) => s.id === "fable-5-ultracode");
-  assert.ok(Math.abs(bench(sub, checklist) - 90.0) < 0.05);
+  const depth = sub.features.reduce((a, f) => a + f.grade, 0);
+  const axes = Object.values(sub.scores).reduce((a, v) => a + v, 0) / 4;
+  assert.ok(Math.abs(bench(sub, checklist) - (0.6 * (depth / 90) * 100 + 0.4 * axes * 10)) < 0.05);
+});
+
+test("real manifest: every scored submission is on the current rubric version", () => {
+  const config = JSON.parse(readFileSync(join(ROOT, "grading", "config.json"), "utf8"));
+  for (const s of manifest.submissions) {
+    if (!isScored(s)) continue;
+    assert.equal(s.grading?.rubricVersion, config.rubricVersion, `${s.id} is on a stale rubric version`);
+  }
 });
 
 test("real manifest: every scored submission's bench is 0-100 and grades are 0-3", () => {

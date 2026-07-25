@@ -2,52 +2,59 @@
 
 # Grok
 
-> A compact (~2,800 LOC) client-side React 19 + TypeScript + Tailwind 4 Pokédex that fetches live from PokeAPI with progressive batch loading and a hand-rolled virtualized grid. It is cleanly organized and visually polished, with a genuinely deep Team Lab (its standout), but is undermined by a broken generation filter, filters that halt data loading, and a reachable whole-app crash.
+> A handsome, feature-broad React 19 + Tailwind Pokédex whose at-rest desktop surface is genuinely well-crafted — authored animation curves, a hand-built CSS pokeball, correct stat bars and radar, skeletons matching real card geometry, toasts and a working error/retry state — sitting on top of a live-API data layer and several load-bearing defects. Adjudicating the audit: I accept the shareable-urls downgrade (the params do round-trip, but useUrlState.ts:67 hands App.tsx:56-67 a new `update` every render against a setState that always allocates, an unconditional render loop; and shared /?gen= and /?types= links render nothing because hydration never triggers data acquisition) and the responsive downgrade (the header row at App.tsx:342 and the Team Lab toolbar at TeamLab.tsx:134 neither wrap nor scroll below ~400px, and the Team Lab overlay has no backdrop click and no reachable close button on a phone). On the axes I accept architecture 4 over 5 — there is no prebuild of any kind, two full detail requests per grid card whose payloads are then sliced to 8/12 moves, a per-batch list call whose results are discarded, a Workbox CacheFirst cache sized at 500 entries against ~2,068 URLs with eviction anti-correlated to the access pattern, and no image caching — and robustness 3.5 over 4, because the 4.5 anchor's two conditions are met exactly (filters halt loading via App.tsx:280; dual-type matchups are not merely incomplete but wrong) and the submission adds a generation filter that renders ~0, a whole-app ErrorBoundary crash reachable from the evolution strip (App.tsx:799 stub → getSprite's unguarded `p.sprites.other`), and no creditable deploy since the recorded live URL serves a different application. uxDesign lands at 5.5: polished at rest, wrong in motion (rowHeight 170 vs a 184–211px card), broken chrome on phones, and mouse-only.
 
 | | |
 |---|---|
-| **Benchmark score** | **53.2 / 100** |
+| **Benchmark score** | **41.7 / 100** |
 | **Model** | Grok (xAI, Q3-2026 build) |
 | **Effort** | default |
 | **Built** | 2026-07-01 |
-| **Live** | <https://pokedex-a7l.pages.dev> |
+| **Live** | — |
 | **Source repo** | <https://github.com/guitaripod/pokedex> |
 | **Platform** | Cloudflare Pages |
 | **Provenance** | one-shot · autonomous · self-provisioned · verified: owner-confirmed |
-| **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
+| **Graded** | Claude Code — Opus 5 (high), three-pass (grade + adversarial verify + independent 10-agent audit adjudication) · 2026-07-25 · rubric v2 |
 | **Stack** | react · typescript · vite · tailwind |
 | **Data strategy** | live-api |
 | **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ · dex reach 1025/1025 by scrolling (headless, 2026-07-25) |
 | **Source** | 3,104 LOC · 24 files · 7+8 deps |
-| **Feature depth** | 43 / 90 (16/30 features solid or better) |
+| **Feature depth** | 37 / 90 (11/30 features solid or better) |
+
+> ⚙️ **Run note:** The Cloudflare Pages project recorded for this run (pokedex-a7l.pages.dev) does not serve this submission: it serves a different, vanilla-JS app, and none of its deployed commits (99d1032, 7b8ce69, fcff7f1) exist in the submission repo. Caught by scripts/verify-live.mjs. The vendored React/Vite source is the model output of record; its runtime signal was measured against a local production build of that source instead.
 
 ## Scorecard
 
 | Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 6.5 | 6 | 7.5 | 4.5 |
+| 4 | 4 | 5.5 | 3.5 |
 
 _Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Team Lab is exceptionally broad: multiple persistent named teams, Showdown import/export, type-based suggestions, coverage analysis, PNG team image, and an interactive damage-calc battle preview with sliders
-- Custom SVG stat radar plus animated stat bars (dual visualization), and a from-scratch ResizeObserver-driven virtualized grid
-- Clean separation into hooks (usePokedexData/useFavorites/useTeams/useUrlState), lib (damage/analysis/showdown/export), and components; in-session Map cache
-- Polished UX: framer-motion transitions, skeleton loaders, mobile bottom-sheet modal, sonner toasts, type-colored badges, favorites + caught/shiny tracking
+- Stat visualisation is best-in-class for this field: correct /255 normalisation, a correctly-ordered clamped radar, and authored overshoot easing.
+- Real visual craft that does not read as templated — consistent radii and tracking, a hand-built CSS pokeball, tabular numerals, a coherent dark palette, skeletons whose geometry matches the real cards.
+- Breadth of surfaces: Team Lab with multiple persisted teams, Showdown import/export, PNG card and team export, compare, caught/shiny collection tracking, favourites.
+- The type chart in lib/damage.ts is a complete and flawless 18x18 Gen 6+ table with a correct dual-type product including immunities.
+- Error-handling scaffolding is real: every fetch is try/catch-and-return-null, loadInitial surfaces a user-visible error with a working Retry, an ErrorBoundary wraps the app, and the unfiltered browse path genuinely converges to all 1025 species.
 
 ## Weaknesses
 
-- Generation filter is broken: ensureDataForGen loads only up to a gen's first id and canShowLoadMore requires gen==='all', so gens 2-9 show ~1 Pokémon and offer no way to load the rest (the 'Load more to reveal this generation' hint points to a button that does not exist in gen view)
-- Applying any search or type/advanced filter sets canShowLoadMore=false, halting infinite loading — so filters only ever operate on the already-loaded subset
-- Clicking an evolution stage that is not yet loaded opens the modal on a bare {id,name} stub; getSprite dereferences stub.sprites without guarding, throwing and tripping the ErrorBoundary that replaces the ENTIRE app
-- Correctness gaps: dual-type defensive matchups use the primary type only; evolution branches are flattened into a false linear chain; Showdown export hardcodes EVs/nature for every Pokémon
-- Dead architecture/code: AppStateContext/AppStateProvider wrap the app but are never consumed (App reimplements caught/shiny/compare); analysis.ts ships unused computeTeamCoverage/getTypeEffectiveness; scattered any/as any; inline comments
-- Abilities (names only), learnsets (truncated sample), and flavor (single entry) are shallow
+- useUrlState's unmemoized `update` plus App's effect dependency on it forms a permanent render/replaceState loop that starves the deferred search.
+- Every filter (search, type, generation) disables both the infinite-scroll observer and the load-more button, freezing the dex at whatever subset happened to be loaded with no way out but clearing the filter.
+- ensureDataForGen loads only up to a generation's FIRST id, so the generation filter renders essentially nothing.
+- The defensive matchup panel and team coverage use the primary type only and print raw damage_relations, so they state falsehoods (Charizard 'weak to ground') while a correct dual-type calculator sits unused in the same repo.
+- The evolution chain is flattened depth-first into one linear strip, inventing evolutions for every branching family (Eevee, Wurmple, Tyrogue).
+- Clicking an unloaded stage in that strip hands openModal a two-field stub and getSprite dereferences `p.sprites.other` unguarded — a whole-app ErrorBoundary crash that React swallows, so smoke tests report zero exceptions.
+- Phone layout: the header and the Team Lab toolbar overflow and overlap below ~400px, and Team Lab has no backdrop dismiss and no on-screen close button there.
+- Live-API data strategy with no prebuild, no persistence, no name index, no concurrency cap or retry: ~2,068 requests and ~18MB gzip of JSON plus ~120MB of uncached artwork, most of it discarded on arrival.
+- Dead and rotting code: AppStateContext is mounted but never consumed while duplicating App's localStorage writers, analysis.ts:52-58 is a 4-type stub chart, damage.ts's crit/boost parameters are never passed, and App.tsx:615 ships `{modalShiny ? 'SHINY' : 'SHINY'}` as UI copy.
+- The recorded live deployment does not serve this source (the CI deploys to a Cloudflare Pages project name that another submission also claims), so deploy health cannot be credited.
 
 ## Standout
 
-The evolution-chain click handler openModals a {id,name} stub for any stage not yet loaded, and getSprite reads p.sprites.other without guarding p.sprites — so a very common action (open Pikachu on a fresh load, click Pichu at id 172) throws a TypeError and the ErrorBoundary swaps the whole app for a 'Something went wrong' screen.
+The stat visualisation pair — a correctly-normalised bar set and a correctly-ordered, clamped stat radar, both animated with hand-authored overshoot curves — is the most convincing piece of work in the submission and the one place where craft and correctness meet.
 
 ## Feature depth detail
 
@@ -57,38 +64,38 @@ Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ ab
 
 | Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ◕ 2 | `src/hooks/usePokedexData.ts totalAvailable=1025; loadInitial(80)+loadMore(60) via IntersectionObserver progressively fetch the full range in the unfiltered view. Full dex reachable but live-fetched (2 req/Pokémon), no persistent cache — solid, not exceptional.` |
-| Instant search | ◔ 1 | `src/App.tsx filtered useMemo (166-172) name+id substring with useDeferredValue. Only searches already-loaded Pokémon, and applying a search sets canShowLoadMore=false (App.tsx:280) which halts infinite loading — so it can never reach unloaded ids. Shallow/loaded-subset only.` |
-| Type filter | ◔ 1 | `src/components/Filters.tsx 18 color toggles; App.tsx multi-select OR (activeTypes.some). Same loaded-subset limit: any active type sets canShowLoadMore=false (App.tsx:280), halting further loads; also OR-only, no AND.` |
-| Generation filter | ◔ 1 | `src/hooks/usePokedexData.ts:201 ensureDataForGen target=range[0] loads only UP TO a gen's first id, and canShowLoadMore requires currentGen==='all' (App.tsx:280) so no load path exists in gen view — gens 2-9 render ~1 Pokémon on fresh load. Present but broken.` |
-| Sorting | ◕ 2 | `src/types/pokemon.ts SORT_OPTIONS + App.tsx result.sort: id asc/desc, name asc/desc, highest HP, highest BST. Cycled via button; applied to the filtered set. Meets id+name+>=1 stat.` |
-| Advanced filters | ◕ 2 | `src/App.tsx + Filters.tsx: legendary||mythical toggle, BST>=500 toggle, ability substring (abilities.some). Three real functional filters; BST is a fixed 500 toggle (not a range) and all limited to loaded data.` |
-| Shareable filter URLs | ◕ 2 | `src/hooks/useUrlState.ts toSearchParams/parseFromUrl sync q/types/gen/sort/fav/special/bst/ability via history.replaceState; App.tsx hydrates once (hydratedRef). Broad param coverage; no deep-link to an open Pokémon.` |
+| National Dex | ◕ 2 | `usePokedexData.ts:5 totalAvailable=1025 (correct Gen 9 National Dex); loadInitial fetches ids 1-80 then loadMore pages 60 at a time via an IntersectionObserver (App.tsx:280-293), and a local build of this source reaches 1025/1025 by scrolling. Not a 3: ids are derived arithmetically (`startOffset + i + 1`, usePokedexData.ts:151) while the list response is discarded, and paging is disabled entirely whenever a search/type/generation filter is active.` |
+| Instant search | ◔ 1 | `App.tsx searches name and id over `allPokemon` only — no name index is ever fetched, so anything past the loaded window is unfindable, and canShowLoadMore (App.tsx:280) disables loading while a search is active, so the window can never grow. useDeferredValue is also starved by the useUrlState render loop (useUrlState.ts:67 + App.tsx:56-67).` |
+| Type filter | ◔ 1 | `Multi-select chips (Filters.tsx) filter client-side over loaded data, but App.tsx:280 turns off both the observer and the load-more button once activeTypes is non-empty, so the result set freezes at whatever subset happened to be loaded (verified: 12 of ~144 water types, permanent). A shared /?types=dragon link renders 0 forever.` |
+| Generation filter | ◔ 1 | `GEN_RANGES covers all 9 gens in a <select> (App.tsx:417-433), but ensureDataForGen (usePokedexData.ts:198-226) sets `target = range[0]` — the generation's FIRST id, not its last — and gen view has no load path, so selecting Paldea yields ~0 results with an empty-state hint pointing at a Load-more button that isn't rendered.` |
+| Sorting | ◕ 2 | `App.tsx:201-212 implements six sorts (id/name asc+desc, HP, BST) reading base_stat correctly and getBst (types/pokemon.ts:118) summing all six stats. Solid but confined to loaded data and no sort-direction UI beyond the fixed option list.` |
+| Advanced filters | ◕ 2 | `App.tsx:180-197 layers legendary/mythical, BST>=500, ability substring and favourites-only on top of type+gen+search, all composable and URL-encoded. Not a 3: BST is a single hardcoded 500 toggle rather than a range, and ability filtering only matches abilities of already-loaded Pokémon.` |
+| Shareable filter URLs | ◔ 1 | `DOWNGRADED from 2. Round-tripping works (useUrlState.ts:26-52 encodes/parses all eight params and App.tsx:71-82 hydrates them), which is what the original grade credited, but the auditor's claims check out in the source: `update` is re-created every render (useUrlState.ts:67) and always allocates a new state object while App.tsx:56-67 lists `updateUrl` in its deps — an unconditional effect→setState→render→effect loop that rewrites the URL thousands of times per second and starves the deferred search. Shared links also do not reproduce the sender's view: hydration never calls ensureDataForGen (only updateGen at App.tsx:295-301 does) so /?gen=9 renders nothing, and /?types=dragon renders 0 because the observer is disabled. replaceState only (no back/forward) and no per-Pokémon deep link at all.` |
 
 **Detail Depth**
 
 | Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ◕ 2 | `src/types/pokemon.ts getSprite prefers sprites.other['official-artwork'].front_default with fallbacks to front_default then raw github sprite; App.tsx renders it large in the modal. Standard, correct.` |
-| Shiny toggle | ◕ 2 | `src/types/pokemon.ts getSprite resolves official-artwork front_shiny then front_shiny; App.tsx has per-Pokémon modalShiny toggle plus a global grid shinyMode. Works in both places.` |
-| Cry playback | ◕ 2 | `src/App.tsx playCry uses cries.latest||cries.legacy via new Audio(url) with error listener + toast fallback; CRY button gated on availability. Solid.` |
-| Stat visualization | ● 3 | `src/components/StatBar.tsx animated framer-motion bars (normalized /255) for all six stats PLUS src/components/StatRadar.tsx hand-rolled SVG radar (grid polygons, axes, spring-animated data polygon, vertex dots, per-axis label+value) alongside a BST total. Dual visualization, above average.` |
-| Abilities with effects | ◔ 1 | `src/App.tsx:758-768 lists ability names + (hidden) flag only; no effect/description text is ever fetched or shown. Shallow.` |
-| Evolution chains | ◕ 2 | `src/hooks/usePokedexData.ts fetchEvolutionChain recursively walks the chain deriving conditions (Lv/item/trigger/happiness/time); App.tsx renders a clickable sprite chain that re-opens the modal. Real depth, but branches are flattened into one linear steps[] with '->' between every node (Eevee/Wurmple render as a false linear sequence) — flawed 2.` |
-| Move learnsets | ◔ 1 | `src/hooks/usePokedexData.ts builds levelUpMoves.slice(0,8) + fullMoves.slice(0,12) with a method label; App.tsx shows 'Level-up Moves' and a truncated 'Sample Learnset' — a truncated sample, not a full by-method (TM/egg/tutor) list.` |
-| Defensive matchups | ◔ 1 | `src/App.tsx:230-231 openModal calls fetchTypeMatchups(pokemon.types[0].type.name) — primary type only; usePokedexData.ts reads a single type's damage_relations, so dual-type defensive multipliers are never combined (wrong for two-type Pokémon).` |
-| Breeding data | ◕ 2 | `src/App.tsx Pokédex Data panel (688-733): egg groups, gender ratio from gender_rate (incl Genderless), hatch steps (hatch_counter*255), base happiness, growth rate, capture rate. Missing EV yield (never fetched).` |
+| Official artwork | ◕ 2 | `getSprite (types/pokemon.ts:107-116) prefers official-artwork, falls back to front_default and finally a raw.githubusercontent sprite URL; cards use loading="lazy" (PokemonCard.tsx:34). Not a 3: full-resolution 475px artwork is served into 118px card slots with no responsive sizing or image caching, and index.css:61 `image-rendering: crisp-edges` hardens the downscale aliasing.` |
+| Shiny toggle | ◕ 2 | `Global shiny mode toggle in the header plus a per-modal SHINY toggle, both routed through getSprite's shiny branch (types/pokemon.ts:108-112), and a separate shiny-caught tracker. Marred by App.tsx:615 shipping `{modalShiny ? 'SHINY' : 'SHINY'}` — an unfinished ternary as user-visible copy.` |
+| Cry playback | ◕ 2 | `playCry uses `cries.latest` with a `cries.legacy` fallback and toasts on playback failure; the CRY button is conditionally rendered only when a cry exists (App.tsx:619-623). No volume/latest-vs-legacy choice, so not a 3.` |
+| Stat visualization | ● 3 | `Two complementary visualisations: StatBar.tsx:9 normalises value/255 (255 = the true max base stat) with an 8% floor, and StatRadar.tsx:18-28 draws a correct hp/atk/def/spa/spd/spe hexagon with values clamped to [0,255], both animated with authored overshoot easing ([0.34,1.56,0.64,1]) and tabular-nums numerals. BST is computed correctly (types/pokemon.ts:118-120). Best-in-class for this field.` |
+| Abilities with effects | ◔ 1 | `App.tsx:761 lists ability names from the /pokemon payload with a hidden-ability marker only — no ability effect text is ever fetched from /ability/{name}, so the user sees names without meaning.` |
+| Evolution chains | ◔ 1 | `usePokedexData.ts:48-67 walks the chain but DFS-pushes every node into one flat array, and App.tsx:795-815 renders it as a single strip with an arrow between every consecutive pair — Eevee reads 'eevee → vaporeon → jolteon → flareon → …', asserting evolutions that don't exist. Only evolution_details[0] is read, item is checked before trigger, and line 61 fabricates an inherited condition on nodes with empty details.` |
+| Move learnsets | ◔ 1 | `usePokedexData.ts:132-133 stores `levelUp.slice(0,8)` and `fullMoves.slice(0,12)`, discarding the real learnset at fetch time; the modal labels it 'Sample Learnset' (App.tsx:780). No method/version-group grouping, no move data (power/accuracy/type).` |
+| Defensive matchups | ◔ 1 | `The defensive panel (App.tsx:821-841) prints /type/{name} double_damage_from / half_damage_from / no_damage_from verbatim for `pokemon.types[0]` only (App.tsx:230-231), so Charizard reads 'Weak: water, ground, rock' — ground is a 0x immunity and rock is 4x, i.e. the panel states falsehoods. A correct dual-type getEffectiveness exists in lib/damage.ts:35-41 but is unreachable from this surface.` |
+| Breeding data | ◕ 2 | `Egg groups, gender rate, hatch counter, base happiness, growth rate and capture rate are all pulled from the species payload (usePokedexData.ts:120-136) and rendered in the modal. Not a 3: gender rate is shown raw rather than converted to a M/F percentage split, and there is no egg-move or compatibility view.` |
 | Alternate forms | ○ 0 |  |
-| Pokédex entries | ◔ 1 | `src/hooks/usePokedexData.ts:88 picks the first flavor_text_entries entry with language 'en'; App.tsx shows one entry, no per-version/game selector. Shallow.` |
+| Pokédex entries | ◔ 1 | `usePokedexData.ts:88 keeps only the FIRST English flavor_text entry, with no game/version attribution and no way to browse other entries.` |
 
 **Tools & Modes**
 
 | Feature | Grade | Notes |
 |---|:---:|---|
 | Type chart | ○ 0 |  |
-| Compare tool | ◕ 2 | `src/App.tsx compareList (up to 4, added from modal) grid shows sprite, both types, BST and stats.slice(0,3) side-by-side with remove/clear. Functional but thin: only 3 of 6 stats and no diff/best-value highlighting.` |
-| Team builder | ● 3 | `src/components/TeamLab.tsx + src/hooks/useTeams.ts: 6 slots, MULTIPLE persistent named teams (create/rename/delete/switch, localStorage), smart suggestions (suggestForTeam type+BST scoring), coverage analysis, Showdown import (real parser) + export, PNG team image, and an interactive damage-calc battle preview with level/power sliders. Exceptional breadth well beyond a basic team builder.` |
-| Damage calculator | ◕ 2 | `src/lib/damage.ts calculateDamage uses a real gen formula; getEffectiveness correctly multiplies across BOTH defending types via a full 18-type TYPE_CHART; TeamLab.tsx Quick Battle Preview with level/power sliders. Simplified/self-labeled approx (no phys/special split, no STAB, base stats not actual, crit/boost params unwired).` |
+| Compare tool | ◔ 1 | `Up to 4 Pokémon can be added from the modal and shown side by side, but entries are only addable from inside the detail modal (no grid multi-select), and the comparison is stat bars plus types with no diffing, winner highlighting or matchup analysis.` |
+| Team builder | ◕ 2 | `TeamLab.tsx is a substantial surface: 6-slot teams, multiple named/renamable teams persisted via useTeams, suggestions, Showdown import/export (lib/showdown.ts) and PNG export. Held to 2 by real defects: the coverage panel reads matchupCache, which is only populated by openModal, so members added from the grid show blank coverage, and it is primary-type-only (analysis.ts:71-77); showdown.ts:70-71 hardcodes 'EVs: 252 HP / 4 Atk / 252 Spe' + Jolly onto every export.` |
+| Damage calculator | ◔ 1 | `damage.ts:56 has the genuine Gen III+ base-damage expression and a correct dual-type multiplier, but feeds it raw BASE stats with no level/IV/EV/nature scaling, no physical/special split, no STAB, and dead isCritical/boost params; percent-of-HP divides by the base HP stat instead of max HP (damage.ts:74-76), so Shedinja always reads 100%. Honestly labelled 'Rough calc… for fun/learning only' (TeamLab.tsx:361), which keeps it off 0.` |
 | Moves / Items / Abilities dex | ○ 0 |  |
 | Who's-that-Pokémon | ○ 0 |  |
 | Command palette | ○ 0 |  |
@@ -97,11 +104,11 @@ Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ ab
 
 | Feature | Grade | Notes |
 |---|:---:|---|
-| Favorites | ◕ 2 | `src/hooks/useFavorites.ts persists a Set to localStorage with toggle/isFavorite; App.tsx favorites-only view, hearts on card+modal, header count, plus bonus caught/shiny-caught Sets persisted separately. Solid + bonus collection tracking.` |
-| Dark/light theming | ◔ 1 | `src/index.css + types/pokemon.ts TYPE_COLORS: single hardcoded dark theme (#0a0c14) with type-colored badges/filters; no light/dark or theme toggle, detail view not type-themed. Shallow.` |
-| Keyboard navigation | ◔ 1 | `src/App.tsx:85-101 onKey: '/' focuses search, Esc closes modal/Team Lab, Cmd/Ctrl+K toggles Team Lab. No ArrowLeft/Right modal navigation (prev/next is on-screen-button only), no roving tabindex. A few shortcuts only.` |
-| Responsive design | ◕ 2 | `src/App.tsx sm: breakpoints throughout, mobile bottom-sheet modal (items-end + rounded-t-3xl + max-h-[85dvh]), horizontally snap-scrolling type row; VirtualPokemonGrid.tsx ResizeObserver recomputes column count from width. Genuinely mobile-usable.` |
-| Export / sharing | ◕ 2 | `src/lib/export.ts exportPokemonCard renders an 800x400 canvas PNG (title/types/stats/sprite) + exportTeamImage; src/lib/showdown.ts exportTeamToShowdown (clipboard) + parseShowdownTeam (file import) wired in TeamLab.tsx. Works, but Showdown export hardcodes EVs '252 HP/4 Atk/252 Spe'+Jolly for every mon and the PNG layout is basic.` |
+| Favorites | ◕ 2 | `useFavorites persists to localStorage with guarded reads, a header count, a favourites-only view and per-card hearts; caught/shiny-caught trackers extend it. Not a 3: no export/import of the collection, and the duplicate writers in AppStateContext.tsx:39-45 (mounted in main.tsx but never consumed) put the caught/shiny keys at risk.` |
+| Dark/light theming | ◔ 1 | `A single hardcoded dark palette (#0a0c14 / #111827) with no light mode, no theme toggle and no prefers-color-scheme handling; per-type colours in TypeBadge are the only variation.` |
+| Keyboard navigation | ◔ 1 | `App.tsx:84-100 binds Escape, '/' to focus search and ⌘K to toggle Team Lab, but the app's core interaction is unreachable by keyboard: PokemonCard's root is a `<div onClick>` with no role/tabIndex/onKeyDown (PokemonCard.tsx:28), same for compare cards, team chips and interactive TypeBadges, and the role="dialog" modal has no focus trap or focus restore.` |
+| Responsive design | ◔ 1 | `DOWNGRADED from 2. The genuine positives remain — a real bottom sheet (App.tsx:546-556, items-end + rounded-t-3xl + max-h-[85dvh]), snap-x type chips (Filters.tsx:38) and a ResizeObserver-driven column count (VirtualPokemonGrid.tsx:38-49) — but the source confirms the phone chrome is broken. App.tsx:342 is a single non-wrapping flex row carrying the full-size 'Pokédex' wordmark, a search pill and five controls plus the generation <select>, none of which collapse at <400px (Compare, unlike Team Lab at App.tsx:378, has no `hidden sm:inline`), so the header overflows and overlaps. TeamLab.tsx:134 is the same pattern in a `fixed inset-0` overlay with no wrap and no horizontal scroll, so 'Export Showdown', 'PNG Team', 'Import Showdown', 'Clear' and the close X (TeamLab.tsx:168) fall off-screen; the backdrop has no onClick and Escape is the only exit, which phones do not have. Also VirtualPokemonGrid is driven with rowHeight={170} (App.tsx:509) against a card that measures ~184px mobile / ~211px desktop, so row positions and the spacer height are wrong at every breakpoint.` |
+| Export / sharing | ◕ 2 | `lib/export.ts renders a real canvas card and a team image, plus Showdown text import/export via lib/showdown.ts. Not a 3: export.ts:50 awaits `img.onload` with no onerror or timeout, so a single failed sprite hangs the export forever.` |
 
 ## Vendored source
 

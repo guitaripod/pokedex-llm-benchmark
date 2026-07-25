@@ -1,8 +1,9 @@
 {
-  "rubricVersion": 1,
+  "rubricVersion": 2,
+  "v2": "Rubric v2 makes the independent AUDIT stage mandatory. v1 graded in two passes (grade, then adversarial calibration); in practice the calibration pass rubber-stamped the first — on one submission it left 22 of 30 features at grade 3 and changed nothing. v2 adds a third stage: ten independent agents attempt to REFUTE every grade against the source and the live deployment, then the judge adjudicates each dispute. It also feeds the judge the measured `runtime.dexReach` (how many of the 1025 species the live browse page actually hands a user). Every submission on the board has been re-graded under v2 by one judge, so the scores are mutually comparable; v1 scores are not comparable to them.",
   "recommendedJudge": {
-    "primary": "Claude Code session (Opus-class) running the two-pass grade + adversarial-verify flow — how every current score was produced",
-    "autonomous": "scripts/grade.mjs --model <capable opencode model> (single command, two-pass)"
+    "primary": "Claude Code session (Opus-class) running the three-pass flow: grade → adversarial verify → independent audit adjudication (scripts/grade.mjs --verify / --adjudicate)",
+    "autonomous": "scripts/grade.mjs --model <capable opencode model> (single command, two-pass — weaker: no audit stage)"
   },
   "scalability": "Append-only. Adding a model grades ONLY the new submission against the fixed calibration anchors in grading/PROMPT.md — existing scores are immutable and never recomputed, so the leaderboard stays reproducible and cost is O(1) per addition. Calibration lives as static anchors in the repo, not a live relative computation.",
   "reGrade": "Re-grade the whole set together ONLY when bumping rubricVersion (a deliberate, breaking change to the scale). Then update every submission's grading.rubricVersion. Scores across different rubricVersions are not directly comparable.",

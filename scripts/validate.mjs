@@ -17,7 +17,7 @@ const TOTAL = validIds.size;
 
 const errors = [];
 const seen = new Set();
-const REQUIRED = ["id", "model", "provider", "effort", "date", "sourceRepo", "liveUrl", "platform"];
+const REQUIRED = ["id", "model", "provider", "effort", "date", "sourceRepo", "platform"];
 
 for (const s of manifest.submissions) {
   const tag = s.id || "(missing id)";
@@ -27,6 +27,8 @@ for (const s of manifest.submissions) {
     if (!s[k]) errors.push(`${tag}: missing "${k}"`);
   }
   if (!s.metrics) errors.push(`${tag}: missing metrics (run compute-metrics.mjs)`);
+  if (!s.liveUrl && !s.notes)
+    errors.push(`${tag}: no liveUrl and no "notes" explaining why the deployment is gone`);
   if (s.features && s.features.length) {
     if (s.features.length !== TOTAL)
       errors.push(`${tag}: ${s.features.length} feature grades, expected ${TOTAL}`);

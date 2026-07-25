@@ -16,15 +16,15 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 
 | # | Model | Effort | Bench | Feature depth | Code · Arch · UX · Robust | Stack | LOC | Live |
 |---|-------|--------|:-----:|:-------------:|:-------------------------:|-------|----:|------|
-| 🥇 | **Fable 5** | ultracode | **90.0** | 81 / 90 | 9 · 9 · 9 · 9 | react/ts&nbsp;·&nbsp;vite | 11,058 | [demo](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) |
-| 🥈 | **Opus 5** | ultracode | **87.8** | 77 / 90 | 9 · 9.5 · 9 · 9 | react/ts&nbsp;·&nbsp;vite | 33,239 | [demo](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) |
-| 🥉 | **GLM 5.2** | max | **69.7** | 61 / 90 | 8 · 8 · 7 · 6 | vanilla/js | 6,523 | [demo](https://pokedex-glm52-max.guitaripod.workers.dev) |
-| 4 | **Opus 4.8** | low | **69.3** | 53 / 90 | 9 · 8 · 9 · 8 | react/ts&nbsp;·&nbsp;vite | 2,395 | [demo](https://pokedex-opus-4-8-low.guitaripod.workers.dev) |
-| 5 | **Fable 5** | low | **65.7** | 52 / 90 | 8 · 8 · 8 · 7 | vanilla/js | 1,379 | [demo](https://pokedex-fable-5-low.guitaripod.workers.dev) |
-| 6 | **Opus 5** | low | **64.2** | 55 / 90 | 7 · 8.5 · 6.5 · 5.5 | react/ts&nbsp;·&nbsp;vite | 4,491 | [demo](https://pokedex-opus-5-low.guitaripod.workers.dev) |
-| 7 | **Grok** | default | **53.2** | 43 / 90 | 6.5 · 6 · 7.5 · 4.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | [demo](https://pokedex-a7l.pages.dev) |
-| 8 | **DeepSeek V4 Flash** | default | **52.8** | 38 / 90 | 7 · 6.5 · 7.5 · 6.5 | react/ts&nbsp;·&nbsp;vite | 2,406 | [demo](https://pokedex-deepseek-v4-flash.pages.dev) |
-| 9 | **Laguna S-2.1** | default | **37.3** | 38 / 90 | 3 · 3 · 4 · 2 | preact/ts&nbsp;·&nbsp;vite | 9,208 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
+| 🥇 | **Opus 5** | ultracode | **83.8** | 74 / 90 | 8.5 · 9 · 9 · 8 | react/ts&nbsp;·&nbsp;vite | 33,239 | [demo](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) |
+| 🥈 | **Fable 5** | ultracode | **78.0** | 66 / 90 | 8 · 8.5 · 9 · 8.5 | react/ts&nbsp;·&nbsp;vite | 11,058 | [demo](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) |
+| 🥉 | **Opus 5** | low | **62.0** | 54 / 90 | 7 · 8 · 6 · 5 | react/ts&nbsp;·&nbsp;vite | 4,491 | [demo](https://pokedex-opus-5-low.guitaripod.workers.dev) |
+| 4 | **Opus 4.8** | low | **56.8** | 41 / 90 | 7.5 · 7.5 · 7 · 7.5 | react/ts&nbsp;·&nbsp;vite | 2,395 | [demo](https://pokedex-opus-4-8-low.guitaripod.workers.dev) |
+| 5 | **Fable 5** | low | **55.8** | 44 / 90 | 6.5 · 6.5 · 7 · 6.5 | vanilla/js | 1,379 | [demo](https://pokedex-fable-5-low.guitaripod.workers.dev) |
+| 6 | **GLM 5.2** | max | **48.7** | 43 / 90 | 4.5 · 5 · 6 · 4.5 | vanilla/js | 6,523 | [demo](https://pokedex-glm52-max.guitaripod.workers.dev) |
+| 7 | **Grok** | default | **41.7** | 37 / 90 | 4 · 4 · 5.5 · 3.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | _gone_ |
+| 8 | **DeepSeek V4 Flash** | default | **41.3** | 29 / 90 | 5.5 · 4.5 · 6.5 · 5.5 | react/ts&nbsp;·&nbsp;vite | 2,406 | [demo](https://pokedex-deepseek-v4-flash.pages.dev) |
+| 9 | **Laguna S-2.1** | default | **33.0** | 33 / 90 | 2.5 · 2.5 · 4 · 2 | preact/ts&nbsp;·&nbsp;vite | 9,208 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
 
 *Bench (0–100) = 60% feature depth + 40% craft axes. **Feature depth** grades each of the 30 features 0–3 (absent → shallow/broken → solid → exceptional), so a few excellent features outscore many stubs. **Code · Arch · UX · Robust** are the four 0–10 craft axes. LOC counts hand-written source only. See [RUBRIC.md](RUBRIC.md).*
 
@@ -32,81 +32,81 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 
 Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow / broken (1) · ○ absent (0)
 
-| Feature | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [Opus·ultracode](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-5-low.guitaripod.workers.dev) | [Grok](https://pokedex-a7l.pages.dev) | [DeepSeek](https://pokedex-deepseek-v4-flash.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
+| Feature | [Opus·ultracode](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-5-low.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | Grok | [DeepSeek](https://pokedex-deepseek-v4-flash.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | **Browse & Discovery** | | | | | | | | | |
-| National Dex | ● | ● | ● | ● | ● | ◔ | ◕ | ◕ | ◔ |
-| Instant search | ● | ● | ● | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Type filter | ● | ◕ | ◔ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Generation filter | ● | ◕ | ● | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Sorting | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ |
-| Advanced filters | ◕ | ● | ○ | ○ | ◕ | ◕ | ◕ | ◔ | ◔ |
-| Shareable filter URLs | ● | ● | ◔ | ○ | ◔ | ◔ | ◕ | ◔ | ◔ |
+| National Dex | ● | ◕ | ◔ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ |
+| Instant search | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Type filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ |
+| Generation filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Sorting | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ |
+| Advanced filters | ● | ◕ | ◕ | ○ | ◕ | ○ | ◕ | ○ | ◔ |
+| Shareable filter URLs | ● | ● | ◔ | ○ | ◔ | ◔ | ◔ | ○ | ◔ |
 | **Detail Depth** | | | | | | | | | |
-| Official artwork | ● | ● | ● | ◕ | ◕ | ● | ◕ | ◕ | ◕ |
-| Shiny toggle | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Official artwork | ● | ◕ | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Shiny toggle | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
 | Cry playback | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ |
-| Stat visualization | ◕ | ● | ● | ● | ◕ | ◕ | ● | ● | ◕ |
-| Abilities with effects | ● | ● | ◕ | ● | ◕ | ◕ | ◔ | ◔ | ◕ |
-| Evolution chains | ● | ● | ● | ● | ● | ◕ | ◕ | ◕ | ◔ |
-| Move learnsets | ● | ◕ | ● | ● | ● | ◔ | ◔ | ◕ | ◕ |
-| Defensive matchups | ● | ● | ● | ● | ● | ◕ | ◔ | ◕ | ◕ |
-| Breeding data | ◕ | ◕ | ◕ | ● | ● | ◕ | ◕ | ◕ | ◕ |
-| Alternate forms | ● | ◕ | ◔ | ◕ | ◕ | ◕ | ○ | ○ | ○ |
-| Pokédex entries | ● | ◕ | ◕ | ● | ◔ | ◕ | ◔ | ◔ | ◕ |
+| Stat visualization | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ● | ◕ | ◕ |
+| Abilities with effects | ● | ● | ◔ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ |
+| Evolution chains | ● | ● | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ |
+| Move learnsets | ● | ● | ◔ | ◔ | ◔ | ◕ | ◔ | ◔ | ◕ |
+| Defensive matchups | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Breeding data | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Alternate forms | ◕ | ● | ◕ | ◕ | ◕ | ◔ | ○ | ○ | ○ |
+| Pokédex entries | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ | ◕ |
 | **Tools & Modes** | | | | | | | | | |
-| Type chart | ● | ● | ● | ● | ● | ◕ | ○ | ◕ | ◕ |
-| Compare tool | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ |
-| Team builder | ● | ◕ | ● | ○ | ○ | ◕ | ● | ○ | ◔ |
-| Damage calculator | ○ | ● | ○ | ○ | ○ | ◕ | ◕ | ◔ | ○ |
-| Moves / Items / Abilities dex | ● | ● | ◕ | ● | ○ | ◕ | ○ | ○ | ◕ |
-| Who's-that-Pokémon | ● | ● | ○ | ○ | ○ | ◕ | ○ | ○ | ○ |
-| Command palette | ● | ◕ | ◔ | ○ | ○ | ◕ | ○ | ○ | ○ |
+| Type chart | ● | ● | ◕ | ◕ | ◕ | ◕ | ○ | ◕ | ◔ |
+| Compare tool | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Team builder | ◕ | ◕ | ◕ | ○ | ○ | ◕ | ◕ | ○ | ◔ |
+| Damage calculator | ● | ○ | ◕ | ○ | ○ | ○ | ◔ | ○ | ○ |
+| Moves / Items / Abilities dex | ● | ● | ◕ | ◕ | ○ | ◔ | ○ | ○ | ◕ |
+| Who's-that-Pokémon | ● | ● | ◕ | ○ | ○ | ○ | ○ | ○ | ○ |
+| Command palette | ◕ | ◕ | ◕ | ○ | ○ | ◔ | ○ | ○ | ○ |
 | **Polish & Platform** | | | | | | | | | |
-| Favorites | ● | ◕ | ● | ○ | ◕ | ◕ | ◕ | ○ | ◔ |
-| Dark/light theming | ● | ◕ | ● | ● | ◕ | ◕ | ◔ | ◕ | ◕ |
-| Keyboard navigation | ● | ● | ◕ | ○ | ◕ | ◔ | ◔ | ○ | ◔ |
-| Responsive design | ● | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
-| Export / sharing | ◔ | ◕ | ○ | ○ | ○ | ○ | ◕ | ○ | ○ |
-| **Feature depth / 90** | **81** | **77** | **61** | **53** | **52** | **55** | **43** | **38** | **38** |
+| Favorites | ◕ | ◕ | ◕ | ○ | ◕ | ◕ | ◕ | ○ | ◔ |
+| Dark/light theming | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Keyboard navigation | ◕ | ● | ◔ | ○ | ◔ | ◔ | ◔ | ○ | ◔ |
+| Responsive design | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Export / sharing | ◕ | ◔ | ○ | ○ | ○ | ○ | ◕ | ○ | ○ |
+| **Feature depth / 90** | **74** | **66** | **54** | **41** | **44** | **43** | **37** | **29** | **33** |
 
 ## Submissions
 
-#### Fable 5 — ultracode
-
-Bench **90.0** · feature depth 81/90 · 28/30 features solid+ · runtime ✓ clean
-
-A remarkably complete React/TypeScript SPA Pokedex that precomputes the entire PokeAPI dataset into per-entity static JSON shards at build time (scripts/build-data.mjs, 639 lines) and serves them from Cloudflare with fully client-side fuzzy search and zero runtime API. Code is strongly-typed, modular (dedicated lib modules, custom hooks, useSyncExternalStore stores), and free of comment rot; feature depth is genuine across detail pages, learnsets, evolution trees, type chart, team builder, compare, quiz, and command palette.
-
-[**Live demo**](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-fable-5-ultracode) · [vendored code & full scorecard](submissions/fable-5-ultracode/ENTRY.md)
-
----
-
 #### Opus 5 — ultracode
 
-Bench **87.8** · feature depth 77/90 · 30/30 features solid+ · runtime ✓ clean
+Bench **83.8** · feature depth 74/90 · 30/30 features solid+ · runtime ✓ clean
 
-An exceptionally well-engineered static Pokédex: 32,737 lines across 146 files with zero `any`, zero suppression comments and zero TODO markers, strict TS gating the build, a pure-function domain layer (types, damage, stats, evolution, coverage, filtering) that never imports React, and a dependency-free build pipeline that resolves 638k learnset rows and 117k encounter rows into 6,032 static shards in 2 seconds. The core logic is not decorative — the type chart is the real veekun efficacy table with era-aware past overrides, the damage engine reproduces the cartridge's exact floor/pokeRound nesting and convolves full roll distributions for nHKO odds, the stat formulas handle both classic traps (Shedinja base-1 HP, nature applied after the floor), and evolution is a genuine recursive branching tree with cross-chain root resolution. Coverage is complete: 1025/1025 species reachable at runtime with no console errors. The adjudication pass sustained most of the auditor's downgrades because the *feature* tier has a consistent pattern the axis scores hide — a large number of surfaces are correct, complete and one step short of the depth the top anchor demands (filters that filter but never count or negate, sorts whose metric is never displayed, breeding and dex text that stop at the raw CSV columns, a team builder missing named teams, Showdown interop and damage preview). Three defects are outright bugs rather than shallowness: alternate-form sprites are keyed off the wrong id space so every one of 235 non-default form rows silently renders a different Pokémon; index-entry generation comes from the species row so generation filtering is wrong for all regional and Mega forms even though the builder already reads the correct column for the detail page; and the command palette's landing-page entry point throws an uncaught TypeError while 5 of its 18 page results 404 against a stale hardcoded route table. Still the strongest submission in the field on engineering substance — the deductions are about the last mile, not the foundation.
+An exceptionally well-engineered static Pokédex: ~32.7k lines across 146 TypeScript files with zero `any`, zero suppression comments and zero TODO markers, strict TS (plus noUnusedLocals/Parameters/verbatimModuleSyntax) gating the build, a pure-function domain layer (types, damage, stats, evolution, coverage, filtering) that never imports React, and a dependency-free build pipeline that resolves 638k learnset rows and 117k encounter rows into thousands of static shards with zero runtime API dependency. The core logic is reference-grade and independently verified: the type chart is the real veekun efficacy table (324 cells, 23 quirk assertions pass) with era-aware past overrides, the damage engine reproduces the cartridge's exact floor/pokeRound nesting and convolves the full 16-roll distribution for nHKO odds, the stat formulas handle both classic traps (Shedinja base-1 HP, nature applied after the floor), and evolution is a genuine recursive branching tree with cross-chain root resolution. Coverage is complete — 1025/1025 species reachable live with zero console errors. The adjudication sustained the auditor on all seven disputed features and both disputed axes, because the pattern is consistent: many surfaces are correct, complete, and exactly one step short of the top anchor (a tri-state type predicate with no counts or negation, a shiny flag threaded everywhere but with no shiny-specific surface and a toggle that does not reach the per-game tiles, per-Pokémon matchups that are defence-only and current-gen-only, favourites that cannot be starred from the browse grid, a keyboard layer that declares role="tablist" on 26 controls it never wires). Three findings are outright bugs rather than shallowness: alternate-form sprites are keyed off the wrong id space so non-default form rows silently render a different Pokémon; index-entry generation comes from the species row so generation filtering is wrong for all regional and Mega forms even though the builder reads the correct column elsewhere; and the landing page's primary search CTA throws an uncaught TypeError while 5 of the palette's 18 page results 404 against a stale hand-duplicated route table. Still the strongest submission in the field on engineering substance — the deductions are about the last mile, not the foundation.
 
 [**Live demo**](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-opus-5-ultracode) · [vendored code & full scorecard](submissions/opus-5-ultracode/ENTRY.md)
 
 ---
 
-#### GLM 5.2 — max
+#### Fable 5 — ultracode
 
-Bench **69.7** · feature depth 61/90 · 22/30 features solid+ · runtime ✓ clean
+Bench **78.0** · feature depth 66/90 · 28/30 features solid+ · runtime ✓ clean
 
-A broad, well-organized vanilla-JS Pokedex on a Cloudflare Worker that proxies and edge-caches PokeAPI, including a smart server-side composite pokemon+species endpoint. It covers an unusually wide feature surface (detail tabs, type chart, team builder with real defensive coverage, compare, moves/abilities/generations dexes, favorites, theming, responsive) at genuine depth, but several features are undermined by cache-ordering and filter bugs.
+A genuinely well-engineered static Pokédex: scripts/build-data.mjs compiles the entire PokéAPI surface into public/data ahead of time with a sha1-keyed on-disk fetch cache, 16-way concurrency, retry/backoff and 404-tolerance, and src/lib/api.ts is the only fetch site in the app, hitting nothing but /data/*. The compact positional move encoding plus vgIndex/methodIndex interning is what makes complete per-version-group learnsets for every variety affordable in ~8 KB brotli per species. The load-bearing logic is provably correct rather than plausibly correct — all 324 cells of the type matrix match the canonical Gen 6+ chart, defenseProfile propagates 0× immunities through both defending types with one shared implementation feeding detail/compare/team/typechart, evoTree renders real multi-branch evolutions with ~30 synthesized condition kinds, and the live index has exactly 1025 species with per-generation counts matching the official 151/100/135/107/156/72/88/96/120 split. The runtime smoke test is clean and reaches 1025/1025. Where it lands short of the top is depth per feature rather than breadth: the audit pass held eleven grades that were awarded as best-in-class against the fixed anchors and most did not survive — the browse grid, name search, single-key sort, artwork, shiny, flavor entries, compare, team builder, command palette, theming and responsiveness are all correct, complete, competent implementations with no distinguishing capability, which is the 2 anchor. The team builder specifically misses three of the five elements the rubric's own anchor enumerates (named multi-team storage, Showdown import/export, damage preview). Two derived-data figures on the flagship detail page are also wrong: format.ts:3-9 heightStr rounds inches without a foot carry, so 166 of 1025 species render impossible imperial heights like Charmander's '1′12″', and format.ts:23 catchPercent reports rate/255 under a '(X% at full HP)' label where the real full-HP figure is rate/765.
 
-[**Live demo**](https://pokedex-glm52-max.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-glm52-max) · [vendored code & full scorecard](submissions/glm-5.2-max/ENTRY.md)
+[**Live demo**](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-fable-5-ultracode) · [vendored code & full scorecard](submissions/fable-5-ultracode/ENTRY.md)
+
+---
+
+#### Opus 5 — low
+
+Bench **62.0** · feature depth 54/90 · 24/30 features solid+ · runtime ✓ clean
+
+A well-architected, tightly-written 4.4k-line React/Vite app whose core domain logic is unusually correct — the 18×18 type chart is derived from the API's live damage_relations rather than hand-typed (build-data.mjs:41-58 → util.ts:35-45), defenseProfile multiplies across both defending types including true 0× immunities, statAtLevel gets the HP/non-HP split, the flooring order and the Shedinja base-1 guard right (util.ts:70-76), and Tools.tsx:61 is the genuine main-series damage expression with the correct floor chain and correct asymmetric crit stage handling. The build pipeline is the strongest part of the submission: lib.mjs gives a resumable disk cache with 404 negative caching and 6-attempt exponential backoff, and build-data.mjs prebuilds every one of the 1351 varieties into static shards with zero runtime API dependency and no cap, slice or id range anywhere. What holds it back is a single hook defect with outsized blast radius: useInfinite (hooks.ts:57-65) keys its IntersectionObserver effect on [total, step] and returns early on a null sentinel, so any page that calls it above a multi-source loading gate never attaches an observer. Dex.tsx:99, Items.tsx:36, TypeDetail.tsx:18 and Dexes.tsx:19 all do exactly that, and there is no pager fallback — the flagship /pokedex hands a user 60 of 1025 species with only the passive caption 'Showing 60 of 1,025…', which also silently kills the alternate-forms browse toggle (forms are ids 10001+ and sort last). Alongside that sit four never-settling promises for unresolvable slugs (PokemonDetail.tsx:25 et al) that render a permanent spinner instead of the Empty state defined one line above — reachable not only from a typo'd URL but from the app's own evolution links, which uniquely use a species slug (PokemonDetail.tsx:392) against a Pokémon-keyed index. Accessibility is not thin but absent: zero aria-*, role or tabIndex in the entire source, no focus trap or restore on either overlay, and Picker.tsx — the modal gating team building, comparison and the damage calculator — handles only Escape, leaving keyboard users unable to select anything.
+
+[**Live demo**](https://pokedex-opus-5-low.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-opus-5-low) · [vendored code & full scorecard](submissions/opus-5-low/ENTRY.md)
 
 ---
 
 #### Opus 4.8 — low
 
-Bench **69.3** · feature depth 53/90 · 21/30 features solid+ · runtime ✓ clean
+Bench **56.8** · feature depth 41/90 · 20/30 features solid+ · runtime ✓ clean
 
-A polished, tightly-built React + TypeScript + Vite Pokedex on Cloudflare Workers that leans into depth over breadth: fewer than a handful of runtime deps, a prebuilt 1025-entry index for instant client-side search/filter/sort, and rich detail pages (correct dual-type matchups, branching evolutions, per-game learnsets, hand-rolled SVG radar, three secondary dexes). It deliberately skips the 'app-shell' features (favorites, URL state, team builder, damage calc, minigame, command palette, keyboard nav, export) in favor of building the core dex features well.
+A tight, well-factored React 19 + Tailwind SPA (1,581 lines across 21 source files, 3 runtime deps) fronted by a genuinely good Cloudflare Worker proxy: worker/index.ts allow-lists 14 PokeAPI resources, uses the Cache API with ctx.waitUntil(cache.put(res.clone())) plus cf cacheTtl/cacheEverything, and stamps s-maxage=604800 — the edge tier is real and verified working. scripts/build-index.mjs prebuilds a load-bearing 1025-entry index (types, gen, six stats, BST, height/weight, validated internally correct for 1025/1025 rows) that runs browse, search, all 11 sorts, compare and the reverse-index grids with zero network. The hand-written 18x18 type chart is provably perfect — I diffed all 324 cells against the canonical gen-6+ table with 0 mismatches — and dual-type defensive products combine correctly including 0x annihilation. Against that, three things pulled grades down on adjudication: MovesTable.tsx:22 picks the default version group as versionGroups[length-1] over Set insertion order, which is not chronological, so on a live 20-species sample 0/20 opened the newest game and 8/20 opened on 'champions' with all four method tabs empty; AbilityDetailPage's holder grid maps through the base-species-only index and silently drops 17.9% of holder rows (measured live across all 373 abilities), leaving 28 ability pages showing '0 Pokémon'; and the declared polish is partly undelivered (the .skeleton shimmer, scale-in and the Clash Display font are defined and used zero times). Accessibility is essentially unbuilt — one aria-label in the whole app, zero focus-visible and zero prefers-reduced-motion. Six disputed feature grades were downgraded on verified evidence; the axes moved architecture 8->7.5, uxDesign 8->7, robustness 8->7.5.
 
 [**Live demo**](https://pokedex-opus-4-8-low.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-opus-4-8-low) · [vendored code & full scorecard](submissions/opus-4-8-low/ENTRY.md)
 
@@ -114,39 +114,39 @@ A polished, tightly-built React + TypeScript + Vite Pokedex on Cloudflare Worker
 
 #### Fable 5 — low
 
-Bench **65.7** · feature depth 52/90 · 22/30 features solid+ · runtime ✓ clean
+Bench **55.8** · feature depth 44/90 · 20/30 features solid+ · runtime ✓ clean
 
-A polished single-page vanilla-JS Pokédex with a distinctive dark terminal aesthetic, served as static assets on Cloudflare Workers. Data (1025 species + 326 forms plus abilities, types, evolution chains, moves) is prebuilt from PokéAPI into static JSON, with only per-Pokémon learnsets fetched live. It covers the core dex deeply with no framework and no build step, and is defensively coded (escaping, image fallbacks, try/catch, retry/backoff).
+A 1,374-line vanilla-JS Pokédex with a genuinely strong prebuild and a striking Pokédex-as-terminal identity, sitting on a shallow feature spread. build-data.mjs pools 25-way with 5-attempt backoff over every /pokemon, /pokemon-species, /evolution-chain, /type, /ability and /generation resource, resolves generation from the /generation endpoint rather than id ranges, and emits four wire-compacted JSON files; the runtime confirms it works — all 1025 species reachable by scrolling, zero console errors, no exceptions. The single app.js is deliberately ordered (constants → pure helpers → domain functions → one view per route → router → listeners) and the hardest piece of logic in the brief, dual-type defensive effectiveness, is exactly right: I ran defensiveEffectiveness verbatim against live relations and Magnezone→ground 4x, Skarmory→poison/ground 0x, Spiritomb's three immunities all come out canonical. Against that: seven of the thirty features are absent (team builder, damage calc, moves dex, minigame, command palette, export, and filter-state URLs are effectively missing), and the two adjudicated downgrades are real defects rather than depth complaints — the Move Pool panel reads version_group_details[last] (app.js:412) and therefore renders learnsets that match no shipped game (Pikachu: 7 level-up rows vs 20 in SV, levels mixed from blue-japan/LGPE/BDSP/SV, 60 moves dumped into a bogus 'Train' tab), and the keyboard layer ships three bindings with no modifier guard so Ctrl+R and Alt+Left both misfire. The architecture stops one step short of its own ambition: four monolithic files all fetched before first paint (including 196 KB of evolution data the browse view never reads), zero cache headers in wrangler.jsonc, sprites hotlinked off an unpinned raw.githubusercontent.com branch at max-age=300, full-res 130-145 KB artwork used as grid thumbnails, and one core detail surface still calling pokeapi.co live per view with no memoization — even though build-data.mjs:59 already held the move data it needs.
 
 [**Live demo**](https://pokedex-fable-5-low.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-fable-5-low) · [vendored code & full scorecard](submissions/fable-5-low/ENTRY.md)
 
 ---
 
-#### Opus 5 — low
+#### GLM 5.2 — max
 
-Bench **64.2** · feature depth 55/90 · 25/30 features solid+ · runtime ✓ clean
+Bench **48.7** · feature depth 43/90 · 17/30 features solid+ · runtime ✓ clean
 
-A beautifully structured, strongly typed React/Vite app on top of a genuinely excellent prebuild pipeline — and a shared hook that quietly kills its own flagship surface. scripts/build-data.mjs + lib.mjs crawl the whole PokéAPI graph behind a resumable disk cache with backoff and a bounded pool, emitting an aggregate per collection plus ~4,892 per-entity shards consumed by a 27-line promise-deduping loader (src/lib/data.ts); there are zero runtime API calls and the live meta.json confirms the full dataset (1351 pokémon / 1025 species / 937 moves / 2223 items / 373 abilities). The core logic is right where it counts: buildChart/defenseProfile compose dual-type multipliers correctly including 0×/¼×/4× (20/20 spot checks pass when replayed against the shipped types.json), statAtLevel is the exact main-series formula with the Shedinja guard, and Tools.tsx implements the real damage and Gen3+ catch expressions. Against that, src/lib/hooks.ts:57-65 builds its IntersectionObserver from sentinel.current with deps [total, step], while Dex.tsx:99, Items.tsx:36 and TypeDetail.tsx:18 all call it above their multi-source loading gates — so on every page whose `total` resolves before its last dataset, the effect fires with a null sentinel and never re-runs. The result is objectively measured: /pokedex hands 60 of 1025 and stops, /items 72 of 2,223, /types/water 60 of 154, with no pagination fallback. A second systematic hole compounds it: unresolved slugs return `new Promise(() => {})` (PokemonDetail.tsx:25 and the three other detail pages), and the app's own evolution tree links species slugs (:392) that don't exist in a pokémon-keyed index, so ~34 species spin forever instead of showing the Empty state defined one line above. The adjudication moved eight feature grades down; the auditor was right on every runtime claim I could reproduce, and only overstated the stat-calculator nature bug and the compare/advanced-filter framing.
+A broad, genuinely well-layered vanilla-JS Pokedex on a competent Cloudflare Worker: 17 ESM modules with a declarative route table, a clean pub/sub store, an api layer with in-flight request dedupe, and a Worker that edge-caches PokeAPI for 24h and exposes a smart composite pokemon+species endpoint. The hard logic most entries get wrong is right here — dual-type defensive multipliers combining both types with real 0x immunities, a live 18x18 type chart, recursive branching evolution chains, correct Gen III+ stat formulas with a proper HP branch, and correct team defensive coverage. What undercuts it is a single self-inflicted contract bug plus systematic truncation. api.js:33 getPokemon() and api.js:37 getCompositePokemon() are byte-identical requests to pokemon/:id, which src/index.ts:132 answers with {pokemon, species}; I confirmed against the live deployment that /api/pokemon/25 returns exactly those two top-level keys. Every caller expecting a flat Pokemon throws on the first dereference and lands in a blanket catch that stores empty state, so all 18 type chips, all seven base-stat sorts, browse-card type badges and backgrounds, the favorites type filter, and the Pokemon-of-the-Day hero are permanently and silently wrong — which is why a smoke test reports zero console errors on a page whose filters cannot work. Layered on top: abilities.js:24 drops 214 of 373 abilities (57%, measured live), the moves dex enriches only 400 of 934, flavor entries are cut to the last 5 of ~28 with no expander, and the Forms tab is gated on pokemon.forms.length so no Mega or regional form is reachable. Nothing typed could have caught any of this: only 140 of ~4,300 lines are TypeScript and `npx tsc --noEmit` fails outright with TS2688.
 
-[**Live demo**](https://pokedex-opus-5-low.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-opus-5-low) · [vendored code & full scorecard](submissions/opus-5-low/ENTRY.md)
+[**Live demo**](https://pokedex-glm52-max.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-glm52-max) · [vendored code & full scorecard](submissions/glm-5.2-max/ENTRY.md)
 
 ---
 
 #### Grok
 
-Bench **53.2** · feature depth 43/90 · 16/30 features solid+ · runtime ✓ clean
+Bench **41.7** · feature depth 37/90 · 11/30 features solid+ · runtime ✓ clean
 
-A compact (~2,800 LOC) client-side React 19 + TypeScript + Tailwind 4 Pokédex that fetches live from PokeAPI with progressive batch loading and a hand-rolled virtualized grid. It is cleanly organized and visually polished, with a genuinely deep Team Lab (its standout), but is undermined by a broken generation filter, filters that halt data loading, and a reachable whole-app crash.
+A handsome, feature-broad React 19 + Tailwind Pokédex whose at-rest desktop surface is genuinely well-crafted — authored animation curves, a hand-built CSS pokeball, correct stat bars and radar, skeletons matching real card geometry, toasts and a working error/retry state — sitting on top of a live-API data layer and several load-bearing defects. Adjudicating the audit: I accept the shareable-urls downgrade (the params do round-trip, but useUrlState.ts:67 hands App.tsx:56-67 a new `update` every render against a setState that always allocates, an unconditional render loop; and shared /?gen= and /?types= links render nothing because hydration never triggers data acquisition) and the responsive downgrade (the header row at App.tsx:342 and the Team Lab toolbar at TeamLab.tsx:134 neither wrap nor scroll below ~400px, and the Team Lab overlay has no backdrop click and no reachable close button on a phone). On the axes I accept architecture 4 over 5 — there is no prebuild of any kind, two full detail requests per grid card whose payloads are then sliced to 8/12 moves, a per-batch list call whose results are discarded, a Workbox CacheFirst cache sized at 500 entries against ~2,068 URLs with eviction anti-correlated to the access pattern, and no image caching — and robustness 3.5 over 4, because the 4.5 anchor's two conditions are met exactly (filters halt loading via App.tsx:280; dual-type matchups are not merely incomplete but wrong) and the submission adds a generation filter that renders ~0, a whole-app ErrorBoundary crash reachable from the evolution strip (App.tsx:799 stub → getSprite's unguarded `p.sprites.other`), and no creditable deploy since the recorded live URL serves a different application. uxDesign lands at 5.5: polished at rest, wrong in motion (rowHeight 170 vs a 184–211px card), broken chrome on phones, and mouse-only.
 
-[**Live demo**](https://pokedex-a7l.pages.dev) · [source](https://github.com/guitaripod/pokedex) · [vendored code & full scorecard](submissions/grok/ENTRY.md)
+_no live deployment_ · [source](https://github.com/guitaripod/pokedex) · [vendored code & full scorecard](submissions/grok/ENTRY.md)
 
 ---
 
 #### DeepSeek V4 Flash
 
-Bench **52.8** · feature depth 38/90 · 16/30 features solid+ · runtime ✓ clean
+Bench **41.3** · feature depth 29/90 · 11/30 features solid+ · runtime ✓ clean
 
-A polished, visually strong React/TS Pokedex covering the core surface well: gen-by-gen national dex, network search, AND-multi-type + generation + sort filtering, a rich detail page (animated stat bars + SVG radar, correct defensive type-effectiveness, breeding/profile data, evolution, learnsets, encounters), a 2-way compare page, and a type calculator with a correct full 18x18 chart. Depth thins out beyond the core: no all-Pokemon view, network-only search, and none of the stretch features (team builder, cries, favorites, forms, command palette, export, moves dex, minigame, real damage calc). Feature grades were accurate; the only correction is that sort is a genuinely working 4-key feature (upgraded from the 0-1 bucket to 2).
+A clean, well-typed, good-looking React/TS Pokédex that never actually becomes a Pokédex. The craft floor is genuinely high: real layering (api/components{layout,pokemon,ui}/pages/types/utils, no file over 250 lines), 186 lines of hand-written domain types including a recursive EvolutionNode and a POKEMON_TYPES-derived union, exactly one `any` in the tree, a working vite build gated by tsc, and correct Cloudflare Pages config (wrangler.jsonc pages_build_output_dir + public/_redirects SPA rewrite) — the live deploy is clean with zero console errors and a working detail route. The type engine is the standout and is exhaustively correct. But the data strategy undercuts everything: there is no prebuild, no edge layer, no persistence, and PokemonGrid.tsx:28-30 hydrates the flagship browse route by firing 151 full /pokemon/{id} requests (~40 MB of uncompressed JSON) just to render 30 cards showing id/name/types/sprite — while the cheap /pokemon?limit=1025 index (68 kB) sits unused in the same api module as a search fallback. Because that slab is capped at one generation with no 'All' option, the page titled 'National Pokédex — Complete Pokémon database' tops out at 156 of 1025 species, and every feature layered on it (type filter, sort) inherits the truncation — the default view returns 'Showing 0 of 0 Pokémon' for Dark. @tanstack/react-query is installed, configured with staleTime/gcTime/retry in App.tsx:10-19 and mounted over the tree with zero useQuery in src, replaced by a hand-rolled module-level Map cache with no dedup that dies on reload. Correctness is uneven: type matchups are perfect (5832/5832 verified), stats are numerically right but the SVG radar is geometrically broken, and evolution chains are flattened DFS-first so Eevee renders as a false 9-stage line.
 
 [**Live demo**](https://pokedex-deepseek-v4-flash.pages.dev) · [source](https://github.com/guitaripod/pokedex-deepseek-v4-flash) · [vendored code & full scorecard](submissions/deepseek-v4-flash/ENTRY.md)
 
@@ -154,9 +154,9 @@ A polished, visually strong React/TS Pokedex covering the core surface well: gen
 
 #### Laguna S-2.1
 
-Bench **37.3** · feature depth 38/90 · 13/30 features solid+ · runtime ⚠ errors
+Bench **33.0** · feature depth 33/90 · 8/30 features solid+ · runtime ⚠ errors
 
-A Preact + Vite + Tailwind SPA that builds and deploys (npm run build exits 0) and ships a genuinely rich per-Pokemon detail page and working secondary dexes for moves/items/abilities/types. But the flagship 'browse all Pokemon' grid hard-crashes via four undefined references, several tools (compare, favorites page, team analysis, evolution chain) are broken by mis-wired code, and the intended static-data pipeline is non-functional so every page live-fetches hundreds-to-thousands of PokeAPI resources.
+A Preact + Vite + Tailwind SPA with a genuinely rich per-Pokémon detail page (tabbed overview/moves/sprites/encounters/lore/evolution, stat bars + BST, shiny toggle, cry playback, breeding data, version-tagged flavor text) and working secondary dexes for moves, items, abilities and types — but its flagship surface is dead. PokemonListPage.tsx calls filterPokemon, sortPokemon and paginatePokemon and passes types={TYPES} without importing any of them, and paginatePokemon (:102) runs in the render body before the loading early-return, so /pokemon/ throws ReferenceError on first paint; the bare identifiers survive into dist/assets/index-DTL92cl7.js, which is what the smoke test's 2 uncaught exceptions and failed detail route measured. The user is left with HomePage.tsx:55-60's curated slices — 93 of 1025 species, no pager. Three more mis-wirings compound it: fetchPokemonDetails doesn't exist in pokeapi.ts yet is called by Compare (and imported by Favorites/TeamBuilder/Lore); the evolution tab gates children on node.evolution_details.length>0, always empty at a chain root, so every species shows a single node; and PokemonDetailPage.tsx:123 parseInts the route param so every name-form permalink the app itself generates loads forever. The type math is arithmetically correct (dual-type products, 0x immunities, correct attacker/defender relation direction) but runs over a TYPE_ORDER that omits Rock and pads with Stellar, so Rock is invisible as an attacker and silently neutral as a defender. Architecturally the intended prebuild cannot run at all — scripts/build-data.mjs is TypeScript in a .mjs file (node --check → SyntaxError at :8) and package.json wires build to plain vite build — so every page live-fetches hundreds to thousands of PokéAPI resources. Responsiveness, re-measured this pass, adds a global horizontal-overflow break from 768px to ~1279px on every route. There is no error boundary in the tree (LoadingSpinner.tsx:51 exports one, imported nowhere), so any of these takes the whole SPA down.
 
 [**Live demo**](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-laguna-s-2-1) · [vendored code & full scorecard](submissions/laguna-s-2-1/ENTRY.md)
 

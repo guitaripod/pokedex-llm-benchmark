@@ -2,11 +2,11 @@
 
 # DeepSeek V4 Flash
 
-> A polished, visually strong React/TS Pokedex covering the core surface well: gen-by-gen national dex, network search, AND-multi-type + generation + sort filtering, a rich detail page (animated stat bars + SVG radar, correct defensive type-effectiveness, breeding/profile data, evolution, learnsets, encounters), a 2-way compare page, and a type calculator with a correct full 18x18 chart. Depth thins out beyond the core: no all-Pokemon view, network-only search, and none of the stretch features (team builder, cries, favorites, forms, command palette, export, moves dex, minigame, real damage calc). Feature grades were accurate; the only correction is that sort is a genuinely working 4-key feature (upgraded from the 0-1 bucket to 2).
+> A clean, well-typed, good-looking React/TS Pokédex that never actually becomes a Pokédex. The craft floor is genuinely high: real layering (api/components{layout,pokemon,ui}/pages/types/utils, no file over 250 lines), 186 lines of hand-written domain types including a recursive EvolutionNode and a POKEMON_TYPES-derived union, exactly one `any` in the tree, a working vite build gated by tsc, and correct Cloudflare Pages config (wrangler.jsonc pages_build_output_dir + public/_redirects SPA rewrite) — the live deploy is clean with zero console errors and a working detail route. The type engine is the standout and is exhaustively correct. But the data strategy undercuts everything: there is no prebuild, no edge layer, no persistence, and PokemonGrid.tsx:28-30 hydrates the flagship browse route by firing 151 full /pokemon/{id} requests (~40 MB of uncompressed JSON) just to render 30 cards showing id/name/types/sprite — while the cheap /pokemon?limit=1025 index (68 kB) sits unused in the same api module as a search fallback. Because that slab is capped at one generation with no 'All' option, the page titled 'National Pokédex — Complete Pokémon database' tops out at 156 of 1025 species, and every feature layered on it (type filter, sort) inherits the truncation — the default view returns 'Showing 0 of 0 Pokémon' for Dark. @tanstack/react-query is installed, configured with staleTime/gcTime/retry in App.tsx:10-19 and mounted over the tree with zero useQuery in src, replaced by a hand-rolled module-level Map cache with no dedup that dies on reload. Correctness is uneven: type matchups are perfect (5832/5832 verified), stats are numerically right but the SVG radar is geometrically broken, and evolution chains are flattened DFS-first so Eevee renders as a false 9-stage line.
 
 | | |
 |---|---|
-| **Benchmark score** | **52.8 / 100** |
+| **Benchmark score** | **41.3 / 100** |
 | **Model** | DeepSeek V4 Flash (DeepSeek, V4 Flash) |
 | **Effort** | default |
 | **Built** | 2026-07-22 |
@@ -14,12 +14,12 @@
 | **Source repo** | <https://github.com/guitaripod/pokedex-deepseek-v4-flash> |
 | **Platform** | Cloudflare Pages |
 | **Provenance** | one-shot · autonomous · deploy-only (no self-created repo) · verified: harness (scripts/run-benchmark.mjs) |
-| **Graded** | Claude Code — Opus 4.8, two-pass (grade + adversarial verify) · 2026-07-22 · rubric v1 |
+| **Graded** | Claude Code — Opus 5 (high), three-pass (grade + adversarial verify + independent 10-agent audit adjudication) · 2026-07-25 · rubric v2 |
 | **Stack** | react · typescript · vite · tailwind |
 | **Data strategy** | live-api |
 | **Runtime check** | **clean** — loads ✓ · content ✓ · JS exceptions 0 · console errors 0 · detail route ✓ · dex reach 30/1025 by scrolling, paginated (headless, 2026-07-25) |
 | **Source** | 2,406 LOC · 27 files · 7+7 deps |
-| **Feature depth** | 38 / 90 (16/30 features solid or better) |
+| **Feature depth** | 29 / 90 (11/30 features solid or better) |
 
 > ⚙️ **Run note:** Deployed to Cloudflare Pages by the model, but it did not create/push a GitHub repo despite being given gh; its unmodified commits were published for the record.
 
@@ -27,28 +27,32 @@
 
 | Code quality | Architecture | UX & design | Robustness |
 |:---:|:---:|:---:|:---:|
-| 7 | 6.5 | 7.5 | 6.5 |
+| 5.5 | 4.5 | 6.5 | 5.5 |
 
 _Four orthogonal axes, 0–10 from source. Benchmark score = 60% feature depth + 40% axis average. See [RUBRIC.md](../../RUBRIC.md)._
 
 ## Strengths
 
-- Correct type math throughout: defensive effectiveness (half*0.5/double*2/immunity->0 across dual types) and the offensive 18x18 chart both compute right values including immunities
-- Strong dual stat visualization: animated per-stat bars with per-stat STAT_MAX normalization + tiered color thresholds AND a hand-built SVG radar, plus BST total
-- Clean, well-typed architecture: api/components/pages/utils/types separation, thorough TypeScript interfaces, consistent Tailwind and framer-motion polish, skeletons and not-found/loading states
-- Genuinely responsive and attractive dark UI (2->6 col grids, sticky blurred header, type-themed gradients/glows, nice hero)
+- Dual-type defensive matchups are exhaustively correct: TypeEffectiveness.tsx:19-29 folds both defender types multiplicatively with a hard 0 for immunity, verified 5832/5832 against a reference implementation over live PokeAPI data, from an 18x18 chart derived at runtime rather than hardcoded
+- Strong typing discipline for 2.4k LOC — 186 lines of genuine domain types (recursive EvolutionNode, `POKEMON_TYPES as const` -> derived union), exactly one `any` (LocationsSection.tsx:8), consistent `import type`, no suppressions; tsc --strict and oxlint both pass
+- Real component decomposition with typed prop interfaces (ProfileRow, CompareInput, CompareColumn, MiniTypeBadge, NavLink) and no file over 250 lines
+- Build and deploy half is verifiably sound: vite build succeeds, tsc -b gates it, wrangler.jsonc + _redirects give correct SPA routing, and deep links to /pokemon/:id resolve on the live host with hashed assets and correct cache headers
+- Per-generation arithmetic is exact (offsets 0/151/.../905, limits summing to exactly 1025) and stat bars normalize per-stat via a real STAT_MAX table rather than a flat /255
 
 ## Weaknesses
 
-- react-query is dead scaffolding: QueryClientProvider wraps the app but zero useQuery hooks exist (grep-confirmed); all fetching is hand-rolled in useEffect against a module-level Map cache
-- Notable dead code / DRY violations: TYPE_GRADIENTS + getTypeGradient and the index.css @theme --color-type-* tokens are never used; typeToHex is duplicated verbatim in PokemonGrid.tsx and StatBar.tsx despite getTypeColor existing; getMove/getGeneration/getPokemonSpriteUrl unused
-- No 'all species' view (one generation at a time, max ~156 visible) despite the 'Complete database' title; search and grid rely on heavy bulk PokeAPI fetches (151 per gen, up to 20 per search) that risk rate-limiting
-- Real bugs/limits: StatRadar axis labels are misplaced inward (getPoint(i, radius+14) fed through /255), evolution branches linearize into a misleading single chain, learnset Type column is a permanent empty placeholder capped at 50 rows, detail next-arrow capped at 1010 not 1025
-- Build unverifiable here (no node_modules) and package.json pins non-existent future versions (typescript ~6.0.2, vite ^8.1.1)
+- The browse route caps at one generation (PokemonGrid.tsx:28) with no 'All' option, so a page titled 'National Pokédex — Complete Pokémon database' hands the user at most 156 of 1025 species; measured runtime reach was 30 by scrolling
+- Type filter and sort both operate only on that truncated slab — clicking 'Dark' on the default view yields 'Showing 0 of 0 Pokémon', and 'sort by Weight' silently means 'heaviest in Kanto'
+- Worst-case data strategy: 151 requests to the heaviest endpoint in the API (~40 MB uncompressed) before first paint to render 30 minimal cards, when /pokemon?limit=1025 (68 kB) is already in the same api module
+- react-query installed, configured and mounted (App.tsx:10-27) with zero useQuery in src, replaced by a weaker module-level Map cache with no in-flight dedup that dies on reload — and bypassed entirely by raw fetch in ComparePage.tsx:33 and LocationsSection.tsx:14
+- Evolution chains are DFS-flattened into one array (EvolutionChain.tsx:91-108) and rendered with arrows between consecutive entries, so Eevee displays as a 9-stage chain claiming Vaporeon evolves into Jolteon; only evolution_details[0] is read, dropping happiness/time-of-day/location conditions
+- No ErrorBoundary anywhere and no try/catch on the flagship route's 151-request Promise.all (PokemonGrid.tsx:26-40) — one 429 leaves /pokedex in skeletons forever; LocationsSection.tsx:24-27 can white-screen the detail page on a non-array JSON body
+- Copy-paste rot across ~13 items: the 18-entry type palette exists five times (verbatim typeToHex clones in PokemonGrid.tsx:164 and StatBar.tsx:105 while six other files correctly import getTypeColor), dead exports getMove/getGeneration/getPokemonSpriteUrl/getTypeGradient, the identical useState+useEffect fetch triple hand-written eight times with no custom hook, a diverged type-folding loop between TypeEffectiveness and TypeCalculatorPage, and README.md left as untouched Vite template boilerplate
+- Ten of thirty checklist features are entirely absent (team builder, damage calc, moves dex, favorites, command palette, minigame, export, forms, shareable URLs, cries)
 
 ## Standout
 
-The type-effectiveness engine: both the per-Pokemon defensive breakdown and the full 18x18 offensive matrix are derived live from PokeAPI damage_relations and are mathematically correct, including 0.25x/4x dual-type stacking and immunities.
+The type engine: an 18x18 chart derived live from /type/{name} damage_relations and folded over both defender types with a hard-zero immunity, which verified 5832/5832 against a reference implementation on live data — including the gen-6 quirks (Fairy immune to dragon, Steel's half-damage-from including fairy but not ghost/dark). It is the one place this entry is provably best-in-class, and it sits inside an app whose flagship page never shows more than 15% of the dex.
 
 ## Feature depth detail
 
@@ -58,38 +62,38 @@ Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ ab
 
 | Feature | Grade | Notes |
 |---|:---:|---|
-| National Dex | ◕ 2 | `PokemonGrid.tsx GEN_LIMITS/GEN_OFFSETS (sum exactly 1025, offsets align cumulatively); ids=offset+i+1 correctly generate each gen's range so all 1025 are reachable. But selectedGen defaults to null -> loads only Kanto 151; there is NO 'all' view, so you never see more than one generation (max 156, gen 5) at once despite the 'National Pokedex - Complete database' title.` |
-| Instant search | ◕ 2 | `SearchBar.tsx debounced 300ms -> pokeapi.searchPokemon: numeric->/pokemon/id, else exact name, else fetch full 1025 list and substring-filter to 20 full records. Works, but every keystroke query hits PokeAPI over the network (up to 20 detail fetches on fallback); not the client-side/no-round-trip search the checklist asks for.` |
-| Type filter | ◕ 2 | `PokemonGrid.tsx toggleType + filtered useMemo uses selectedTypes.every() (AND of multiple types) against loaded set (lines 46-50). Multi-select AND works but only filters the currently-loaded generation/151, not the full dex.` |
-| Generation filter | ◕ 2 | `PokemonGrid.tsx GENERATIONS 1-9 buttons re-fetch with correct GEN_OFFSETS+GEN_LIMITS per gen; region labels (Kanto..Paldea) from types/pokemon.ts GENERATIONS. Solid, working; single-select toggle.` |
-| Sorting | ◕ 2 | `UPGRADE. PokemonGrid.tsx has a working sort dropdown (state line 22; sort logic lines 51-56; UI lines 75-84) over id (asc), name (localeCompare), height (desc), weight (desc), applied live via useMemo. Working multi-key sort; no asc/desc direction toggle and only sorts the currently-loaded gen set.` |
-| Advanced filters | ◔ 1 | `Beyond single-toggle: type multi-select uses AND semantics (every()) and combines live with the generation filter and the sort in one useMemo. But no numeric/stat-range, ability, legendary, height/weight, or egg-group filters and no dedicated advanced-filter panel; incremental value over type-filter+generation-filter is small.` |
-| Shareable filter URLs | ◔ 1 | `Detail pages use clean deep-linkable routes /pokemon/:id (App.tsx), which are shareable. But no URL state anywhere else: pokedex type/gen/sort/search, compare selections, and type-calc selections are all component useState with no searchParams (grep: no useSearchParams/URLSearchParams), so filtered views and comparisons cannot be shared.` |
+| National Dex | ◔ 1 | `PokemonGrid.tsx:28-30 hydrates ids 1..151 by default (`limit = selectedGen ? GEN_LIMITS[selectedGen] : 151`) and GENERATIONS (types/pokemon.ts:158-168) offers no 'All' option, so the route titled 'National Pokédex — Complete Pokémon database' (PokedexPage.tsx:13-17) never holds more than one generation (max 156). The Load More pager (:148-157) only walks the already-loaded slab, matching the measured runtime reach of 30/1025 by scrolling and ~151 by clicking. Per-gen offsets/limits are exact and sum to 1025, but the dex itself is never presented — a fraction of the dex is the 1 anchor.` |
+| Instant search | ◕ 2 | `SearchBar.tsx + pokeapi.ts:98-106 does exact-name/id resolution against a 1025-entry name index with substring fallback, debounce and keyboard-navigable dropdown. Solid, not exceptional: results capped at 20 (pokeapi.ts:106), no type/ability/move search, and alternate forms it does resolve (e.g. charizard-mega-x, id 10034) lead to a detail route that 404s on getSpecies and renders 'Pokemon not found'.` |
+| Type filter | ◔ 1 | `DOWNGRADED 2→1 after re-reading PokemonGrid.tsx. The mechanics are fine — toggleType (:62-66) builds a multi-select set, :46-50 ANDs with `selectedTypes.every(...)`, type-colored pills (:104-121) and Clear filters (:134-141) — but it filters `allPokemon`, which :28 caps at one generation (151 by default). On the default /pokedex view clicking 'Dark' yields 'Showing 0 of 0 Pokémon' (:133) because no base Gen-1 species is Dark-type, so the filter reads as broken to the user; selecting any 3 types is likewise always empty with no guard. State is pure useState (:20) with no persistence and no URL encoding (0 hits for localStorage/searchParams in src). The 2 anchor requires filtering correctly over the full dex; this covers ≤15% of it with a silently-empty default case.` |
+| Generation filter | ◕ 2 | `PokemonGrid.tsx:9-15 + :90-102: nine region buttons with exact offsets (0/151/251/386/493/649/721/809/905) and limits (151/100/135/107/156/72/88/96/120) summing to exactly 1025, ids built as offset+i+1, so every generation's range is correct and re-fetches on change (:42). Solid; short of 3 because there is no 'All' option and no persistence/URL state.` |
+| Sorting | ◔ 1 | `DOWNGRADED 2→1. The entire feature is the 6-line comparator at PokemonGrid.tsx:51-56 behind a 4-option select (:75-84): id/name ascending and height/weight descending, all directions hardcoded with no asc/desc toggle anywhere in src, so 'lightest first' or 'Z–A' is impossible. No base-stat or BST sort despite `stats`/`base_stat` being present in every loaded payload (types/pokemon.ts:17-21). It sorts `[...allPokemon]` (:45), i.e. at most one generation, so 'Weight' returns the heaviest Kanto species, not the heaviest Pokémon, and silently changes meaning per generation. Thin keys over a truncated set is the 1 band; the 2 anchor is sorting correctly over the full dex.` |
+| Advanced filters | ○ 0 |  |
+| Shareable filter URLs | ○ 0 |  |
 
 **Detail Depth**
 
 | Feature | Grade | Notes |
 |---|:---:|---|
-| Official artwork | ◕ 2 | `PokemonDetailPage.tsx renders official-artwork front_default at w-64 h-64 with a type-colored blurred glow backdrop (lines 90-100); getPokemonImageUrl -> PokeAPI official-artwork PNGs. Cards/home also use official-artwork. Works.` |
-| Shiny toggle | ◕ 2 | `PokemonDetailPage.tsx spriteMode toggle switches official-artwork front_default vs front_shiny via Normal / 'Shiny' buttons (lines 60-118). Works on the detail page only; grid/compare/search show non-shiny.` |
+| Official artwork | ◕ 2 | `PokemonDetailPage.tsx:60-62 renders sprites.other['official-artwork'] at large size with a framer-motion entrance, PokemonCard uses the sprite for the grid with lazy loading. Solid, but there is no sprite gallery (Home/Dream World/game sprites), no zoom and no fallback chain, so not a 3.` |
+| Shiny toggle | ◕ 2 | `PokemonDetailPage.tsx:22 + :112-118: a real default/shiny toggle that swaps front_default for front_shiny on the official artwork (:60-62), styled with a gold accent when active. Working and obvious; no shiny sprite in the grid or comparison view, so 2 not 3.` |
 | Cry playback | ○ 0 |  |
-| Stat visualization | ● 3 | `StatBar.tsx: animated per-stat bars with per-stat STAT_MAX normalization + 5-tier color thresholds, PLUS a hand-built SVG StatRadar hexagon (concentric rings, vertex dots, type-colored fill); detail page shows both + BST total. Genuinely strong dual viz. Flaw: StatRadar labels/axis lines use getPoint(i, radius+14) which passes 86 through the /255 normalizer (line 55), clustering all labels at ~24px from center instead of the rim.` |
-| Abilities with effects | ◔ 1 | `PokemonDetailPage.tsx and ComparePage.tsx list ability names with an is_hidden (Hidden) marker. But names only: no ability effect/description text, no tooltips, no getAbility fetch (grep: no getAbility; effect_entries exists only on the Move type). Shallow display.` |
-| Evolution chains | ◕ 2 | `EvolutionChain.tsx fetches chain, renders sprites with trigger + min_level + item conditions. But flattenChain() linearizes branches (base + DFS of every child sequentially), so branching lines (Eevee's 8, Wurmple) render as one misleading sequence with arrows between siblings; only level/item shown, not happiness/trade/time/etc.` |
-| Move learnsets | ◕ 2 | `MovesSection.tsx: moves filterable by learn method (dropdown from actual methods), searchable, sortable by level/name, deduped to min level. But capped at 50 rows (slice(0,50)) and the Type column is a permanently-empty placeholder <span> with a stray '{/* Type info fetched lazily */}' comment (lines 111-114).` |
-| Defensive matchups | ◕ 2 | `TypeEffectiveness.tsx computes per-Pokemon DEFENSIVE effectiveness from live getAllTypes() damage_relations, multiplying half(0.5)/double(2) across dual types and zeroing on no_damage_from; grouped Immune/Weak/Resists. Math is correct including immunities (multiplier reset per attacker, immunity dominates).` |
-| Breeding data | ◕ 2 | `PokemonDetailPage.tsx Profile/Classification blocks show egg_groups, gender ratio (formatGenderRatio handles -1 genderless and rate/8), hatch_counter as cycles + steps (*257), growth rate, capture rate %. Missing EV yield (stats.effort is in the type but never displayed).` |
+| Stat visualization | ◕ 2 | `StatBar.tsx animates per-stat bars normalized against a real per-stat STAT_MAX table (:11-12, types/pokemon.ts:179-186) with Math.min clamping, and PokemonDetailPage.tsx:157 shows a true 6-stat BST. It also ships a hand-built SVG radar — which is the shape of a 3 — but the radar is geometrically broken: getPoint normalizes its argument as value/255 (StatBar.tsx:55) while labels/spokes are placed with getPoint(i, radius + 14) (:82), so a nominal 86px radius collapses to 24.3px and labels render inside the polygon with stub spokes; the radar also uses flat /255 while the bars use STAT_MAX, so the two views of the same stats disagree. Correct numbers, broken third pillar = 2.` |
+| Abilities with effects | ◔ 1 | `PokemonDetailPage.tsx:198-200 lists ability names with a hidden-ability marker and nothing else — no effect text, no short_effect, no /ability fetch anywhere in src. Names without effect text on the surface where a user reads them is the explicit 1 anchor.` |
+| Evolution chains | ◔ 1 | `EvolutionChain.tsx flattenChain (:91-108) DFS-pushes the root and every descendant into ONE flat array (:99-104) and the renderer draws a right-arrow between consecutive entries (:36-51), so branches are rendered as a false linear sequence: Eevee becomes a 9-stage chain claiming Vaporeon→Jolteon, and Tyrogue renders tyrogue→hitmonlee→hitmonchan→hitmontop all labelled 'Level Up Lv.20'. Conditions are lossy too — :102 reads only evolution_details[0] and :45-47 renders only trigger/min_level/item, dropping min_happiness, time_of_day, location, trade_species, known_move (all typed at types/pokemon.ts:99-115), so Espeon/Umbreon show bare 'Level Up'. Linear chains render correctly and species links resolve, which keeps it at 1 rather than 0. Species are also fetched in a sequential await loop (:19-24).` |
+| Move learnsets | ◔ 1 | `MovesSection.tsx renders level-up moves sorted by min level but `return list.slice(0, 50)` (:52) hard-truncates with no pager (Charizard has 131), the `'type'` sort option is a dead union member with a no-op branch, and the Type column is permanently blank under a comment claiming lazy fetching that never happens. No TM/egg/tutor separation, no power/accuracy/PP (getMove is exported and imported nowhere). Truncated + stubbed columns = 1.` |
+| Defensive matchups | ◕ 2 | `TypeEffectiveness.tsx:19-29 folds every attacking type over BOTH defender types multiplicatively (half *= 0.5, double *= 2) and forces immunity to a hard 0, from a live-derived 18×18 chart. Verified exhaustively against a reference implementation over live PokeAPI type JSON: 5832/5832 attacker × ordered-dual/single-defender combos match, 0 mismatches (ground vs Steel/Flying = 0, fighting vs Dark/Ice = 4, dragon vs Steel/Fairy = 0). Correct and complete = 2; not 3 because there is no ability interaction (Levitate/Wonder Guard), no offensive coverage view per species, and no .catch on the fetch.` |
+| Breeding data | ◕ 2 | `PokemonDetailPage.tsx:174-186 surfaces egg groups (formatted), gender ratio computed from gender_rate, growth rate, habitat, capture rate and hatch steps. Solid coverage of the species payload; two small inaccuracies keep it off 3 — hatch steps use hatch_counter * 257 where PokeAPI documents 255 * (hatch_counter + 1), and capture_rate is printed as a percentage of 255, which is not a catch probability.` |
 | Alternate forms | ○ 0 |  |
-| Pokédex entries | ◔ 1 | `PokemonDetailPage.tsx shows a single flavor text (filters en entries, takes .at(-1)) with sanitizeFlavorText cleanup. No version/game selector and no browsing of multiple entries; one blurb only.` |
+| Pokédex entries | ◔ 1 | `PokemonDetailPage.tsx:55-57 filters flavor_text_entries to English and takes `.at(-1)` — a single Pokédex entry with no game/version label, no version picker and no list of the dozens of other entries in the same payload. One string out of many is thin.` |
 
 **Tools & Modes**
 
 | Feature | Grade | Notes |
 |---|:---:|---|
-| Type chart | ◕ 2 | `TypeCalculatorPage.tsx 'All Type Matchups' renders a full 18x18 offensive matrix from each attacker's damage_relations double/half/no_damage_to with correct 0/0.5/1/2 values and color coding. Complete and correct, but axis headers are bare color swatches (no type labels) and cells aren't clickable.` |
-| Compare tool | ◕ 2 | `ComparePage.tsx side-by-side of exactly two Pokemon: dual stat bars (red vs blue, normalized to per-row max), types, abilities (hidden flagged), height/weight/base-xp, VS divider. Works but hard-limited to 2 (not 2+), no radar, no defensive/coverage analysis.` |
+| Type chart | ◕ 2 | `TypeCalculatorPage.tsx:151-169 renders a full 18×18 offensive matrix derived live from /type/{name} damage_relations for all 18 types (pokeapi.ts:51-55), verified correct against the API including gen-6 quirks (ghost→normal 0, normal→ghost 0, fairy→dragon 2, steel→ghost 1, Fairy immune to dragon, Dark immune to psychic). Solid; short of 3 because there is no dual-type defender mode on this page and no .catch (:15) — if getAllTypes fails the grid silently renders 324 neutral '1's since :164 defaults mult=1.` |
+| Compare tool | ◕ 2 | `ComparePage.tsx is a genuine side-by-side: two typeahead inputs, VS columns, and per-stat dual bars normalized against max(a,b) with a maxVal > 0 guard (:94-98) so no NaN, plus animated widths. Works as a user expects = 2; not 3 because it compares only two species, has no BST/type-coverage verdict, and bypasses the api layer with a bare fetch (:33) in the same function whose other branch calls getPokemonById.` |
 | Team builder | ○ 0 |  |
-| Damage calculator | ◔ 1 | `TypeCalculatorPage.tsx provides an interactive attacker x up-to-2-defenders effectiveness calculator producing 0/0.25/0.5/1/2/4 multipliers with labels. But it is a type-matchup calculator, not a damage calculator: no level, base power, attack/defense stats, STAB, or damage formula anywhere.` |
+| Damage calculator | ○ 0 |  |
 | Moves / Items / Abilities dex | ○ 0 |  |
 | Who's-that-Pokémon | ○ 0 |  |
 | Command palette | ○ 0 |  |
@@ -99,9 +103,9 @@ Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ ab
 | Feature | Grade | Notes |
 |---|:---:|---|
 | Favorites | ○ 0 |  |
-| Dark/light theming | ◕ 2 | `Pervasive type-themed styling: getTypeColor drives card glows, detail hero gradients, radar fill, badges via inline styles. NOTE: index.css @theme --color-type-* tokens and TYPE_GRADIENTS/getTypeGradient are defined but never used (components use inline getTypeColor). No light/dark toggle (html hardcoded class='dark', body bg-gray-950), but checklist accepts type-themed styling.` |
+| Dark/light theming | ◕ 2 | `A coherent dark design system: index.css design tokens, Tailwind 4 config, a display font, per-type color derivation driving card gradients and badges (utils/typeColors.ts) and consistent surface/border treatment across every page. Visually assured = 2; not 3 because there is no light/dark toggle and no prefers-color-scheme handling, and the palette is duplicated in five places with dead --color-type-* tokens.` |
 | Keyboard navigation | ○ 0 |  |
-| Responsive design | ◕ 2 | `Thorough responsive design: grid-cols-2 -> xl:grid-cols-6 (PokemonGrid/home), sm/md/lg breakpoints throughout, nav labels hidden below md (Header.tsx), search hidden below sm, flex-col->row switches, sticky blurred header, detail lg:grid-cols-5. Usable at phone widths.` |
+| Responsive design | ◕ 2 | `PokemonGrid.tsx:143 steps 2→3→4→5→6 columns across sm/md/lg/xl, filter/sort rows collapse to column at sm (:71), Header collapses its nav, and the detail page reflows its two-column layout. Works down to phone widths = 2; no mobile-specific navigation or touch affordances push it past that.` |
 | Export / sharing | ○ 0 |  |
 
 ## Vendored source

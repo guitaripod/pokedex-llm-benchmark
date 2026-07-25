@@ -61,7 +61,7 @@ function runtimeText() {
     r.dexReach == null
       ? ""
       : `, species reachable by scrolling the browse page (${r.dexRoute}) = ${r.dexReach} of 1025${short}`;
-  return `loads=${r.loadOk ? "ok" : "FAILED"}, content=${r.contentOk ? "ok" : "blank/error"}, consoleErrors=${r.consoleErrors}, jsExceptions=${r.pageErrors}, detailRoute=${r.detailOk ? "ok" : "failed"}${dex} → ${r.verdict} (checked ${r.checkedAt})`;
+  return `loads=${r.loadOk ? "ok" : "FAILED"}, content=${r.contentOk ? "ok" : "blank/error"}, consoleErrors=${r.consoleErrors}, jsExceptions=${r.pageErrors}, detailRoute=${r.detailOk ? "ok" : "failed"}${dex} → ${r.verdict} (checked ${r.checkedAt}${r.measuredOn ? `, ${r.measuredOn}` : ""})`;
 }
 
 function assemblePrompt() {

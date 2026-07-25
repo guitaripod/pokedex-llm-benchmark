@@ -51,15 +51,15 @@ function leaderboard() {
         }`
       : "—";
     const loc = s.metrics ? s.metrics.sourceLoc.toLocaleString("en-US") : "—";
-    return `| ${medal(i)} | **${s.model}** | ${s.effort} | **${fmt(bench(s))}** | ${depth} | ${axes} | ${nbsp(stack)} | ${loc} | [demo](${s.liveUrl}) |`;
+    return `| ${medal(i)} | **${s.model}** | ${s.effort} | **${fmt(bench(s))}** | ${depth} | ${axes} | ${nbsp(stack)} | ${loc} | ${s.liveUrl ? `[demo](${s.liveUrl})` : "_gone_"} |`;
   });
   return [head, ...rows].join("\n");
 }
 
-const shortId = (s) =>
-  `[${s.model.replace("Laguna S-2.1", "Laguna").split(" ")[0]}${
-    s.effort !== "default" ? `·${s.effort}` : ""
-  }](${s.liveUrl})`;
+const shortId = (s) => {
+  const label = `${s.model.replace("Laguna S-2.1", "Laguna").split(" ")[0]}${s.effort !== "default" ? `·${s.effort}` : ""}`;
+  return s.liveUrl ? `[${label}](${s.liveUrl})` : label;
+};
 
 function matrix() {
   const cols = ranked;
@@ -89,7 +89,7 @@ function entryList() {
       const stat = scored(s)
         ? `Bench **${fmt(bench(s))}** · feature depth ${featureQuality(s)}/${MAX_QUALITY} · ${solidCount(s)}/${TOTAL_FEATURES} features solid+${rt}`
         : "_unscored_";
-      return `#### ${s.model}${s.effort !== "default" ? ` — ${s.effort}` : ""}\n\n${stat}\n\n${line}\n\n[**Live demo**](${s.liveUrl}) · [source](${s.sourceRepo}) · [vendored code & full scorecard](submissions/${s.id}/ENTRY.md)`;
+      return `#### ${s.model}${s.effort !== "default" ? ` — ${s.effort}` : ""}\n\n${stat}\n\n${line}\n\n${s.liveUrl ? `[**Live demo**](${s.liveUrl})` : "_no live deployment_"} · [source](${s.sourceRepo}) · [vendored code & full scorecard](submissions/${s.id}/ENTRY.md)`;
     })
     .join("\n\n---\n\n");
 }

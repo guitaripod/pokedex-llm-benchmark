@@ -33,21 +33,23 @@ These are NOT about how many features exist — do not restate coverage:
 
 Objective runtime smoke-test result for this submission (loads / console errors / detail route), if available — weigh it heavily for `robustness`: {{RUNTIME}}
 
-## Calibration anchors (rubric v1)
+## Calibration anchors (rubric v2)
 
-Grade against these FIXED reference points from already-scored submissions so scores stay comparable across sessions and judges. Do not re-score the anchors; match this submission's depth to the closest example.
+These are FIXED reference points so scores stay comparable across sessions and judges. They are stated as CRITERIA first — match this submission's implementation to the criteria, not to any other entry's current score.
 
 **Feature depth 0–3:**
-- **3 (exceptional)** — team-builder as in Fable-5-ultracode / Grok: 6 slots, multiple persistent named teams, coverage/defensive analysis, Showdown import+export, damage preview. Or stats-viz as in Grok / DeepSeek-V4-Flash: animated per-stat bars **plus** a hand-built SVG radar plus BST total.
-- **2 (solid)** — type-matchups as in DeepSeek-V4-Flash: correct per-Pokémon defensive multipliers combined across BOTH types including immunities. Working as a user expects, no major gap.
-- **1 (shallow/broken)** — type-matchups as in Grok: primary type only, so dual-type results are wrong. Or abilities as in Grok: ability names only, no effect text. Or generation-filter as in Grok: present but renders ~1 Pokémon in gen view (broken).
-- **0 (absent)** — team-builder as in Opus-4.8 / DeepSeek: no implementation at all. Or forms across most entries: no mega/regional/variant handling.
+- **3 (exceptional)** — the implementation goes past what the feature needs to work, in a way a Pokédex enthusiast would single out. It is not enough to be correct and complete. Shape of a 3: a team builder with 6 slots, *multiple persistent named* teams, coverage/defensive analysis, Showdown import **and** export, and a damage preview; or stat visualization with genuinely animated per-stat bars **plus** a hand-built SVG radar **plus** BST. If you cannot name a specific thing it does that a merely-good implementation would not, it is a 2.
+- **2 (solid)** — properly implemented, correct, and working as a user expects, with no major gap. Shape of a 2: per-Pokémon defensive matchups combining BOTH types including 0× immunities; a filter/sort that filters and sorts correctly over the full dex. Breadth achieved by adding one more one-line predicate per dimension is a 2, not a 3.
+- **1 (shallow/broken)** — present but thin, truncated, hardcoded, *or* broken at runtime. Shape of a 1: defensive matchups computed off the primary type only, so dual types are wrong; abilities listed by name with no effect text on the surface where a user reads them; a browse feed that renders a fraction of the dex with no pagination; a generation filter that renders ~1 Pokémon.
+- **0 (absent)** — no real implementation.
 
-**Craft axes 0–10:**
-- **codeQuality** — 9: Fable-5-ultracode / Opus-4.8 (modular, strongly typed, no rot). 3: Laguna-S-2.1 (mis-wired references, dead tokens, broken imports).
-- **architecture** — 9: Fable-5-ultracode (entire dataset prebuilt into static shards, zero runtime API). 3: Laguna (intended prebuild is non-functional, so every page live-fetches thousands of resources).
-- **uxDesign** — 9: Opus-4.8 / Fable-5-ultracode (polished, animated, accessible, responsive). 4: Laguna (rough, broken views).
-- **robustness** — 9: Fable-5-ultracode (works end-to-end, correct logic). 6.5: DeepSeek-V4-Flash (works, minor issues). 4.5: Grok (filters halt infinite-loading; dual-type matchups wrong). 2: Laguna (loads and renders, then throws a JS exception and the detail route fails — runtime verdict: errors).
+**Craft axes 0–10** (orthogonal to coverage — do not restate how many features exist):
+- **codeQuality** — 9: modular, strongly typed, no rot, no dead code, layering respected. 3: mis-wired references, dead tokens, broken imports.
+- **architecture** — 9: the whole dataset prebuilt into static shards with a real caching story and zero runtime API dependency. 3: an intended prebuild that does not function, so every page live-fetches thousands of resources.
+- **uxDesign** — 9: polished, animated, accessible (real aria/focus/reduced-motion handling), responsive to phone widths. 4: rough, unstyled or broken views.
+- **robustness** — 9: works end to end with correct logic and no reachable crash. 6.5: works, minor issues. 4.5: a core surface fails (filters halt loading, dual-type matchups wrong). 2: loads and renders, then throws a JS exception and the detail route fails.
+
+Weigh the objective runtime measurement above heavily for `robustness` and for `national-dex`: a site with zero console errors that still hands the user only a fraction of the 1025 species (and offers no pager) is broken at its primary job.
 
 ## Rules
 
