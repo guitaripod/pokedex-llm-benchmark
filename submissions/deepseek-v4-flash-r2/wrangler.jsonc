@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "pokedex-deepseek-v4-flash-r2",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "DEX_KV",
+      "id": "4ef8983473c840ea95f1efb22c4fab9b"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

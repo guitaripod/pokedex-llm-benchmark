@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+dist/
+data/
+*.log
+.DS_Store
+shots/
+*.out

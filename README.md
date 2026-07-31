@@ -8,8 +8,8 @@
 
 Only the trailing name token changes per run (it encodes the model + effort). Read the full framing in **[THE_BRIEF.md](THE_BRIEF.md)** and how submissions are scored in **[RUBRIC.md](RUBRIC.md)**.
 
-- **9 submissions** across 4 named providers (plus 1 codename entry), graded on **30 Pokédex features** by depth plus four craft axes.
-- **8 of 9** submissions still serve a **live Cloudflare deployment** (click any demo link; the one that does not is noted on its scorecard) and every one has its **vendored source** under [`submissions/`](submissions/).
+- **10 submissions** across 4 named providers (plus 1 codename entry), graded on **30 Pokédex features** by depth plus four craft axes.
+- **9 of 10** submissions still serve a **live Cloudflare deployment** (click any demo link; the one that does not is noted on its scorecard) and every one has its **vendored source** under [`submissions/`](submissions/).
 - The tables below are generated from [`submissions.json`](submissions.json) — the single source of truth.
 
 ## 🏆 Leaderboard
@@ -21,10 +21,11 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 | 🥉 | **Opus 5** | low | **62.0** | 54 / 90 | 7 · 8 · 6 · 5 | react/ts&nbsp;·&nbsp;vite | 4,491 | [demo](https://pokedex-opus-5-low.guitaripod.workers.dev) |
 | 4 | **Opus 4.8** | low | **56.8** | 41 / 90 | 7.5 · 7.5 · 7 · 7.5 | react/ts&nbsp;·&nbsp;vite | 2,395 | [demo](https://pokedex-opus-4-8-low.guitaripod.workers.dev) |
 | 5 | **Fable 5** | low | **55.8** | 44 / 90 | 6.5 · 6.5 · 7 · 6.5 | vanilla/js | 1,379 | [demo](https://pokedex-fable-5-low.guitaripod.workers.dev) |
-| 6 | **GLM 5.2** | max | **48.7** | 43 / 90 | 4.5 · 5 · 6 · 4.5 | vanilla/js | 6,523 | [demo](https://pokedex-glm52-max.guitaripod.workers.dev) |
-| 7 | **Grok** | default | **41.7** | 37 / 90 | 4 · 4 · 5.5 · 3.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | _gone_ |
-| 8 | **DeepSeek V4 Flash** | default | **41.3** | 29 / 90 | 5.5 · 4.5 · 6.5 · 5.5 | react/ts&nbsp;·&nbsp;vite | 2,406 | [demo](https://pokedex-deepseek-v4-flash.pages.dev) |
-| 9 | **Laguna S-2.1** | default | **33.0** | 33 / 90 | 2.5 · 2.5 · 4 · 2 | preact/ts&nbsp;·&nbsp;vite | 9,208 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
+| 6 | **DeepSeek V4 Flash 0731** | default | **49.7** | 40 / 90 | 5 · 7 · 5.5 · 5.5 | vanilla/ts | 2,708 | [demo](https://pokedex-deepseek-v4-flash-r2.guitaripod.workers.dev) |
+| 7 | **GLM 5.2** | max | **48.7** | 43 / 90 | 4.5 · 5 · 6 · 4.5 | vanilla/js | 6,523 | [demo](https://pokedex-glm52-max.guitaripod.workers.dev) |
+| 8 | **Grok** | default | **41.7** | 37 / 90 | 4 · 4 · 5.5 · 3.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | _gone_ |
+| 9 | **DeepSeek V4 Flash Preview** | default | **41.3** | 29 / 90 | 5.5 · 4.5 · 6.5 · 5.5 | react/ts&nbsp;·&nbsp;vite | 2,406 | [demo](https://pokedex-deepseek-v4-flash.pages.dev) |
+| 10 | **Laguna S-2.1** | default | **33.0** | 33 / 90 | 2.5 · 2.5 · 4 · 2 | preact/ts&nbsp;·&nbsp;vite | 9,208 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
 
 *Bench (0–100) = 60% feature depth + 40% craft axes. **Feature depth** grades each of the 30 features 0–3 (absent → shallow/broken → solid → exceptional), so a few excellent features outscore many stubs. **Code · Arch · UX · Robust** are the four 0–10 craft axes. LOC counts hand-written source only. See [RUBRIC.md](RUBRIC.md).*
 
@@ -32,43 +33,43 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 
 Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow / broken (1) · ○ absent (0)
 
-| Feature | [Opus·ultracode](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-5-low.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | Grok | [DeepSeek](https://pokedex-deepseek-v4-flash.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Browse & Discovery** | | | | | | | | | |
-| National Dex | ● | ◕ | ◔ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ |
-| Instant search | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Type filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ |
-| Generation filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Sorting | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ |
-| Advanced filters | ● | ◕ | ◕ | ○ | ◕ | ○ | ◕ | ○ | ◔ |
-| Shareable filter URLs | ● | ● | ◔ | ○ | ◔ | ◔ | ◔ | ○ | ◔ |
-| **Detail Depth** | | | | | | | | | |
-| Official artwork | ● | ◕ | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
-| Shiny toggle | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
-| Cry playback | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ |
-| Stat visualization | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ● | ◕ | ◕ |
-| Abilities with effects | ● | ● | ◔ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ |
-| Evolution chains | ● | ● | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ |
-| Move learnsets | ● | ● | ◔ | ◔ | ◔ | ◕ | ◔ | ◔ | ◕ |
-| Defensive matchups | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Breeding data | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
-| Alternate forms | ◕ | ● | ◕ | ◕ | ◕ | ◔ | ○ | ○ | ○ |
-| Pokédex entries | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ | ◕ |
-| **Tools & Modes** | | | | | | | | | |
-| Type chart | ● | ● | ◕ | ◕ | ◕ | ◕ | ○ | ◕ | ◔ |
-| Compare tool | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Team builder | ◕ | ◕ | ◕ | ○ | ○ | ◕ | ◕ | ○ | ◔ |
-| Damage calculator | ● | ○ | ◕ | ○ | ○ | ○ | ◔ | ○ | ○ |
-| Moves / Items / Abilities dex | ● | ● | ◕ | ◕ | ○ | ◔ | ○ | ○ | ◕ |
-| Who's-that-Pokémon | ● | ● | ◕ | ○ | ○ | ○ | ○ | ○ | ○ |
-| Command palette | ◕ | ◕ | ◕ | ○ | ○ | ◔ | ○ | ○ | ○ |
-| **Polish & Platform** | | | | | | | | | |
-| Favorites | ◕ | ◕ | ◕ | ○ | ◕ | ◕ | ◕ | ○ | ◔ |
-| Dark/light theming | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Keyboard navigation | ◕ | ● | ◔ | ○ | ◔ | ◔ | ◔ | ○ | ◔ |
-| Responsive design | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Export / sharing | ◕ | ◔ | ○ | ○ | ○ | ○ | ◕ | ○ | ○ |
-| **Feature depth / 90** | **74** | **66** | **54** | **41** | **44** | **43** | **37** | **29** | **33** |
+| Feature | [Opus·ultracode](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-5-low.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [DeepSeek](https://pokedex-deepseek-v4-flash-r2.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | Grok | [DeepSeek](https://pokedex-deepseek-v4-flash.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Browse & Discovery** | | | | | | | | | | |
+| National Dex | ● | ◕ | ◔ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ |
+| Instant search | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◕ | ◔ |
+| Type filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ |
+| Generation filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Sorting | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ |
+| Advanced filters | ● | ◕ | ◕ | ○ | ◕ | ◕ | ○ | ◕ | ○ | ◔ |
+| Shareable filter URLs | ● | ● | ◔ | ○ | ◔ | ◔ | ◔ | ◔ | ○ | ◔ |
+| **Detail Depth** | | | | | | | | | | |
+| Official artwork | ● | ◕ | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Shiny toggle | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Cry playback | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ |
+| Stat visualization | ● | ◕ | ◕ | ◕ | ◕ | ● | ◕ | ● | ◕ | ◕ |
+| Abilities with effects | ● | ● | ◔ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ |
+| Evolution chains | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ |
+| Move learnsets | ● | ● | ◔ | ◔ | ◔ | ◔ | ◕ | ◔ | ◔ | ◕ |
+| Defensive matchups | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◕ | ◔ |
+| Breeding data | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
+| Alternate forms | ◕ | ● | ◕ | ◕ | ◕ | ○ | ◔ | ○ | ○ | ○ |
+| Pokédex entries | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ | ◔ | ◕ |
+| **Tools & Modes** | | | | | | | | | | |
+| Type chart | ● | ● | ◕ | ◕ | ◕ | ○ | ◕ | ○ | ◕ | ◔ |
+| Compare tool | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Team builder | ◕ | ◕ | ◕ | ○ | ○ | ○ | ◕ | ◕ | ○ | ◔ |
+| Damage calculator | ● | ○ | ◕ | ○ | ○ | ○ | ○ | ◔ | ○ | ○ |
+| Moves / Items / Abilities dex | ● | ● | ◕ | ◕ | ○ | ○ | ◔ | ○ | ○ | ◕ |
+| Who's-that-Pokémon | ● | ● | ◕ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| Command palette | ◕ | ◕ | ◕ | ○ | ○ | ○ | ◔ | ○ | ○ | ○ |
+| **Polish & Platform** | | | | | | | | | | |
+| Favorites | ◕ | ◕ | ◕ | ○ | ◕ | ◕ | ◕ | ◕ | ○ | ◔ |
+| Dark/light theming | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Keyboard navigation | ◕ | ● | ◔ | ○ | ◔ | ◕ | ◔ | ◔ | ○ | ◔ |
+| Responsive design | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
+| Export / sharing | ◕ | ◔ | ○ | ○ | ○ | ○ | ○ | ◕ | ○ | ○ |
+| **Feature depth / 90** | **74** | **66** | **54** | **41** | **44** | **40** | **43** | **37** | **29** | **33** |
 
 ## Submissions
 
@@ -122,6 +123,16 @@ A 1,374-line vanilla-JS Pokédex with a genuinely strong prebuild and a striking
 
 ---
 
+#### DeepSeek V4 Flash 0731
+
+Bench **49.7** · feature depth 40/90 · 17/30 features solid+ · runtime ✓ clean
+
+A zero-dependency vanilla-JS Pokedex on Cloudflare Workers whose strength is its data pipeline: scripts/ingest.js pulls all 1025 species plus every referenced move, ability, item and type from PokeAPI with pooled concurrency, retries and resume-on-restart, transforms them into compact payloads and writes chunked bulk NDJSON that is loaded into KV; src/index.ts then serves nine JSON endpoints straight from KV with batched multi-key gets and s-maxage/stale-while-revalidate headers, so nothing hits PokeAPI at request time. The split is stark: the worker and the ingest script are production-shaped, while the 1105-line public/app.js carries the defects — a mis-wired reference that makes the Matchups tab render the literal word 'undefined' in all 36 rows for every species, offensive type effectiveness computed as a product of the attacker's own two types, a search that cannot find the hyphenated names it prints itself, and method chips that show a fraction of each learnset. It covers the core dex competently (full 1025 browse verified live, filters, an excellent stats tab, a recursive branching evolution tree, compare) and stops there: no team builder, damage calculator, standalone moves dex, type chart, minigame, command palette or export, and no alternate forms at all because ingest hard-filters to ids 1-1025.
+
+[**Live demo**](https://pokedex-deepseek-v4-flash-r2.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-deepseek-v4-flash-r2) · [vendored code & full scorecard](submissions/deepseek-v4-flash-r2/ENTRY.md)
+
+---
+
 #### GLM 5.2 — max
 
 Bench **48.7** · feature depth 43/90 · 17/30 features solid+ · runtime ✓ clean
@@ -142,7 +153,7 @@ _no live deployment_ · [source](https://github.com/guitaripod/pokedex) · [vend
 
 ---
 
-#### DeepSeek V4 Flash
+#### DeepSeek V4 Flash Preview
 
 Bench **41.3** · feature depth 29/90 · 11/30 features solid+ · runtime ✓ clean
 
