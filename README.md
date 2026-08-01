@@ -2,6 +2,14 @@
 
 # Pokédex — LLM Coding Benchmark
 
+[![visitors](https://hits.sh/github.com/guitaripod/pokedex-llm-benchmark.svg?style=flat-square&labelColor=1f2328&label=visitors&color=6e7781)](https://hits.sh/github.com/guitaripod/pokedex-llm-benchmark/)
+[![stars](https://img.shields.io/github/stars/guitaripod/pokedex-llm-benchmark?style=flat-square&labelColor=1f2328&color=6e7781)](https://github.com/guitaripod/pokedex-llm-benchmark/stargazers)
+[![validate](https://img.shields.io/github/actions/workflow/status/guitaripod/pokedex-llm-benchmark/ci.yml?style=flat-square&labelColor=1f2328&branch=master&label=validate)](https://github.com/guitaripod/pokedex-llm-benchmark/actions/workflows/ci.yml)
+[![submissions](https://img.shields.io/badge/submissions-11-e3350d?style=flat-square&labelColor=1f2328)](#-leaderboard)
+[![live demos](https://img.shields.io/badge/live%20demos-10%2F11-3b7dd8?style=flat-square&labelColor=1f2328)](#submissions)
+[![rubric](https://img.shields.io/badge/rubric-v2-b39c4d?style=flat-square&labelColor=1f2328)](RUBRIC.md)
+[![license](https://img.shields.io/badge/license-GPL--3.0-6e7781?style=flat-square&labelColor=1f2328)](LICENSE)
+
 **One prompt, many models.** Every model gets the *identical* one-shot prompt and must build and deploy a complete Pokédex web app fully autonomously — no iteration, no human help. This repo collects each model's submission, its live Cloudflare deployment, and an apples-to-apples scorecard that grades **how well** each feature is built, not just whether it exists.
 
 > Build a pokedex. Use all the data available on pokeapi to build out the UI. Make a web app. Host it on cloudflare. You have gh and wrangler available. Make it fleshed out and beautiful and production tier. Work autonomously until complete. Build as much functionality as you can with the data and then some. Make the greatest pokedex ever built. call it pokedex-<model>-<effort>. Work fully autonomously.
