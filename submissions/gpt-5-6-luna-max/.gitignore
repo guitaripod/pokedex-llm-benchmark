@@ -1,0 +1,8 @@
+node_modules
+dist
+.wrangler
+*.tsbuildinfo
+*.cpuprofile
+.env
+.env.*
+!.env.example
