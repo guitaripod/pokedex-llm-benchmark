@@ -7,7 +7,7 @@
 | | |
 |---|---|
 | **Benchmark score** | **26.7 / 100** |
-| **Model** | Qwen3.8 27B (qwen) |
+| **Model** | Qwen3.8 27B (qwen, 27b-nvfp4 (4-bit), ollama digest 5642e97495e1) |
 | **Effort** | high |
 | **Built** | 2026-08-17 |
 | **Live** | <https://pokedex-qwen-3-8-27b-high.guitaripod.workers.dev> |
@@ -21,7 +21,7 @@
 | **Source** | 2,090 LOC · 28 files · 3+11 deps |
 | **Feature depth** | 19 / 90 (2/30 features solid or better) |
 
-> ⚙️ **Run note:** The only entry that needed the harness set up around it, so it is not a like-for-like run. (1) The local ollama server defaults to a 4,096-token context, which cannot hold opencode's ~23k-token system prompt, so it was raised to 131,072 before the run — below that the model is not being measured, its truncation is. (2) The first run was discarded before grading: opencode loads the machine owner's global CLAUDE.md as an implicit AGENTS.md, and those rules stopped the model before deploy and dictated its licence and branch choices; the graded run was relaunched with that file disabled. (3) It deployed to Cloudflare itself but never created a GitHub repo despite being given gh, so its source was published for the record. Nothing inside the graded run was prompted, corrected or completed by hand — the code, the build and the deployment are all its own, in one shot.
+> ⚙️ **Run note:** Weights: the 4-bit `nvfp4` build (ollama `qwen3.8:27b-mlx`, digest 5642e97495e1 — the `-mlx` tag is an alias for `27b-nvfp4`, nothing MLX is involved), the joint-smallest of the eleven 27B builds published. 8-bit `q8_0`/`mxfp8` and bf16 builds exist and were not run, so this score is a floor for the model, not its ceiling. It is also the only entry that needed the harness set up around it, so it is not a like-for-like run. (1) The local ollama server defaults to a 4,096-token context, which cannot hold opencode's ~23k-token system prompt, so it was raised to 131,072 before the run — below that the model is not being measured, its truncation is. (2) The first run was discarded before grading: opencode loads the machine owner's global CLAUDE.md as an implicit AGENTS.md, and those rules stopped the model before deploy and dictated its licence and branch choices; the graded run was relaunched with that file disabled. (3) It deployed to Cloudflare itself but never created a GitHub repo despite being given gh, so its source was published for the record. Nothing inside the graded run was prompted, corrected or completed by hand — the code, the build and the deployment are all its own, in one shot.
 
 ## Scorecard
 
