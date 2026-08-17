@@ -32,10 +32,10 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 | 6 | **DeepSeek V4 Flash 0731** | default | **49.7** | 40 / 90 | 5 · 7 · 5.5 · 5.5 | vanilla/ts | 2,708 | [demo](https://pokedex-deepseek-v4-flash-r2.guitaripod.workers.dev) |
 | 7 | **GLM 5.2** | max | **48.7** | 43 / 90 | 4.5 · 5 · 6 · 4.5 | vanilla/js | 6,523 | [demo](https://pokedex-glm52-max.guitaripod.workers.dev) |
 | 8 | **GPT-5.6 Luna** | max | **42.7** | 31 / 90 | 5.5 · 5 · 6 · 5.5 | react/ts&nbsp;·&nbsp;vite | 5,292 | [demo](https://pokedex-gpt-5-6-luna-max.guitaripod.workers.dev) |
-| 9 | **Grok** | default | **41.7** | 37 / 90 | 4 · 4 · 5.5 · 3.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | _gone_ |
+| 9 | **Grok** <sub>Q3-2026 build</sub> | default | **41.7** | 37 / 90 | 4 · 4 · 5.5 · 3.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | _gone_ |
 | 10 | **DeepSeek V4 Flash Preview** | default | **41.3** | 29 / 90 | 5.5 · 4.5 · 6.5 · 5.5 | react/ts&nbsp;·&nbsp;vite | 2,406 | [demo](https://pokedex-deepseek-v4-flash.pages.dev) |
 | 11 | **Laguna S-2.1** | default | **33.0** | 33 / 90 | 2.5 · 2.5 · 4 · 2 | preact/ts&nbsp;·&nbsp;vite | 9,208 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
-| 12 | **Qwen3.8 27B** | high | **26.7** | 19 / 90 | 3.5 · 4.5 · 4 · 2 | react/ts&nbsp;·&nbsp;vite | 2,090 | [demo](https://pokedex-qwen-3-8-27b-high.guitaripod.workers.dev) |
+| 12 | **Qwen3.8 27B** <sub>27b-nvfp4 · 4-bit</sub> | high | **26.7** | 19 / 90 | 3.5 · 4.5 · 4 · 2 | react/ts&nbsp;·&nbsp;vite | 2,090 | [demo](https://pokedex-qwen-3-8-27b-high.guitaripod.workers.dev) |
 
 *Bench (0–100) = 60% feature depth + 40% craft axes. **Feature depth** grades each of the 30 features 0–3 (absent → shallow/broken → solid → exceptional), so a few excellent features outscore many stubs. **Code · Arch · UX · Robust** are the four 0–10 craft axes. LOC counts hand-written source only. See [RUBRIC.md](RUBRIC.md).*
 

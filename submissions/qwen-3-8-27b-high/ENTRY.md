@@ -7,7 +7,7 @@
 | | |
 |---|---|
 | **Benchmark score** | **26.7 / 100** |
-| **Model** | Qwen3.8 27B (qwen, 27b-nvfp4 (4-bit), ollama digest 5642e97495e1) |
+| **Model** | Qwen3.8 27B (qwen, 27b-nvfp4 · 4-bit) |
 | **Effort** | high |
 | **Built** | 2026-08-17 |
 | **Live** | <https://pokedex-qwen-3-8-27b-high.guitaripod.workers.dev> |

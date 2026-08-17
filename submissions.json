@@ -2509,7 +2509,7 @@
       "id": "qwen-3-8-27b-high",
       "model": "Qwen3.8 27B",
       "provider": "qwen",
-      "modelVersion": "27b-nvfp4 (4-bit), ollama digest 5642e97495e1",
+      "modelVersion": "27b-nvfp4 · 4-bit",
       "effort": "high",
       "date": "2026-08-17",
       "sourceRepo": "https://github.com/guitaripod/pokedex-qwen-3-8-27b-high",

@@ -72,6 +72,12 @@ function leaderboard() {
   const head =
     "| # | Model | Effort | Bench | Feature depth | Code · Arch · UX · Robust | Stack | LOC | Live |\n" +
     "|---|-------|--------|:-----:|:-------------:|:-------------------------:|-------|----:|------|";
+  /// Most modelVersions just restate the name ("Opus 5" / "5") and are noise in
+  /// the table. Print the ones that identify a genuinely different build — a
+  /// quantization, a dated snapshot — because those change what the score means.
+  const buildTag = (s) =>
+    s.modelVersion && !s.model.includes(s.modelVersion) ? ` <sub>${s.modelVersion}</sub>` : "";
+
   const rows = ranked.map((s, i) => {
     const axes = scored(s)
       ? AXIS_KEYS.map((k) => s.scores[k]).join(" · ")
@@ -83,7 +89,7 @@ function leaderboard() {
         }`
       : "—";
     const loc = s.metrics ? s.metrics.sourceLoc.toLocaleString("en-US") : "—";
-    return `| ${medal(i)} | **${s.model}** | ${s.effort} | **${fmt(bench(s))}** | ${depth} | ${axes} | ${nbsp(stack)} | ${loc} | ${s.liveUrl ? `[demo](${s.liveUrl})` : "_gone_"} |`;
+    return `| ${medal(i)} | **${s.model}**${buildTag(s)} | ${s.effort} | **${fmt(bench(s))}** | ${depth} | ${axes} | ${nbsp(stack)} | ${loc} | ${s.liveUrl ? `[demo](${s.liveUrl})` : "_gone_"} |`;
   });
   return [head, ...rows].join("\n");
 }
