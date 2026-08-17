@@ -2734,7 +2734,8 @@
         "gradedOn": "2026-08-17",
         "rubricVersion": 2
       },
-      "note": "Run locally on a MacBook via ollama (qwen3.8:27b-mlx, nvfp4, 131k ctx) through the opencode runner at --variant high. The model deployed to Cloudflare itself but did not create a GitHub repo, so its source was published for the record — verbatim, as the run left it, minus build output (dist/, dist-worker/). A first attempt was discarded before grading: opencode had loaded the machine owner’s global CLAUDE.md as an implicit AGENTS.md, which stopped the model before deploy and dictated its license and branch choices; the graded run was relaunched with that file disabled."
+      "notes": "The only entry that needed the harness set up around it, so it is not a like-for-like run. (1) The local ollama server defaults to a 4,096-token context, which cannot hold opencode's ~23k-token system prompt, so it was raised to 131,072 before the run — below that the model is not being measured, its truncation is. (2) The first run was discarded before grading: opencode loads the machine owner's global CLAUDE.md as an implicit AGENTS.md, and those rules stopped the model before deploy and dictated its licence and branch choices; the graded run was relaunched with that file disabled. (3) It deployed to Cloudflare itself but never created a GitHub repo despite being given gh, so its source was published for the record. Nothing inside the graded run was prompted, corrected or completed by hand — the code, the build and the deployment are all its own, in one shot.",
+      "dataNote": "dist/ and dist-worker/ (Vite and wrangler build output) excluded from the published source; regenerate with npm run build."
     }
   ]
 }

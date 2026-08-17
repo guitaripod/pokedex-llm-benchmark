@@ -21,6 +21,8 @@
 | **Source** | 2,090 LOC · 28 files · 3+11 deps |
 | **Feature depth** | 19 / 90 (2/30 features solid or better) |
 
+> ⚙️ **Run note:** The only entry that needed the harness set up around it, so it is not a like-for-like run. (1) The local ollama server defaults to a 4,096-token context, which cannot hold opencode's ~23k-token system prompt, so it was raised to 131,072 before the run — below that the model is not being measured, its truncation is. (2) The first run was discarded before grading: opencode loads the machine owner's global CLAUDE.md as an implicit AGENTS.md, and those rules stopped the model before deploy and dictated its licence and branch choices; the graded run was relaunched with that file disabled. (3) It deployed to Cloudflare itself but never created a GitHub repo despite being given gh, so its source was published for the record. Nothing inside the graded run was prompted, corrected or completed by hand — the code, the build and the deployment are all its own, in one shot.
+
 ## Scorecard
 
 | Code quality | Architecture | UX & design | Robustness |
@@ -111,5 +113,7 @@ Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow/broken (1) · ○ ab
 ## Vendored source
 
 The source in this directory is the code the model wrote, copied verbatim from [its repo](https://github.com/guitaripod/pokedex-qwen-3-8-27b-high) minus `node_modules`, build output, and generated data.
+
+> dist/ and dist-worker/ (Vite and wrangler build output) excluded from the published source; regenerate with npm run build.
 
 Canonical history and issues live in the [original repo](https://github.com/guitaripod/pokedex-qwen-3-8-27b-high). This is a scored snapshot for the benchmark.

@@ -121,7 +121,8 @@ function entryList() {
       const stat = scored(s)
         ? `Bench **${fmt(bench(s))}** · feature depth ${featureQuality(s)}/${MAX_QUALITY} · ${solidCount(s)}/${TOTAL_FEATURES} features solid+${rt}`
         : "_unscored_";
-      return `#### ${s.model}${s.effort !== "default" ? ` — ${s.effort}` : ""}\n\n${stat}\n\n${line}\n\n${s.liveUrl ? `[**Live demo**](${s.liveUrl})` : "_no live deployment_"} · [source](${s.sourceRepo}) · [vendored code & full scorecard](submissions/${s.id}/ENTRY.md)`;
+      const note = s.notes ? `\n\n> ⚙️ **Run note:** ${s.notes}` : "";
+      return `#### ${s.model}${s.effort !== "default" ? ` — ${s.effort}` : ""}\n\n${stat}${note}\n\n${line}\n\n${s.liveUrl ? `[**Live demo**](${s.liveUrl})` : "_no live deployment_"} · [source](${s.sourceRepo}) · [vendored code & full scorecard](submissions/${s.id}/ENTRY.md)`;
     })
     .join("\n\n---\n\n");
 }
