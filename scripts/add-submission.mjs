@@ -13,8 +13,9 @@ const args = process.argv.slice(2);
 const positional = [];
 const opts = {};
 for (let i = 0; i < args.length; i++) {
-  if (args[i].startsWith("--")) opts[args[i].slice(2)] = args[++i];
-  else positional.push(args[i]);
+  if (!args[i].startsWith("--")) positional.push(args[i]);
+  else if (args[i + 1] === undefined || args[i + 1].startsWith("--")) opts[args[i].slice(2)] = true;
+  else opts[args[i].slice(2)] = args[++i];
 }
 
 const repoUrl = positional[0];

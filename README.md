@@ -5,8 +5,8 @@
 [![visitors](https://hits.sh/github.com/guitaripod/pokedex-llm-benchmark.svg?style=flat-square&labelColor=1f2328&label=visitors&color=6e7781)](https://hits.sh/github.com/guitaripod/pokedex-llm-benchmark/)
 [![stars](https://img.shields.io/github/stars/guitaripod/pokedex-llm-benchmark?style=flat-square&labelColor=1f2328&color=6e7781)](https://github.com/guitaripod/pokedex-llm-benchmark/stargazers)
 [![validate](https://img.shields.io/github/actions/workflow/status/guitaripod/pokedex-llm-benchmark/ci.yml?style=flat-square&labelColor=1f2328&branch=master&label=validate)](https://github.com/guitaripod/pokedex-llm-benchmark/actions/workflows/ci.yml)
-[![submissions](https://img.shields.io/badge/submissions-11-e3350d?style=flat-square&labelColor=1f2328)](#-leaderboard)
-[![live demos](https://img.shields.io/badge/live%20demos-10%2F11-3b7dd8?style=flat-square&labelColor=1f2328)](#submissions)
+[![submissions](https://img.shields.io/badge/submissions-12-e3350d?style=flat-square&labelColor=1f2328)](#-leaderboard)
+[![live demos](https://img.shields.io/badge/live%20demos-11%2F12-3b7dd8?style=flat-square&labelColor=1f2328)](#submissions)
 [![rubric](https://img.shields.io/badge/rubric-v2-b39c4d?style=flat-square&labelColor=1f2328)](RUBRIC.md)
 [![license](https://img.shields.io/badge/license-GPL--3.0-6e7781?style=flat-square&labelColor=1f2328)](LICENSE)
 
@@ -16,8 +16,8 @@
 
 Only the trailing name token changes per run (it encodes the model + effort). Read the full framing in **[THE_BRIEF.md](THE_BRIEF.md)** and how submissions are scored in **[RUBRIC.md](RUBRIC.md)**.
 
-- **11 submissions** across 5 named providers (plus 1 codename entry), graded on **30 Pokédex features** by depth plus four craft axes.
-- **10 of 11** submissions still serve a **live Cloudflare deployment** (click any demo link; the one that does not is noted on its scorecard) and every one has its **vendored source** under [`submissions/`](submissions/).
+- **12 submissions** across 6 named providers (plus 1 codename entry), graded on **30 Pokédex features** by depth plus four craft axes.
+- **11 of 12** submissions still serve a **live Cloudflare deployment** (click any demo link; the one that does not is noted on its scorecard) and every one has its **vendored source** under [`submissions/`](submissions/).
 - The tables below are generated from [`submissions.json`](submissions.json) — the single source of truth.
 
 ## 🏆 Leaderboard
@@ -35,6 +35,7 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 | 9 | **Grok** | default | **41.7** | 37 / 90 | 4 · 4 · 5.5 · 3.5 | react/ts&nbsp;·&nbsp;vite | 3,104 | _gone_ |
 | 10 | **DeepSeek V4 Flash Preview** | default | **41.3** | 29 / 90 | 5.5 · 4.5 · 6.5 · 5.5 | react/ts&nbsp;·&nbsp;vite | 2,406 | [demo](https://pokedex-deepseek-v4-flash.pages.dev) |
 | 11 | **Laguna S-2.1** | default | **33.0** | 33 / 90 | 2.5 · 2.5 · 4 · 2 | preact/ts&nbsp;·&nbsp;vite | 9,208 | [demo](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
+| 12 | **Qwen3.8 27B** | high | **26.7** | 19 / 90 | 3.5 · 4.5 · 4 · 2 | react/ts&nbsp;·&nbsp;vite | 2,090 | [demo](https://pokedex-qwen-3-8-27b-high.guitaripod.workers.dev) |
 
 *Bench (0–100) = 60% feature depth + 40% craft axes. **Feature depth** grades each of the 30 features 0–3 (absent → shallow/broken → solid → exceptional), so a few excellent features outscore many stubs. **Code · Arch · UX · Robust** are the four 0–10 craft axes. LOC counts hand-written source only. See [RUBRIC.md](RUBRIC.md).*
 
@@ -42,43 +43,43 @@ Only the trailing name token changes per run (it encodes the model + effort). Re
 
 Legend: ● exceptional (3) · ◕ solid (2) · ◔ shallow / broken (1) · ○ absent (0)
 
-| Feature | [Opus·ultracode](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-5-low.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [DeepSeek](https://pokedex-deepseek-v4-flash-r2.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | [GPT-5.6·max](https://pokedex-gpt-5-6-luna-max.guitaripod.workers.dev) | Grok | [DeepSeek](https://pokedex-deepseek-v4-flash.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Browse & Discovery** | | | | | | | | | | | |
-| National Dex | ● | ◕ | ◔ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ |
-| Instant search | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ | ◕ | ◔ |
-| Type filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ | ◔ |
-| Generation filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Sorting | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◕ | ◔ | ◔ |
-| Advanced filters | ● | ◕ | ◕ | ○ | ◕ | ◕ | ○ | ○ | ◕ | ○ | ◔ |
-| Shareable filter URLs | ● | ● | ◔ | ○ | ◔ | ◔ | ◔ | ◔ | ◔ | ○ | ◔ |
-| **Detail Depth** | | | | | | | | | | | |
-| Official artwork | ● | ◕ | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
-| Shiny toggle | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ | ◕ | ◕ |
-| Cry playback | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ |
-| Stat visualization | ● | ◕ | ◕ | ◕ | ◕ | ● | ◕ | ◕ | ● | ◕ | ◕ |
-| Abilities with effects | ● | ● | ◔ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ | ◔ |
-| Evolution chains | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ |
-| Move learnsets | ● | ● | ◔ | ◔ | ◔ | ◔ | ◕ | ◔ | ◔ | ◔ | ◕ |
-| Defensive matchups | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ○ | ◔ | ◕ | ◔ |
-| Breeding data | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ |
-| Alternate forms | ◕ | ● | ◕ | ◕ | ◕ | ○ | ◔ | ◔ | ○ | ○ | ○ |
-| Pokédex entries | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ | ◔ | ◔ | ◕ |
-| **Tools & Modes** | | | | | | | | | | | |
-| Type chart | ● | ● | ◕ | ◕ | ◕ | ○ | ◕ | ◔ | ○ | ◕ | ◔ |
-| Compare tool | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◔ | ◕ | ◔ |
-| Team builder | ◕ | ◕ | ◕ | ○ | ○ | ○ | ◕ | ◔ | ◕ | ○ | ◔ |
-| Damage calculator | ● | ○ | ◕ | ○ | ○ | ○ | ○ | ○ | ◔ | ○ | ○ |
-| Moves / Items / Abilities dex | ● | ● | ◕ | ◕ | ○ | ○ | ◔ | ○ | ○ | ○ | ◕ |
-| Who's-that-Pokémon | ● | ● | ◕ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
-| Command palette | ◕ | ◕ | ◕ | ○ | ○ | ○ | ◔ | ○ | ○ | ○ | ○ |
-| **Polish & Platform** | | | | | | | | | | | |
-| Favorites | ◕ | ◕ | ◕ | ○ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◔ |
-| Dark/light theming | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ |
-| Keyboard navigation | ◕ | ● | ◔ | ○ | ◔ | ◕ | ◔ | ◔ | ◔ | ○ | ◔ |
-| Responsive design | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◕ | ◔ |
-| Export / sharing | ◕ | ◔ | ○ | ○ | ○ | ○ | ○ | ○ | ◕ | ○ | ○ |
-| **Feature depth / 90** | **74** | **66** | **54** | **41** | **44** | **40** | **43** | **31** | **37** | **29** | **33** |
+| Feature | [Opus·ultracode](https://pokedex-opus-5-ultracode.guitaripod.workers.dev) | [Fable·ultracode](https://pokedex-fable-5-ultracode.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-5-low.guitaripod.workers.dev) | [Opus·low](https://pokedex-opus-4-8-low.guitaripod.workers.dev) | [Fable·low](https://pokedex-fable-5-low.guitaripod.workers.dev) | [DeepSeek](https://pokedex-deepseek-v4-flash-r2.guitaripod.workers.dev) | [GLM·max](https://pokedex-glm52-max.guitaripod.workers.dev) | [GPT-5.6·max](https://pokedex-gpt-5-6-luna-max.guitaripod.workers.dev) | Grok | [DeepSeek](https://pokedex-deepseek-v4-flash.pages.dev) | [Laguna](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) | [Qwen3.8·high](https://pokedex-qwen-3-8-27b-high.guitaripod.workers.dev) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Browse & Discovery** | | | | | | | | | | | | |
+| National Dex | ● | ◕ | ◔ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ |
+| Instant search | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ | ◕ | ◔ | ◕ |
+| Type filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ | ◔ | ○ |
+| Generation filter | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ |
+| Sorting | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◕ | ◔ | ◔ | ○ |
+| Advanced filters | ● | ◕ | ◕ | ○ | ◕ | ◕ | ○ | ○ | ◕ | ○ | ◔ | ○ |
+| Shareable filter URLs | ● | ● | ◔ | ○ | ◔ | ◔ | ◔ | ◔ | ◔ | ○ | ◔ | ○ |
+| **Detail Depth** | | | | | | | | | | | | |
+| Official artwork | ● | ◕ | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ |
+| Shiny toggle | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ | ◕ | ◕ | ◔ |
+| Cry playback | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◕ | ◔ |
+| Stat visualization | ● | ◕ | ◕ | ◕ | ◕ | ● | ◕ | ◕ | ● | ◕ | ◕ | ◔ |
+| Abilities with effects | ● | ● | ◔ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ | ◔ | ◔ |
+| Evolution chains | ● | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ |
+| Move learnsets | ● | ● | ◔ | ◔ | ◔ | ◔ | ◕ | ◔ | ◔ | ◔ | ◕ | ◔ |
+| Defensive matchups | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ○ | ◔ | ◕ | ◔ | ◔ |
+| Breeding data | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ |
+| Alternate forms | ◕ | ● | ◕ | ◕ | ◕ | ○ | ◔ | ◔ | ○ | ○ | ○ | ○ |
+| Pokédex entries | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◔ | ◔ | ◔ | ◔ | ◕ | ◔ |
+| **Tools & Modes** | | | | | | | | | | | | |
+| Type chart | ● | ● | ◕ | ◕ | ◕ | ○ | ◕ | ◔ | ○ | ◕ | ◔ | ◔ |
+| Compare tool | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◔ | ◕ | ◔ | ◕ |
+| Team builder | ◕ | ◕ | ◕ | ○ | ○ | ○ | ◕ | ◔ | ◕ | ○ | ◔ | ○ |
+| Damage calculator | ● | ○ | ◕ | ○ | ○ | ○ | ○ | ○ | ◔ | ○ | ○ | ○ |
+| Moves / Items / Abilities dex | ● | ● | ◕ | ◕ | ○ | ○ | ◔ | ○ | ○ | ○ | ◕ | ○ |
+| Who's-that-Pokémon | ● | ● | ◕ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| Command palette | ◕ | ◕ | ◕ | ○ | ○ | ○ | ◔ | ○ | ○ | ○ | ○ | ○ |
+| **Polish & Platform** | | | | | | | | | | | | |
+| Favorites | ◕ | ◕ | ◕ | ○ | ◕ | ◕ | ◕ | ◕ | ◕ | ○ | ◔ | ◔ |
+| Dark/light theming | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◕ | ◔ | ◔ |
+| Keyboard navigation | ◕ | ● | ◔ | ○ | ◔ | ◕ | ◔ | ◔ | ◔ | ○ | ◔ | ○ |
+| Responsive design | ● | ◕ | ◕ | ◕ | ◕ | ◕ | ◕ | ◔ | ◔ | ◕ | ◔ | ◔ |
+| Export / sharing | ◕ | ◔ | ○ | ○ | ○ | ○ | ○ | ○ | ◕ | ○ | ○ | ○ |
+| **Feature depth / 90** | **74** | **66** | **54** | **41** | **44** | **40** | **43** | **31** | **37** | **29** | **33** | **19** |
 
 ## Submissions
 
@@ -189,6 +190,16 @@ Bench **33.0** · feature depth 33/90 · 8/30 features solid+ · runtime ⚠ err
 A Preact + Vite + Tailwind SPA with a genuinely rich per-Pokémon detail page (tabbed overview/moves/sprites/encounters/lore/evolution, stat bars + BST, shiny toggle, cry playback, breeding data, version-tagged flavor text) and working secondary dexes for moves, items, abilities and types — but its flagship surface is dead. PokemonListPage.tsx calls filterPokemon, sortPokemon and paginatePokemon and passes types={TYPES} without importing any of them, and paginatePokemon (:102) runs in the render body before the loading early-return, so /pokemon/ throws ReferenceError on first paint; the bare identifiers survive into dist/assets/index-DTL92cl7.js, which is what the smoke test's 2 uncaught exceptions and failed detail route measured. The user is left with HomePage.tsx:55-60's curated slices — 93 of 1025 species, no pager. Three more mis-wirings compound it: fetchPokemonDetails doesn't exist in pokeapi.ts yet is called by Compare (and imported by Favorites/TeamBuilder/Lore); the evolution tab gates children on node.evolution_details.length>0, always empty at a chain root, so every species shows a single node; and PokemonDetailPage.tsx:123 parseInts the route param so every name-form permalink the app itself generates loads forever. The type math is arithmetically correct (dual-type products, 0x immunities, correct attacker/defender relation direction) but runs over a TYPE_ORDER that omits Rock and pads with Stellar, so Rock is invisible as an attacker and silently neutral as a defender. Architecturally the intended prebuild cannot run at all — scripts/build-data.mjs is TypeScript in a .mjs file (node --check → SyntaxError at :8) and package.json wires build to plain vite build — so every page live-fetches hundreds to thousands of PokéAPI resources. Responsiveness, re-measured this pass, adds a global horizontal-overflow break from 768px to ~1279px on every route. There is no error boundary in the tree (LoadingSpinner.tsx:51 exports one, imported nowhere), so any of these takes the whole SPA down.
 
 [**Live demo**](https://pokedex-laguna-s-2-1.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-laguna-s-2-1) · [vendored code & full scorecard](submissions/laguna-s-2-1/ENTRY.md)
+
+---
+
+#### Qwen3.8 27B — high
+
+Bench **26.7** · feature depth 19/90 · 2/30 features solid+ · runtime ⚠ errors
+
+A well-organised, attractive React SPA on a Cloudflare Worker whose principal view is dead on arrival. Layering is clean (api.ts → useData.ts hooks → views/ui/components), the Worker's KV proxy is a genuinely good piece of work, and the browse grid is one of the better-looking ones in the field. But PokemonDetail.tsx:427 stores PokeAPI's `move_learn_method` — an object {name,url} — as if it were a string and :453 calls .replace on it, and with no error boundary anywhere in src/ the throw unmounts the entire app. Every species detail page is a white screen, which takes artwork variants, shiny, cries, the radar, stat bars, abilities, evolution, moves, matchups, flavour entries and the only way to add a favourite down with it. Behind that, the data logic that would have rendered is itself wrong in three independent ways: the type engine (useData.ts:68-105) files resistances in the `zero` bucket so 0.5x is reported as 0x and no 0.5 exists anywhere in the codebase; the matchup panel labels super-effective attackers as 'Strong Against' (PokemonDetail.tsx:294), inverting every defensive readout; and evolution chains are fetched by pokemon id instead of species.evolution_chain.url (useData.ts:44-45), so Pikachu's page would show the Growlithe line. The Worker fetches a correct, complete damage_relations table for all 18 types and then throws it away in favour of the broken local one (TypeChart.tsx:20 vs :94). Two secondary routes, #type and #compare, do render cleanly, and the browse page has a real working 'Load 120 more' pager that the smoke harness missed — which is why this is not lower. Adjudication: I accepted the audit on shareable-urls (0), flavor-entries (1), architecture (4.5) and robustness (2), all verified against the source; uxDesign lands at 4 rather than the audit's 3, because the surviving surfaces show real visual craft that the 'unstyled' anchor does not describe; and I extended the same runtime-crash finding to the detail-only features I had previously graded 2 (artwork, shiny, cries, stats-viz, favorites) plus national-dex and responsive, since grading flavor-entries down for the crash while leaving its neighbours at 2 would be incoherent. I also found, independently of both passes, that the generation dropdown's romanize() (Dex.tsx:116-128) indexes a 10-character string with a 13-entry table, so all nine options render as 'Gen undefined'/'Gen V'.
+
+[**Live demo**](https://pokedex-qwen-3-8-27b-high.guitaripod.workers.dev) · [source](https://github.com/guitaripod/pokedex-qwen-3-8-27b-high) · [vendored code & full scorecard](submissions/qwen-3-8-27b-high/ENTRY.md)
 
 ## Running a new model
 

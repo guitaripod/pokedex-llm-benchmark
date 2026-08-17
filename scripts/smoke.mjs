@@ -14,8 +14,13 @@ for (let i = 0; i < args.length; i++)
 
 const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
 const targets = opts.all
-  ? manifest.submissions
+  ? manifest.submissions.filter((s) => !s.runtime?.measuredOn)
   : manifest.submissions.filter((s) => s.id === opts.submission);
+
+if (opts.all)
+  for (const s of manifest.submissions)
+    if (s.runtime?.measuredOn)
+      console.log(`· skipping ${s.id} — runtime was measured on ${s.runtime.measuredOn}; re-run it with --submission + --url`);
 
 if (!targets.length) {
   console.error(
@@ -120,11 +125,33 @@ function hasPager(page) {
         const t = (el.textContent || "").trim().toLowerCase();
         return (
           /^(next|load more|show more|more|»|→|›)\b/.test(t) ||
-          /\bnext page\b|\bload more\b/.test(t) ||
+          /\bnext page\b|\b(load|show)(\s+\d+)?\s+more\b/.test(t) ||
           /next|more/i.test(el.getAttribute("aria-label") || "")
         );
       }),
     )
+    .catch(() => false);
+}
+
+/// Some SPAs render the browse grid as <button>/<div> cards with no anchor to
+/// follow, so the href probe finds nothing. Click the first card-like element
+/// that carries an image instead — otherwise a detail view that throws on
+/// render is never exercised and passes as clean.
+function clickIntoDetail(page) {
+  return page
+    .evaluate(() => {
+      const el = [...document.querySelectorAll('button, [role="button"], li, article, a, div[class*="ard"]')].find(
+        (e) => {
+          if (!e.querySelector("img")) return false;
+          const r = e.getBoundingClientRect();
+          return r.width > 60 && r.height > 60 && r.width < window.innerWidth * 0.9;
+        },
+      );
+      if (!el) return false;
+      el.scrollIntoView({ block: "center" });
+      el.click();
+      return true;
+    })
     .catch(() => false);
 }
 
@@ -154,14 +181,22 @@ async function smoke(browser, sub, origin) {
           .find((h) => h && !/^(https?:|#|mailto:|tel:)/.test(h) && /\d|pokemon|dex|detail|species/i.test(h)),
       )
       .catch(() => null);
+    const before = pageErrors;
+    let reachedDetail = false;
     if (href) {
-      const before = pageErrors;
       await page.goto(new URL(href, origin).href, { waitUntil: "networkidle", timeout: 30000 }).catch(() => {});
+      reachedDetail = true;
+    } else {
+      reachedDetail = await clickIntoDetail(page);
+    }
+    if (reachedDetail) {
       await page.waitForTimeout(2000);
       const dtext = (await page.evaluate(() => document.body?.innerText || "").catch(() => "")).trim();
       rec.detailOk = pageErrors === before && dtext.length > 100;
+      rec.detailVia = href ? "link" : "click";
     } else {
       rec.detailOk = rec.contentOk;
+      rec.detailVia = "none";
     }
 
     const dex = await measureDexReach(page, origin);

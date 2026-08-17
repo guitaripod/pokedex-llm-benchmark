@@ -1,0 +1,20 @@
+{
+   "$schema": "./node_modules/wrangler/config-schema.json",
+   "name": "pokedex-qwen-3-8-27b-high",
+   "main": "src/worker.ts",
+   "compatibility_date": "2026-06-01",
+   "compatibility_flags": ["nodejs_compat"],
+   "assets": {
+     "directory": "dist",
+     "binding": "ASSETS",
+     "not_found_handling": "single-page-application",
+     "run_worker_first": true
+   },
+    "kv_namespaces": [
+      {"binding": "CACHE", "id": "2e346e466e9b4cc7b50b57895a80e676"}
+    ],
+   "vars": {
+     "POKEAPI_BASE": "https://pokeapi.co/api/v2",
+     "CACHE_TTL": "86400"
+   }
+}

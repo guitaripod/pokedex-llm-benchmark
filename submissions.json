@@ -2504,6 +2504,237 @@
         "gradedOn": "2026-08-01",
         "rubricVersion": 2
       }
+    },
+    {
+      "id": "qwen-3-8-27b-high",
+      "model": "Qwen3.8 27B",
+      "provider": "qwen",
+      "modelVersion": "",
+      "effort": "high",
+      "date": "2026-08-17",
+      "sourceRepo": "https://github.com/guitaripod/pokedex-qwen-3-8-27b-high",
+      "liveUrl": "https://pokedex-qwen-3-8-27b-high.guitaripod.workers.dev",
+      "platform": "Cloudflare Workers",
+      "metrics": {
+        "sourceLoc": 2090,
+        "sourceFiles": 28,
+        "sourceBytes": 73613,
+        "dependencies": 3,
+        "devDependencies": 11
+      },
+      "stack": {
+        "framework": "react",
+        "language": "typescript",
+        "bundler": "vite",
+        "styling": "tailwind"
+      },
+      "dataStrategy": "edge-proxy",
+      "provenance": {
+        "oneShot": true,
+        "autonomous": true,
+        "selfProvisioned": false,
+        "verified": "harness (scripts/run-benchmark.mjs)"
+      },
+      "features": [
+        {
+          "id": "national-dex",
+          "grade": 1,
+          "evidence": "Downgraded from 2. The dex is hardcoded-truncated: src/worker.ts:76 requests `limit=1010`, and the cap is duplicated at src/poke.ts:52 (GEN_END[9]=1010), src/views/Dex.tsx:12 and the prev/next wrap at src/views/PokemonDetail.tsx:248, so species 1011-1025 exist nowhere in the app — App.tsx:15 even initialises total to 1025 then overwrites it with the fetched 1010 at :21. The browse grid itself is sound (PAGE=60 render cap with a real working 'Load 120 more' at src/views/Dex.tsx:102-111 — the smoke harness's 'no pagination' note is wrong, its hasPager regex only matches '^load more', not 'Load 120 more'), but every card click leads to a view that white-screens the whole SPA (see type-matchups/learnsets). Hardcoded truncation + a dead destination is the rubric's 1, not a solid dex."
+        },
+        {
+          "id": "search",
+          "grade": 2,
+          "evidence": "src/views/Dex.tsx:25-40 normalises the query (:27) and matches name substring, exact id and '#id' against the full fetched list, recomputed in a useMemo with a show-reset effect (:23) and a clear button (SearchBar.tsx:26-30). Instant and correct over the whole list; no fuzzy matching, no search by type/ability/move, so solid rather than exceptional."
+        },
+        {
+          "id": "type-filter",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "generation-filter",
+          "grade": 1,
+          "evidence": "Ranges are hardcoded at src/views/Dex.tsx:10-13 and the filter predicate (:29-32) does work, but the control is unusable: the option labels come from `romanize()` (src/views/Dex.tsx:116-128), whose `chars` string 'MCMCDXLIXV' has 10 characters against a 13-entry `vals` array, so the index lookup falls off the end — verified by running it, gens 1-8 render as 'Gen undefined', 'Gen undefinedundefined', … and gen 9 as 'Gen V'. Nine options, none correctly labelled. Gen 9 is also short 15 species from the 1010 cap."
+        },
+        {
+          "id": "sort",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "advanced-filter",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "shareable-urls",
+          "grade": 0,
+          "evidence": "Downgraded from 1 — audit accepted. No filter state reaches the URL at all: q, gen and onlyFav are plain component useState (src/views/Dex.tsx:18-20), Compare's slot ids are local (src/views/Compare.tsx:12), useRoute.ts:25-31 emits a bare '#' for the dex view and nothing anywhere writes location.search. The only content-addressable route, `#pokemon/:id` (useRoute.ts:12), hands a recipient a blank page because PokemonDetail throws app-wide on every species (PokemonDetail.tsx:427/453). What survives is '#type' and '#compare' — stateless view switches, which is not the feature."
+        },
+        {
+          "id": "artwork",
+          "grade": 1,
+          "evidence": "Downgraded from 2. Official artwork does render on the browse grid (Card.tsx:34 → poke.ts:64-67), and that surface is genuinely attractive. But the whole variant system — Modern/Home/Retro chips at PokemonDetail.tsx:99-116 — lives on the view that crashes, so it is unreachable; the Retro path is broken regardless because gen1Sprite (poke.ts:71-72) inserts a `front_default/` segment that does not exist in the PokeAPI sprites repo, and the img is painted at `opacity:0` and revealed only in onLoad (PokemonDetail.tsx:94-96), so a 404 leaves an invisible box. The one file with a real onError fallback chain, src/ui/Sprite.tsx:25-30, is imported by nothing."
+        },
+        {
+          "id": "shiny",
+          "grade": 1,
+          "evidence": "Downgraded from 2. The URL construction is right (poke.ts:64-66 swaps in the /shiny/ path) and the toggle is styled (PokemonDetail.tsx:117-126), but it exists only on the detail view, which unmounts the entire React tree on every species (PokemonDetail.tsx:453 calls .replace on the object PokeAPI puts in move_learn_method). Broken at runtime = at most 1."
+        },
+        {
+          "id": "cries",
+          "grade": 1,
+          "evidence": "Downgraded from 2. Clean implementation — cries?.latest guarded, Audio constructed in an effect with a pause cleanup and re-keyed on the url (PokemonDetail.tsx:31-36), play button at :135-141 — but the only surface hosting it never renders (detail view throws app-wide). Unreachable feature."
+        },
+        {
+          "id": "stats-viz",
+          "grade": 1,
+          "evidence": "Downgraded from 2. Two of the three pieces are defective or unreachable: the hand-built SVG radar uses `ang = (Math.PI/n)*i - Math.PI/2` (RadarChart.tsx:15) where a circle needs 2*Math.PI/n, so six axes span 150° and both the polygon and the ring guides (:22-25) render as a one-sided fan; StatBars.tsx:10-11 gives `>=130` and `>=90` the identical hex '#3ba55d', making the top tier dead; and the whole Base Stats/Breakdown section (PokemonDetail.tsx:171-193) sits on the crashing view. Only the animated bars inside Compare (Compare.tsx:162) actually reach a user. BST sums are correct (PokemonDetail.tsx:48, Compare.tsx:121) and the 255 normalisation is right."
+        },
+        {
+          "id": "abilities",
+          "grade": 1,
+          "evidence": "Names and a Hidden badge only (PokemonDetail.tsx:200-216); no effect text — the surface shows the placeholder 'Ability #N' from a url-slice (:213, :264-266) even though api.ts:21 exports an unused getAbility. Also unreachable, since the detail view crashes."
+        },
+        {
+          "id": "evolution",
+          "grade": 1,
+          "evidence": "The chain is keyed off the wrong id space: useData.ts:44-45 calls getEvolutionChain(id) with the *pokemon* id (api.ts:18-19) instead of following species.evolution_chain.url, which is in the species payload fetched two lines above — so Pikachu's page requests /evolution-chain/25 (the Growlithe line) rather than chain 10. flattenEvos (PokemonDetail.tsx:382-393) also pushes every branch into one flat array rendered with '→' between consecutive items (:354), so Eevee's eight parallel branches would read as a nine-stage linear chain, and only evolution_details[0] is ever consulted (:389). Wrong data, wrong topology, and unreachable behind the render crash."
+        },
+        {
+          "id": "learnsets",
+          "grade": 1,
+          "evidence": "This is the crash site. MovesSection dedupes by move name and offers a real show-all expander (PokemonDetail.tsx:417-446), but :427 stores `method: g.move_learn_method || \"\"` — PokeAPI returns an object {name,url} there (verified against /api/v2/pokemon/25) — and :453 calls `m.method.replace(/-/g,\" \")` on it, throwing during render. With no error boundary anywhere in src/ (App.tsx:32 wraps lazy views in Suspense only), the throw unmounts the whole app. Separately :428 reads `g.level_up_level`, a field that does not exist (it is level_learned_at), so levels would never display either. No level/TM/egg grouping, no move power/accuracy."
+        },
+        {
+          "id": "type-matchups",
+          "grade": 1,
+          "evidence": "The engine is wrong before the crash is even considered: ATTACK (useData.ts:68-96) has only `up` and `zero` buckets and multiplier() sets m=0 for anything in `zero` (:105), but `zero` is filled with resistances — fire:['fire','water'], grass:['fire','poison','steel','grass','dragon','bug'] — so the app reports Fire as having NO EFFECT on Charizard. Genuine immunities are missing (psychic omits dark, :85), fairy→fairy is fabricated as 2x (:95), dark→flying is claimed 0x (:93). No 0.5 exists anywhere, so relation()'s 'superweak' branch (:114) is dead. MatchupMatrix then files super-effective *attackers* under the green 'Strong Against' heading (PokemonDetail.tsx:277-294), inverting the meaning, and 'Weak To' always prints 'None'. Unreachable anyway."
+        },
+        {
+          "id": "breeding",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "forms",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "flavor-entries",
+          "grade": 1,
+          "evidence": "Downgraded from 2 — audit accepted. FlavorSection (PokemonDetail.tsx:462-492) never renders for anyone: it sits below MovesSection on the view that throws at :453. Independently, the version ordering I previously credited is dead code — versionRank (:499-507) matches version-GROUP slugs ('red-blue','gold-silver','x-y','sword-shield') against `e.version?.name` (:466), which PokeAPI populates with single-version slugs ('red','blue','gold','sword'), so indexOf is always -1, every entry ranks 99, and the sort is a no-op. What is real: the English filter, cleanFlavor whitespace normalisation (:493-498) and the Set dedupe (:468-473). Hard cap of 6 with no expander and no version picker (:481)."
+        },
+        {
+          "id": "type-chart",
+          "grade": 1,
+          "evidence": "The /#type page does render cleanly with an 18x defender grid and a dual-type checkbox (TypeChart.tsx:34-96), but every number is computed from the broken local table via `multiplier(t, defenders)` (:94), so cells only ever show 0/1/2/4 — grass defenders report Water as 0x, and the 'weak' tone plus its '0.25x / 0.5x resisted' legend entry (:101, :110-116) are unreachable. The damning part: the Worker fans out 18 upstream requests to build a correct damage_relations payload (worker.ts:85-97) and useTypeChart retrieves it (useData.ts:22-28), but TypeChart.tsx:20 uses it only as a loading gate and discards it."
+        },
+        {
+          "id": "compare",
+          "grade": 2,
+          "evidence": "One of the two surfaces that actually works. Compare.tsx supports 2-4 slots with add/remove (:40-42, :80-87), full-dex selects (:73-77), a keyed refetch with an alive-flag cancel (:18-38), and renders artwork, type badges, BST and per-stat bars side by side (:104-167) with a responsive column count. No winner highlighting or per-row diff, and clicking a card navigates to the dead detail page, so solid rather than exceptional."
+        },
+        {
+          "id": "team-builder",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "damage-calc",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "moves-dex",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "minigame",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "command-palette",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "favorites",
+          "grade": 1,
+          "evidence": "Downgraded from 2. The hook is clean — try/caught localStorage read and write (useFavorites.ts:12-25), toggle/remove callbacks, and Dex has a working favorites-only filter with a distinct empty state (Dex.tsx:33, :70-79, :90-95). But the only control that can ever ADD a favorite is the star at PokemonDetail.tsx:142-150, on the view that white-screens, so the filter is permanently empty and the 'No favorites yet' state is unreachable to escape. Cards carry no star (Card.tsx has none)."
+        },
+        {
+          "id": "theming",
+          "grade": 1,
+          "evidence": "Dark only, no toggle and no light palette: `color-scheme: dark` at index.css:6 with a hardcoded #080b18 body and layered radial gradients (:14-27). The one theme is well-executed, but there is no theming feature."
+        },
+        {
+          "id": "keyboard-nav",
+          "grade": 0,
+          "evidence": ""
+        },
+        {
+          "id": "responsive",
+          "grade": 1,
+          "evidence": "Downgraded from 2. Breakpoints are used throughout (grid-cols-3→sm:4→md:5→lg:6 at Dex.tsx:43, md:grid-cols-[260px_1fr] at PokemonDetail.tsx:74, hidden sm:inline nav labels at Navigation.tsx:202/218), but the browse grid overflows a standard 360px phone: Card.tsx:30 hardcodes a 96x96 box inside `p-3` and a border, giving 3x122px + 24px of gaps = ~390px against ~328px of available width, which pushes the right column and the '⭐ Favorites' toggle off-screen. The audit measured scrollWidth 450 vs clientWidth 360 live, matching the arithmetic. Breaks at the most common phone width."
+        },
+        {
+          "id": "export",
+          "grade": 0,
+          "evidence": ""
+        }
+      ],
+      "scores": {
+        "codeQuality": 3.5,
+        "architecture": 4.5,
+        "uxDesign": 4,
+        "robustness": 2
+      },
+      "assessment": {
+        "summary": "A well-organised, attractive React SPA on a Cloudflare Worker whose principal view is dead on arrival. Layering is clean (api.ts → useData.ts hooks → views/ui/components), the Worker's KV proxy is a genuinely good piece of work, and the browse grid is one of the better-looking ones in the field. But PokemonDetail.tsx:427 stores PokeAPI's `move_learn_method` — an object {name,url} — as if it were a string and :453 calls .replace on it, and with no error boundary anywhere in src/ the throw unmounts the entire app. Every species detail page is a white screen, which takes artwork variants, shiny, cries, the radar, stat bars, abilities, evolution, moves, matchups, flavour entries and the only way to add a favourite down with it. Behind that, the data logic that would have rendered is itself wrong in three independent ways: the type engine (useData.ts:68-105) files resistances in the `zero` bucket so 0.5x is reported as 0x and no 0.5 exists anywhere in the codebase; the matchup panel labels super-effective attackers as 'Strong Against' (PokemonDetail.tsx:294), inverting every defensive readout; and evolution chains are fetched by pokemon id instead of species.evolution_chain.url (useData.ts:44-45), so Pikachu's page would show the Growlithe line. The Worker fetches a correct, complete damage_relations table for all 18 types and then throws it away in favour of the broken local one (TypeChart.tsx:20 vs :94). Two secondary routes, #type and #compare, do render cleanly, and the browse page has a real working 'Load 120 more' pager that the smoke harness missed — which is why this is not lower. Adjudication: I accepted the audit on shareable-urls (0), flavor-entries (1), architecture (4.5) and robustness (2), all verified against the source; uxDesign lands at 4 rather than the audit's 3, because the surviving surfaces show real visual craft that the 'unstyled' anchor does not describe; and I extended the same runtime-crash finding to the detail-only features I had previously graded 2 (artwork, shiny, cries, stats-viz, favorites) plus national-dex and responsive, since grading flavor-entries down for the crash while leaving its neighbours at 2 would be incoherent. I also found, independently of both passes, that the generation dropdown's romanize() (Dex.tsx:116-128) indexes a 10-character string with a 13-entry table, so all nine options render as 'Gen undefined'/'Gen V'.",
+        "strengths": [
+          "src/worker.ts:29-54 is a real edge-cache: KV get, upstream fetch, non-blocking waitUntil put behind a 6MB serialization guard, 24h TTL from an env var, x-cache header, CORS — and it verifiably HITs on repeat.",
+          "Clean module layering with no circular reach-through: api.ts owns fetch, useData.ts owns hooks and a promise-level memo (:5-11), views compose ui/ and components/; usePokemon cancels via an alive flag (:36-59) and route views are code-split with React.lazy + a styled Suspense fallback (App.tsx:6-11, 32-38).",
+          "The browse surface is genuinely designed: layered radial-gradient ground (index.css:18-22), custom scrollbar (:30-41), a global :focus-visible poke-ball ring (:44-47), type-tinted card hover-lift (Card.tsx:19-23), a skeleton grid (Dex.tsx:130-138), two distinct empty states (:90-98) and a working 'Load 120 more' pager (:102-111).",
+          "Compare is complete and correct for what it does: 2-4 slots, full-dex selects, cancel-safe refetch, BST and per-stat bars side by side (Compare.tsx:18-167).",
+          "Real defensive coding in places — the evolution fetch has its own .catch (useData.ts:45), species access is optional-chained throughout, cries are guarded before constructing Audio, localStorage is try/caught (useFavorites.ts:12-25)."
+        ],
+        "weaknesses": [
+          "Fatal: PokemonDetail.tsx:427/453 calls .replace on PokeAPI's move_learn_method object; with no error boundary in src/, every species detail page unmounts the entire app to a blank screen — taking the sticky nav with it, so the user cannot navigate back.",
+          "The type-effectiveness table (useData.ts:68-96) puts resistances in the `zero` bucket, so multiplier() can only return 0/1/2/4, dark's psychic immunity is missing, fairy→fairy is fabricated as 2x, and relation()'s 'superweak' branch (:114) is unreachable dead code.",
+          "MatchupMatrix renders attacker-vs-this-Pokemon results under inverted headings (PokemonDetail.tsx:277-294): super-effective attackers appear under 'Strong Against' and 'Weak To' always reads 'None'.",
+          "Evolution chains are keyed by pokemon id rather than species.evolution_chain.url (useData.ts:44-45), showing an unrelated family; flattenEvos (PokemonDetail.tsx:382-393) also collapses branching chains into one linear arrow sequence and reads only evolution_details[0].",
+          "Hardcoded 1010 cap at worker.ts:76, poke.ts:52, Dex.tsx:12 and PokemonDetail.tsx:248 permanently omits species 1011-1025.",
+          "The Worker's /api/type-chart fan-out (worker.ts:85-97) is fetched and discarded — TypeChart.tsx uses it only as a loading gate and computes every cell from the broken local table.",
+          "Proxy failures are returned as HTTP 200 with an {error} body (worker.ts:102-105 + json() hardcoding status 200 at :58), which defeats the client's only guard (`if (!res.ok) throw`, api.ts:8) and lets an error object flow into the UI as data.",
+          "Geometry and token bugs: RadarChart.tsx:15 steps by Math.PI/n instead of 2*Math.PI/n (150° fan, not a hexagon); StatBars.tsx:10-11 duplicates the same hex for two tiers; Dex.tsx:116-128 romanize() overruns its `chars` string so every generation option reads 'Gen undefined'.",
+          "Rot: `hono` is a dependency the Worker never imports, patch-worker.cjs is wired to no npm script and its replacement literals no longer match src/worker.ts (so run_worker_first:true still stands at wrangler.jsonc:11, putting a Worker invocation in front of every static asset), src/ui/Sprite.tsx — the one file with an onError fallback chain — is imported by nothing, and gen1Sprite (poke.ts:71-72) builds a `front_default/` path that 404s for all 1010 ids.",
+          "Accessibility is near-absent: two real aria-labels in the whole app plus a no-op aria-label=\"\" (Card.tsx:31), no label on the search input or generation select, no aria-current/aria-pressed on nav tabs or toggles, no prefers-reduced-motion guard for the fadeup animation (index.css:50-56); and the browse grid overflows a 360px viewport."
+        ],
+        "standout": "src/worker.ts:29-54 — a properly built KV edge cache (json-typed get, upstream error propagation, non-blocking waitUntil put with a 6MB serialization guard and configurable TTL, x-cache reporting) that genuinely works. It is the one part of this submission that is both complete and correct, and it makes the wasted /api/type-chart fan-out and the wrong evolution-chain keys above it that much more of a shame."
+      },
+      "runtime": {
+        "loadOk": true,
+        "contentOk": true,
+        "consoleErrors": 0,
+        "pageErrors": 1,
+        "detailOk": false,
+        "verdict": "errors",
+        "checkedAt": "2026-08-17",
+        "detailVia": "click",
+        "dexReach": 60,
+        "dexRoute": "/",
+        "dexPager": true
+      },
+      "grading": {
+        "gradedBy": "Opus 5 (grade → calibrate → 10-agent audit → adjudicate)",
+        "gradedOn": "2026-08-17",
+        "rubricVersion": 2
+      },
+      "note": "Run locally on a MacBook via ollama (qwen3.8:27b-mlx, nvfp4, 131k ctx) through the opencode runner at --variant high. The model deployed to Cloudflare itself but did not create a GitHub repo, so its source was published for the record — verbatim, as the run left it, minus build output (dist/, dist-worker/). A first attempt was discarded before grading: opencode had loaded the machine owner’s global CLAUDE.md as an implicit AGENTS.md, which stopped the model before deploy and dictated its license and branch choices; the graded run was relaunched with that file disabled."
     }
   ]
 }
