@@ -107,9 +107,9 @@ const readLive = () => {
     const p = join(dest, f);
     if (!existsSync(p)) continue;
     const m = readFileSync(p, "utf8").match(
-      /https?:\/\/[^\s)"']*\.(?:pages|workers)\.dev[^\s)"']*/,
+      /https?:\/\/[^\s)"'*<>\]]*\.(?:pages|workers)\.dev[^\s)"'*<>\]]*/,
     );
-    if (m) return m[0];
+    if (m) return m[0].replace(/[.,;:]+$/, "");
     const name = readFileSync(p, "utf8").match(/"name"\s*:\s*"([^"]+)"/);
     if (f.endsWith("jsonc") && name) return reachable(`https://${name[1]}.workers.dev`);
   }
@@ -129,6 +129,7 @@ function reachable(url) {
   return "";
 }
 
+const liveUrl = readLive();
 const analysis = analyzeSubmission(dest);
 const entry = {
   id,
@@ -138,8 +139,8 @@ const entry = {
   effort,
   date: opts.date || "",
   sourceRepo: repoUrl.replace(/\.git$/, ""),
-  liveUrl: readLive(),
-  platform: opts.platform || "Cloudflare Workers",
+  liveUrl,
+  platform: opts.platform || (liveUrl.includes(".pages.dev") ? "Cloudflare Pages" : "Cloudflare Workers"),
   ...(dataNote ? { dataNote } : {}),
   ...analysis,
   dataStrategy: detectDataStrategy(dest),

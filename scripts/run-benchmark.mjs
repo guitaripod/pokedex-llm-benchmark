@@ -1,10 +1,19 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
-import { readFileSync, mkdirSync, existsSync, createWriteStream } from "node:fs";
+import {
+  readFileSync,
+  mkdirSync,
+  existsSync,
+  createWriteStream,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+} from "node:fs";
 import { join, dirname } from "node:path";
-import { homedir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline";
+import { DatabaseSync } from "node:sqlite";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(readFileSync(join(ROOT, "submissions.json"), "utf8"));
@@ -21,7 +30,7 @@ fully autonomously (it uses gh + wrangler itself).
 
 Usage:
   node scripts/run-benchmark.mjs --model <model> --name <token> [--runner opencode|claude]
-                                 [--variant <effort>] [--dir <path>] [--log <path>]
+                                 [--variant <effort>] [--resume <n>] [--dir <path>] [--log <path>]
 
   --model    model id. opencode ids carry a provider prefix (opencode/deepseek-v4-flash-free,
              xai/grok-4.5); bare Anthropic ids (claude-opus-5, claude-fable-5) run on Claude Code.
@@ -31,6 +40,8 @@ Usage:
              means opencode, otherwise claude)
   --variant  reasoning effort passed through to the runner
              (opencode: high, max, minimal — claude: low, medium, high, xhigh, max, ultracode)
+  --resume   opencode only: how many times to resume the session after the provider
+             severs the stream mid-run (default: 12, 0 to disable)
   --dir      working directory the model builds in (default: ~/Dev/pokedex-<name>)
   --log      transcript path (claude runner only; default: <dir>/../pokedex-<name>-run.jsonl)
 
@@ -63,9 +74,10 @@ if (existsSync(dir) && existsSync(join(dir, ".git"))) {
 }
 mkdirSync(dir, { recursive: true });
 
-const opencodeArgs = () => {
-  const a = ["run", prompt, "--model", opts.model, "--auto"];
+const opencodeArgs = (resume) => {
+  const a = ["run", resume ? "Continue." : prompt, "--model", opts.model, "--auto"];
   if (opts.variant) a.push("--variant", opts.variant);
+  if (resume) a.push("--continue");
   a.push("--dir", dir, "--title", `benchmark: ${repoName}`);
   return a;
 };
@@ -76,6 +88,52 @@ const claudeArgs = () => {
   a.push("--dangerously-skip-permissions", "--verbose", "--output-format", "stream-json");
   return a;
 };
+
+/// opencode feeds the model the machine owner's house rules from three places at
+/// once: ~/.claude/CLAUDE.md and ~/.claude/skills (implicit Claude Code support),
+/// and $XDG_CONFIG_HOME/opencode/{AGENTS.md,plugin,opencode.json} — which on this
+/// machine symlinks AGENTS.md straight at that same CLAUDE.md. Any of them hands
+/// the run instructions no other entry got. Point the config dir at an empty
+/// throwaway so the model sees the brief and nothing else; auth and the model
+/// catalogue live under XDG_DATA_HOME and are unaffected.
+/// The catch: XDG_CONFIG_HOME is also where gh and wrangler keep their
+/// credentials, and the brief promises the model both. So mirror the real config
+/// dir entry by entry and blank out only opencode's own slot.
+const configDir = join(tmpdir(), `pokedex-bench-config-${repoName}`);
+const opencodeEnv = () => {
+  const real = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+  rmSync(configDir, { recursive: true, force: true });
+  mkdirSync(join(configDir, "opencode"), { recursive: true });
+  for (const entry of readdirSync(real))
+    if (entry !== "opencode") symlinkSync(join(real, entry), join(configDir, entry));
+  const wranglerMac = join(homedir(), "Library", "Preferences", ".wrangler");
+  if (existsSync(wranglerMac) && !existsSync(join(configDir, ".wrangler")))
+    symlinkSync(wranglerMac, join(configDir, ".wrangler"));
+  return { ...process.env, XDG_CONFIG_HOME: configDir, OPENCODE_DISABLE_CLAUDE_CODE: "1" };
+};
+
+const resumeLimit = opts.resume === undefined ? 12 : Number(opts.resume);
+
+/// Free and preview endpoints drop the stream mid-run: opencode records an
+/// assistant turn with no tokens and finish "unknown", then exits 0 as if the
+/// model were done. Read the last turn of this build dir's session straight out
+/// of opencode's store so the harness can tell a finished run from a severed one.
+function lastTurn() {
+  const data = process.env.XDG_DATA_HOME || join(homedir(), ".local", "share");
+  try {
+    const db = new DatabaseSync(join(data, "opencode", "opencode.db"), { readOnly: true });
+    const rows = db
+      .prepare("select data from message order by rowid desc limit 400")
+      .all()
+      .map((r) => JSON.parse(r.data))
+      .filter((m) => m.role === "assistant" && m.path?.cwd === dir);
+    db.close();
+    if (!rows.length) return "none";
+    return rows[0].finish === "unknown" && !rows[0].tokens?.total ? "dropped" : "ended";
+  } catch {
+    return "unknown";
+  }
+}
 
 const logPath = opts.log || join(dir, "..", `${repoName}-run.jsonl`);
 
@@ -110,24 +168,43 @@ console.log(`▶ Running benchmark for ${opts.model} (runner: ${runner})`);
 console.log(`  repo name : ${repoName}`);
 console.log(`  build dir : ${dir}`);
 console.log(`  variant   : ${opts.variant || "(model default)"}`);
+if (runner === "opencode") {
+  console.log(`  isolation : empty XDG_CONFIG_HOME=${configDir} + OPENCODE_DISABLE_CLAUDE_CODE=1`);
+  console.log(`  resumes   : ${resumeLimit} (on a severed stream)`);
+}
 if (runner === "claude") console.log(`  transcript: ${logPath}`);
 console.log(`  prompt    : ${prompt}\n`);
 
-const child =
-  runner === "opencode"
-    ? spawn("opencode", opencodeArgs(), { stdio: "inherit", cwd: dir })
-    : spawn("claude", claudeArgs(), { stdio: ["ignore", "pipe", "pipe"], cwd: dir });
-if (runner === "claude") pipeTranscript(child);
+const run = (args, env) =>
+  new Promise((resolve) => {
+    const child =
+      runner === "opencode"
+        ? spawn("opencode", args, { stdio: "inherit", cwd: dir, env })
+        : spawn("claude", args, { stdio: ["ignore", "pipe", "pipe"], cwd: dir });
+    if (runner === "claude") pipeTranscript(child);
+    child.on("exit", (code) => resolve(code ?? 1));
+  });
 
-child.on("exit", (code) => {
-  console.log(`\n─────────────────────────────────────────────`);
-  if (code === 0) {
-    console.log(`✓ ${runner} run finished. The model should have created "${repoName}" and deployed it.`);
-    console.log(`\nNext — ingest and grade:`);
-    console.log(`  node scripts/add-submission.mjs https://github.com/<owner>/${repoName} --model "<Name>" [--effort <e>]`);
-    console.log(`  # then grade it — see docs/running-a-benchmark.md`);
-  } else {
-    console.log(`✗ ${runner} run exited with code ${code}. Inspect ${dir} and the model's own repo before ingesting.`);
+let code =
+  runner === "opencode"
+    ? await run(opencodeArgs(false), opencodeEnv())
+    : await run(claudeArgs(), process.env);
+
+if (runner === "opencode")
+  for (let attempt = 1; attempt <= resumeLimit && code === 0 && lastTurn() === "dropped"; attempt++) {
+    console.log(`\n⟳ stream dropped mid-run (attempt ${attempt}/${resumeLimit}) — resuming the same session`);
+    code = await run(opencodeArgs(true), opencodeEnv());
   }
-  process.exit(code ?? 1);
-});
+
+console.log(`\n─────────────────────────────────────────────`);
+if (code === 0 && runner === "opencode" && lastTurn() === "dropped")
+  console.log(`✗ still dropping after ${resumeLimit} resumes. The run is incomplete — do not ingest it.`);
+else if (code === 0) {
+  console.log(`✓ ${runner} run finished. The model should have created "${repoName}" and deployed it.`);
+  console.log(`\nNext — ingest and grade:`);
+  console.log(`  node scripts/add-submission.mjs https://github.com/<owner>/${repoName} --model "<Name>" [--effort <e>]`);
+  console.log(`  # then grade it — see docs/running-a-benchmark.md`);
+} else {
+  console.log(`✗ ${runner} run exited with code ${code}. Inspect ${dir} and the model's own repo before ingesting.`);
+}
+process.exit(code);

@@ -15,7 +15,10 @@ node scripts/run-benchmark.mjs --model <model> --name <token> [--runner opencode
 - `--model` — the model id. Prefixed ids run on [opencode](https://opencode.ai) (`opencode models` to list), e.g. `opencode/deepseek-v4-flash-free`, `xai/grok-...`; bare Anthropic ids run on Claude Code, e.g. `claude-opus-5`, `claude-fable-5`.
 - `--name` — the repo name token; the model is told to *"call it `pokedex-<name>`"*. Encode model + effort, e.g. `deepseek-v4-flash`, `opus-5-ultracode`.
 - `--runner` — which agent harness drives the run. Inferred from the model id (a `/` means opencode), so you rarely pass it.
-- `--variant` — reasoning effort passed through to the runner: opencode takes `high` / `max` / `minimal`, Claude Code takes `low` / `medium` / `high` / `xhigh` / `max` / `ultracode`.
+- `--variant` — reasoning effort passed through to the runner: opencode takes `high` / `max` / `minimal`, Claude Code takes `low` / `medium` / `high` / `xhigh` / `max` / `ultracode`. Check the model's own `reasoning_options` on [models.dev](https://models.dev/api.json) — opencode accepts an unknown variant silently.
+- `--resume` — opencode only: how many times to resume after the provider severs the stream (default 12). See [Provider drop-outs](methodology.md#provider-drop-outs).
+
+The opencode runner is sandboxed from the host's agent config — a mirrored `XDG_CONFIG_HOME` with opencode's own slot blanked, plus `OPENCODE_DISABLE_CLAUDE_CODE=1` — so the model gets the brief and not the operator's `AGENTS.md`, skills, plugins or MCP servers, while `gh` and `wrangler` keep their credentials. Do not defeat this; see [Run isolation](methodology.md#run-isolation).
 
 The prompt is read verbatim from `submissions.json` (only the name token is substituted). The run is fully autonomous — `opencode --auto`, or `claude -p --dangerously-skip-permissions` for the Claude Code runner, which also writes a full stream-json transcript next to the build dir so a background run stays tailable. Examples:
 

@@ -15,6 +15,20 @@ Source only. Excluded when copying:
 
 This keeps the whole repo a few MB while preserving exactly what each model *wrote*.
 
+## Run isolation
+
+A run is only prompt-identical if the model receives the brief **and nothing else**. Agent harnesses do not default to that: opencode composes its system prompt from `$XDG_CONFIG_HOME/opencode/AGENTS.md`, `~/.claude/CLAUDE.md` (implicit Claude Code support), `~/.claude/skills`, and any plugins and MCP servers in the global config. On the machine these runs were made, `~/.config/opencode/AGENTS.md` is a symlink to the operator's personal `CLAUDE.md` — several thousand words of house rules covering licensing, git branch names, comment style, brevity, and unrelated project lore.
+
+So [`run-benchmark.mjs`](../scripts/run-benchmark.mjs) now points the opencode runner at a throwaway `XDG_CONFIG_HOME` that mirrors the real one entry by entry — `gh` and `wrangler` keep their credentials, since the brief promises the model both — with opencode's own slot blanked, and sets `OPENCODE_DISABLE_CLAUDE_CODE=1`. Verify it on any machine by asking the model, with tools disabled, whether its system prompt contains a rule it could only have got from the host config: unisolated it answers yes, isolated it answers no.
+
+This is measurable in the output, not just in principle: the discarded first attempt at `ox-alpha-max` (unisolated) initialised on `master` and shipped a GPL-3.0 `LICENSE`, both straight out of the operator's house rules; the graded, isolated run of the same model on the same prompt did neither.
+
+**Entries added before this fix ran unisolated** and saw those house rules — `deepseek-v4-flash`, `deepseek-v4-flash-r2`, `glm-5.2-max`, `laguna-s-2-1`, `gpt-5-6-luna-max`, `qwen-3-8-27b-high`, `grok`. (The `qwen-3-8-27b-high` note describing a re-run "with that file disabled" refers to `~/.claude/CLAUDE.md`; the `AGENTS.md` symlink still fed the same text.) The rules are style and process instructions, not Pokédex hints, so the effect is on repo hygiene and code conventions rather than on feature depth — but it is a real difference in what those models were told, and it is not corrected retroactively. Anthropic entries ran through the Claude Code runner, which is unaffected by the opencode config path.
+
+## Provider drop-outs
+
+Free and preview endpoints sever the stream mid-run: opencode records an assistant turn with zero tokens and finish `unknown`, then exits `0` as if the model had finished. Left alone this scores an infrastructure failure as a model failure — the first two `ox-alpha-max` attempts died this way at 33k and 100k context, one of them with an empty build directory. The harness now reads the last turn of the run's session out of opencode's own store and, on a severed stream, resumes the same session with a bare `Continue.` (up to `--resume` times, default 12). It adds no information the brief did not already contain, but it is a deviation from a single uninterrupted invocation and is recorded per entry in `runNotes`.
+
 ## Metrics
 
 [`scripts/compute-metrics.mjs`](../scripts/compute-metrics.mjs) walks each vendored tree ([`scripts/lib/analyze.mjs`](../scripts/lib/analyze.mjs)) and derives LOC, file count, dependency counts, detected stack, and data strategy. It counts only source extensions (`.ts/.tsx/.js/.jsx/.mjs/.css/.html/...`), skipping lockfiles, `node_modules`, build output, and `public/data`. It is deterministic — re-running reproduces the numbers.
@@ -43,7 +57,7 @@ It also measures **`dexReach`**: it finds the browse route, scrolls it to exhaus
 ## Honest caveats
 
 - **One-shot, not best-of-N.** Each submission is a single autonomous run against the [verbatim prompt](../THE_BRIEF.md) — no iteration or human course-correction. A model could do better on a second try; this measures the first, unassisted attempt.
-- **The prompt is held constant**, word-for-word, except the trailing name token (`pokedex-<model>-<effort>`). This is a controlled prompt-identical trial, not a loose build-off.
+- **The prompt is held constant**, word-for-word, except the trailing name token (`pokedex-<model>-<effort>`). This is a controlled prompt-identical trial, not a loose build-off — but prompt-identical only holds if the harness adds nothing of its own, which for the opencode entries predating the isolation fix it did (see [Run isolation](#run-isolation)).
 - **The model self-provisions.** It uses `gh` and `wrangler` to create its own repo and deploy — so repo hygiene and a successful deploy are themselves part of what's being tested.
 - **Effort labels are self-reported and not cross-comparable.** They come from the run setup (the model's own reasoning-effort setting), not measured compute — and an Anthropic "ultracode" is not the same knob as an opencode `--variant high`. Compare same-provider/same-tool efforts (e.g. the two Fable 5 entries) for the cleanest read.
 - **Provenance is recorded per submission** (`provenance`: one-shot, autonomous, self-provisioned, verified). All current entries are owner-confirmed legit one-shot runs; `deepseek-v4-flash` and `gpt-5-6-luna-max` additionally carry the full harness trail (both deployed but did not self-create a repo, so their source was published for the record — verbatim, as the run left it).
