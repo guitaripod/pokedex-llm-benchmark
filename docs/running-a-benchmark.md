@@ -51,7 +51,7 @@ scripts/regrade.sh <id>            # all three passes end to end, then merge the
 node scripts/grade.mjs --submission <id> --merge /tmp/rg-<id>-final.json --by "<judge>"
 ```
 
-`regrade.sh` drives the pinned prompts; run a single stage with `regrade.sh <id> 12|audit|3`. What it runs, if you want the steps by hand:
+`regrade.sh` drives the pinned prompts through [`scripts/judge.mjs`](../scripts/judge.mjs), which runs each judge in a read-only copy of the repo with the operator's settings and memory switched off, and fails the stage if the working repo moved ([judge containment](methodology.md#judge-containment)). Run a single stage with `regrade.sh <id> 12|audit|3`. What it runs, if you want the steps by hand:
 
 ```bash
 node scripts/grade.mjs --submission <id>                              # 1. grade      → grading/prompts/<id>.md
@@ -80,7 +80,7 @@ node scripts/verify-live.mjs               # does each live URL still serve its 
 node scripts/compute-metrics.mjs   # refresh objective metrics
 node scripts/gen-entries.mjs       # per-submission ENTRY.md scorecards
 node scripts/gen-readme.mjs        # rebuild leaderboard + depth matrix
-node scripts/validate.mjs          # must pass before committing
+node scripts/validate.mjs          # must pass before committing (also re-checks every vendorHash)
 ```
 
 Run `verify-live.mjs` before trusting any runtime-derived judgment: a deployment that has drifted to a different codebase (as `grok`'s had) makes every runtime signal for that entry meaningless. When it flags one, either fix `liveUrl` or measure a local build with `smoke.mjs --submission <id> --url http://localhost:PORT`, which stamps `runtime.measuredOn`.

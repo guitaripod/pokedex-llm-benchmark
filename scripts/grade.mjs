@@ -3,8 +3,11 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { SANDBOX } from "./lib/judge.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+/// Prompts point judges at the read-only sandbox copy, never at the working repo.
+const SOURCE_DIR = (id) => join(SANDBOX, "submissions", id);
 const MANIFEST = join(ROOT, "submissions.json");
 const CONFIG = JSON.parse(readFileSync(join(ROOT, "grading", "config.json"), "utf8"));
 
@@ -72,7 +75,7 @@ function assemblePrompt() {
     .replace(/^<!--[\s\S]*?-->\n/, "")
     .replaceAll("{{MODEL}}", sub.model)
     .replaceAll("{{EFFORT}}", sub.effort)
-    .replaceAll("{{SUBMISSION_DIR}}", join(ROOT, "submissions", sub.id))
+    .replaceAll("{{SUBMISSION_DIR}}", SOURCE_DIR(sub.id))
     .replaceAll("{{LIVE_URL}}", sub.liveUrl || "(none)")
     .replaceAll("{{SUBMISSION_ID}}", sub.id)
     .replaceAll("{{RUNTIME}}", runtimeText())
@@ -80,7 +83,7 @@ function assemblePrompt() {
 }
 
 function verifyPrompt(entry) {
-  return `Adversarial calibration pass for submission "${sub.id}" (${sub.model}). Source: ${join(ROOT, "submissions", sub.id)}
+  return `Adversarial calibration pass for submission "${sub.id}" (${sub.model}). Source: ${SOURCE_DIR(sub.id)}
 
 A first pass produced these grades (0 absent, 1 shallow/broken, 2 solid, 3 exceptional):
 ${entry.features.map((f) => `- ${f.id}: ${f.grade}`).join("\n")}
@@ -105,7 +108,7 @@ function adjudicatePrompt(entry, audit) {
   const logic = (audit.logic ?? [])
     .map((l) => `- ${l.id} (${l.proposedGrade}/3 correct): ${l.reason}`)
     .join("\n");
-  return `Adjudication pass for submission "${sub.id}" (${sub.model}). Source: ${join(ROOT, "submissions", sub.id)}
+  return `Adjudication pass for submission "${sub.id}" (${sub.model}). Source: ${SOURCE_DIR(sub.id)}
 
 You previously graded this submission. An INDEPENDENT adversarial audit then re-read the source and disputed some grades — it was instructed to attack inflated grades, so it is biased toward downgrading. Your job is to adjudicate, not to defer to either side.
 

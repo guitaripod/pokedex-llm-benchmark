@@ -1,4 +1,5 @@
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { join, extname } from "node:path";
 
 const SOURCE_EXT = new Set([
@@ -132,6 +133,30 @@ function grepAny(dir, re) {
   const wrangler = join(dir, "wrangler.jsonc");
   if (existsSync(wrangler) && re.test(readFileSync(wrangler, "utf8"))) return true;
   return false;
+}
+
+/// Every file a model actually wrote, in a stable order — including the ones
+/// `walkSource` skips for LOC (configs, lockfiles, committed data), because the
+/// point here is the artifact, not the line count. `ENTRY.md` is excluded: it is
+/// this repo's generated scorecard, not model output.
+function* walkVendored(dir, root = dir) {
+  for (const name of readdirSync(dir).sort()) {
+    const full = join(dir, name);
+    const rel = full.slice(root.length + 1);
+    if (SKIP_DIRS.has(name) || rel === "ENTRY.md") continue;
+    if (statSync(full).isDirectory()) yield* walkVendored(full, root);
+    else yield [rel, full];
+  }
+}
+
+/// A fingerprint of the vendored submission as ingested. Anything that later
+/// edits a model's source — a stray probe script from a grading agent, a
+/// well-meant lint fix — changes this, and `validate.mjs` fails. The artifact
+/// being graded has to stay exactly what the model produced.
+export function vendorHash(dir) {
+  const h = createHash("sha256");
+  for (const [rel, full] of walkVendored(dir)) h.update(rel).update("\0").update(readFileSync(full));
+  return `sha256:${h.digest("hex")}`;
 }
 
 /// Compute the objective, deterministic metrics for a single submission

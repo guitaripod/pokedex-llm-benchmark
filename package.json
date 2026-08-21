@@ -19,7 +19,9 @@
     "smoke": "node scripts/smoke.mjs",
     "add": "node scripts/add-submission.mjs",
     "grade": "node scripts/grade.mjs",
-    "run-benchmark": "node scripts/run-benchmark.mjs"
+    "run-benchmark": "node scripts/run-benchmark.mjs",
+    "stamp": "node scripts/stamp-vendor-hash.mjs",
+    "judge": "node scripts/judge.mjs"
   },
   "devDependencies": {
     "playwright": "^1.48.0"

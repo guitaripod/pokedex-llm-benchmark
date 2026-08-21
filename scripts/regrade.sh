@@ -29,18 +29,17 @@ print('$ID', sys.argv[3], 'depth', sum(f['grade'] for f in e['features']), '/90'
 }
 
 judge() {
-  timeout 7200 claude -p "$(cat "$1")" --model $MODEL --effort $EFFORT \
-    --dangerously-skip-permissions --disallowed-tools Edit Write NotebookEdit \
-    --output-format json > "$2" 2>"/tmp/rg-$ID.err"
+  timeout 7200 node scripts/judge.mjs "$1" --model $MODEL --effort $EFFORT --label "$ID $3" \
+    > "$2" 2>"/tmp/rg-$ID.err" || { cat "/tmp/rg-$ID.err" >&2; return 1; }
 }
 
 if [ "$STAGE" = "12" ] || [ "$STAGE" = "all" ]; then
   node scripts/grade.mjs --submission "$ID" >/dev/null
-  judge "grading/prompts/$ID.md" "/tmp/rg-$ID-p1.raw.json"
+  judge "grading/prompts/$ID.md" "/tmp/rg-$ID-p1.raw.json" pass1
   extract "/tmp/rg-$ID-p1.raw.json" "/tmp/rg-$ID-p1.json" pass1
 
   node scripts/grade.mjs --submission "$ID" --verify "/tmp/rg-$ID-p1.json" >/dev/null
-  judge "grading/prompts/$ID-verify.md" "/tmp/rg-$ID-p2.raw.json"
+  judge "grading/prompts/$ID-verify.md" "/tmp/rg-$ID-p2.raw.json" pass2
   extract "/tmp/rg-$ID-p2.raw.json" "/tmp/rg-$ID-p2.json" pass2
 fi
 
@@ -50,6 +49,6 @@ fi
 
 if [ "$STAGE" = "3" ] || [ "$STAGE" = "all" ]; then
   node scripts/grade.mjs --submission "$ID" --adjudicate "/tmp/audit-$ID.json" --entry "/tmp/rg-$ID-p2.json" >/dev/null
-  judge "grading/prompts/$ID-adjudicate.md" "/tmp/rg-$ID-p3.raw.json"
+  judge "grading/prompts/$ID-adjudicate.md" "/tmp/rg-$ID-p3.raw.json" adjudicate
   extract "/tmp/rg-$ID-p3.raw.json" "/tmp/rg-$ID-final.json" final
 fi

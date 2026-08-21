@@ -235,7 +235,8 @@
         "dexRoute": "/",
         "measuredOn": "local build of the vendored source (http://localhost:4599) — the recorded deployment does not serve this source"
       },
-      "notes": "The Cloudflare Pages project recorded for this run (pokedex-a7l.pages.dev) does not serve this submission: it serves a different, vanilla-JS app, and none of its deployed commits (99d1032, 7b8ce69, fcff7f1) exist in the submission repo. Caught by scripts/verify-live.mjs. The vendored React/Vite source is the model output of record; its runtime signal was measured against a local production build of that source instead."
+      "notes": "The Cloudflare Pages project recorded for this run (pokedex-a7l.pages.dev) does not serve this submission: it serves a different, vanilla-JS app, and none of its deployed commits (99d1032, 7b8ce69, fcff7f1) exist in the submission repo. Caught by scripts/verify-live.mjs. The vendored React/Vite source is the model output of record; its runtime signal was measured against a local production build of that source instead.",
+      "vendorHash": "sha256:66a0fa23c9e5bf5f0b0aba970562432ffeb379bae4b879510069a77fa4467e5a"
     },
     {
       "id": "fable-5-low",
@@ -464,7 +465,8 @@
         "checkedAt": "2026-07-25",
         "dexReach": 1025,
         "dexRoute": "/"
-      }
+      },
+      "vendorHash": "sha256:c31e0e1e4f897ea0f2b80e2a461c72a5d35316b36f70401a779d1bb451ae3b13"
     },
     {
       "id": "opus-4-8-low",
@@ -693,7 +695,8 @@
         "checkedAt": "2026-07-25",
         "dexReach": 1025,
         "dexRoute": "/"
-      }
+      },
+      "vendorHash": "sha256:f8b9f33c7b6f57da2b69b40add494d9fd8028b45b0edfcd70a79e431cab18c05"
     },
     {
       "id": "glm-5.2-max",
@@ -917,7 +920,8 @@
         "checkedAt": "2026-07-25",
         "dexReach": 1025,
         "dexRoute": "/"
-      }
+      },
+      "vendorHash": "sha256:a400550ef895e278ead1289252c0589f20e384a2408b3779e241b61bbdcd9af5"
     },
     {
       "id": "fable-5-ultracode",
@@ -1145,7 +1149,8 @@
         "checkedAt": "2026-07-25",
         "dexReach": 1025,
         "dexRoute": "/"
-      }
+      },
+      "vendorHash": "sha256:d5f4a2a66619938b8c8f706fdeccd0772f48610bc2e747d89d91177168b5af43"
     },
     {
       "id": "laguna-s-2-1",
@@ -1369,7 +1374,8 @@
         "dexReach": 93,
         "dexRoute": "/",
         "dexPager": false
-      }
+      },
+      "vendorHash": "sha256:8520b53473d8b02ed958a0ed2fa6423cdf37ca97a06db03c8d6650c07017fa3c"
     },
     {
       "id": "deepseek-v4-flash",
@@ -1597,7 +1603,8 @@
         "dexReach": 30,
         "dexRoute": "/pokedex",
         "dexPager": true
-      }
+      },
+      "vendorHash": "sha256:2a7ad55f90aa2386cd5bd8de985611ea3f4f2808704c33ea1f45e02d11d565bc"
     },
     {
       "id": "opus-5-low",
@@ -1823,7 +1830,8 @@
         "autonomous": true,
         "selfProvisioned": true,
         "verified": "harness (scripts/run-benchmark.mjs)"
-      }
+      },
+      "vendorHash": "sha256:ebe3df79faecff394ce92a5d16abcbfc5ab3d7f1b7a3287e004aaee664eb1265"
     },
     {
       "id": "opus-5-ultracode",
@@ -2048,7 +2056,8 @@
         "gradedOn": "2026-07-25",
         "rubricVersion": 2
       },
-      "dataNote": "55 MB of PokéAPI data (public/data, 6032 files) and 41 MB of the upstream PokéAPI CSV dump (data-src, 180 files) stripped from the vendored source — it is data, not model-written code; regenerate with `npm run data` (the original repo keeps the CSV dump)."
+      "dataNote": "55 MB of PokéAPI data (public/data, 6032 files) and 41 MB of the upstream PokéAPI CSV dump (data-src, 180 files) stripped from the vendored source — it is data, not model-written code; regenerate with `npm run data` (the original repo keeps the CSV dump).",
+      "vendorHash": "sha256:a9b07fc4b5f23928ceaeb90537b134ce76d4de259de5fd0c84a732c6f29d2c19"
     },
     {
       "id": "deepseek-v4-flash-r2",
@@ -2276,7 +2285,8 @@
         "gradedBy": "Claude Code — Opus 5 (high), three-pass (grade + adversarial verify + independent 10-agent audit adjudication)",
         "gradedOn": "2026-07-31",
         "rubricVersion": 2
-      }
+      },
+      "vendorHash": "sha256:90f5c7781e823425072e0dff5df05d7a6b41c880a67c7c5f6412cb69bb6902f5"
     },
     {
       "id": "gpt-5-6-luna-max",
@@ -2503,7 +2513,8 @@
         "gradedBy": "Opus 5 (three-pass: grade → calibrate → 10-agent audit → adjudicate; search downgraded on live verification)",
         "gradedOn": "2026-08-01",
         "rubricVersion": 2
-      }
+      },
+      "vendorHash": "sha256:40227bd8ad1fb95df1bb5073f2eb24af42ab2d6b8284a7db324dc83a05edc2d7"
     },
     {
       "id": "qwen-3-8-27b-high",
@@ -2735,7 +2746,8 @@
         "rubricVersion": 2
       },
       "notes": "Weights: the 4-bit `nvfp4` build (ollama `qwen3.8:27b-mlx`, digest 5642e97495e1 — the `-mlx` tag is an alias for `27b-nvfp4`, nothing MLX is involved), the joint-smallest of the eleven 27B builds published. 8-bit `q8_0`/`mxfp8` and bf16 builds exist and were not run, so this score is a floor for the model, not its ceiling. It is also the only entry that needed the harness set up around it, so it is not a like-for-like run. (1) The local ollama server defaults to a 4,096-token context, which cannot hold opencode's ~23k-token system prompt, so it was raised to 131,072 before the run — below that the model is not being measured, its truncation is. (2) The first run was discarded before grading: opencode loads the machine owner's global CLAUDE.md as an implicit AGENTS.md, and those rules stopped the model before deploy and dictated its licence and branch choices; the graded run was relaunched with that file disabled. (3) It deployed to Cloudflare itself but never created a GitHub repo despite being given gh, so its source was published for the record. Nothing inside the graded run was prompted, corrected or completed by hand — the code, the build and the deployment are all its own, in one shot.",
-      "dataNote": "dist/ and dist-worker/ (Vite and wrangler build output) excluded from the published source; regenerate with npm run build."
+      "dataNote": "dist/ and dist-worker/ (Vite and wrangler build output) excluded from the published source; regenerate with npm run build.",
+      "vendorHash": "sha256:f878eab3197d8f6058366c8e22d6d0134a8ceb983d9b7f717a348f7a6cd2e1e2"
     },
     {
       "id": "ox-alpha-max",
@@ -2966,7 +2978,8 @@
         "gradedOn": "2026-08-21",
         "rubricVersion": 2
       },
-      "notes": "Run isolation: this is the first entry run with the opencode harness sandboxed from the host's agent config (mirrored XDG_CONFIG_HOME with opencode's slot blanked, plus OPENCODE_DISABLE_CLAUDE_CODE=1), so the model saw the brief and not the operator's AGENTS.md, skills, plugins or MCP servers — every earlier opencode entry did see them. The difference is visible: a first, unisolated attempt at this same prompt initialised on `master` and shipped a GPL-3.0 LICENSE, both straight out of those house rules; it was discarded before grading and the graded run did neither. Stream drops: the free endpoint severed the stream five times mid-run (opencode records a zero-token turn with finish `unknown`, then exits 0), and the harness resumed the same session with a bare `Continue.` each time — no information beyond the brief, but not a single uninterrupted invocation either. Two earlier attempts were abandoned to the same drops before the resume logic existed. Nothing in the graded run was prompted, corrected or completed by hand."
+      "notes": "Run isolation: this is the first entry run with the opencode harness sandboxed from the host's agent config (mirrored XDG_CONFIG_HOME with opencode's slot blanked, plus OPENCODE_DISABLE_CLAUDE_CODE=1), so the model saw the brief and not the operator's AGENTS.md, skills, plugins or MCP servers — every earlier opencode entry did see them. The difference is visible: a first, unisolated attempt at this same prompt initialised on `master` and shipped a GPL-3.0 LICENSE, both straight out of those house rules; it was discarded before grading and the graded run did neither. Stream drops: the free endpoint severed the stream five times mid-run (opencode records a zero-token turn with finish `unknown`, then exits 0), and the harness resumed the same session with a bare `Continue.` each time — no information beyond the brief, but not a single uninterrupted invocation either. Two earlier attempts were abandoned to the same drops before the resume logic existed. Nothing in the graded run was prompted, corrected or completed by hand.",
+      "vendorHash": "sha256:499c91ba2ad88b6cddb9220cc2a46a0f880f1d956580ad6bd73bc4cf1e2fd390"
     }
   ]
 }

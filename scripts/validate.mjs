@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadAndRender } from "./gen-readme.mjs";
+import { vendorHash } from "./lib/analyze.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(readFileSync(join(ROOT, "submissions.json"), "utf8"));
@@ -58,6 +59,15 @@ for (const s of manifest.submissions) {
   const pv = s.provenance;
   if (!pv || typeof pv.oneShot !== "boolean" || typeof pv.autonomous !== "boolean" || !pv.verified)
     errors.push(`${tag}: incomplete provenance (need oneShot / autonomous / verified)`);
+
+  const dir = join(ROOT, "submissions", s.id);
+  if (!s.vendorHash) errors.push(`${tag}: no vendorHash — re-stamp with scripts/stamp-vendor-hash.mjs`);
+  else if (!existsSync(dir)) errors.push(`${tag}: vendored source missing at submissions/${s.id}`);
+  else if (vendorHash(dir) !== s.vendorHash)
+    errors.push(
+      `${tag}: vendored source no longer matches the hash recorded at ingest — ` +
+        `something edited what the model wrote (git diff submissions/${s.id})`,
+    );
 }
 
 if (typeof config.rubricVersion !== "number")

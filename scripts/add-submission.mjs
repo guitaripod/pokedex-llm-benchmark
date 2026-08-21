@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, existsSync, rmSync, mkdtempSync, statSync 
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
-import { analyzeSubmission, detectDataStrategy } from "./lib/analyze.mjs";
+import { analyzeSubmission, detectDataStrategy, vendorHash } from "./lib/analyze.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const MANIFEST = join(ROOT, "submissions.json");
@@ -142,6 +142,7 @@ const entry = {
   liveUrl,
   platform: opts.platform || (liveUrl.includes(".pages.dev") ? "Cloudflare Pages" : "Cloudflare Workers"),
   ...(dataNote ? { dataNote } : {}),
+  vendorHash: vendorHash(dest),
   ...analysis,
   dataStrategy: detectDataStrategy(dest),
   provenance: {

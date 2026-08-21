@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { JUDGE_FLAGS, SANDBOX, refreshSandbox, disposeSandbox, fingerprint, assertUnchanged } from "./lib/judge.mjs";
 
 const run = promisify(execFile);
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -88,7 +89,7 @@ const template = readFileSync(join(ROOT, "grading", "AUDIT.md"), "utf8").replace
 function prompt(scope) {
   return template
     .replaceAll("{{SUBMISSION_ID}}", sub.id)
-    .replaceAll("{{SUBMISSION_DIR}}", join(ROOT, "submissions", sub.id))
+    .replaceAll("{{SUBMISSION_DIR}}", join(SANDBOX, "submissions", sub.id))
     .replaceAll("{{LIVE_URL}}", sub.liveUrl || "(none — judge from source and the vendored build)")
     .replaceAll("{{RUNTIME}}", runtimeText())
     .replaceAll("{{SCOPE}}", scope);
@@ -130,9 +131,8 @@ function extractJson(text) {
 async function audit(scope) {
   const { stdout } = await run(
     "claude",
-    ["-p", prompt(scope.text), "--model", model, "--effort", "high", "--dangerously-skip-permissions",
-      "--disallowed-tools", "Edit", "Write", "NotebookEdit", "--output-format", "json"],
-    { maxBuffer: 256 * 1024 * 1024, cwd: ROOT },
+    ["-p", prompt(scope.text), "--model", model, "--effort", "high", ...JUDGE_FLAGS],
+    { maxBuffer: 256 * 1024 * 1024, cwd: SANDBOX },
   );
   const res = JSON.parse(stdout);
   if (res.subtype !== "success") throw new Error(`${scope.label}: ${res.subtype}`);
@@ -143,7 +143,11 @@ async function audit(scope) {
 }
 
 console.log(`▶ auditing ${sub.id} with ${model} — ${SCOPES.length} independent scopes`);
+refreshSandbox();
+const before = fingerprint();
 const settled = await Promise.allSettled(SCOPES.map(audit));
+assertUnchanged(before, `the ${sub.id} audit`);
+disposeSandbox();
 for (const s of settled) if (s.status === "rejected") console.error(`  ✗ ${s.reason.message}`);
 
 const done = settled.filter((s) => s.status === "fulfilled").map((s) => s.value);

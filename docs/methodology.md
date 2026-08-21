@@ -25,6 +25,18 @@ This is measurable in the output, not just in principle: the discarded first att
 
 **Entries added before this fix ran unisolated** and saw those house rules — `deepseek-v4-flash`, `deepseek-v4-flash-r2`, `glm-5.2-max`, `laguna-s-2-1`, `gpt-5-6-luna-max`, `qwen-3-8-27b-high`, `grok`. (The `qwen-3-8-27b-high` note describing a re-run "with that file disabled" refers to `~/.claude/CLAUDE.md`; the `AGENTS.md` symlink still fed the same text.) The rules are style and process instructions, not Pokédex hints, so the effect is on repo hygiene and code conventions rather than on feature depth — but it is a real difference in what those models were told, and it is not corrected retroactively. Anthropic entries ran through the Claude Code runner, which is unaffected by the opencode config path.
 
+## Judge containment
+
+The same isolation problem applies on the grading side, and it is worse there because a judge runs headless with `--dangerously-skip-permissions`. Three guarantees, in [`scripts/lib/judge.mjs`](../scripts/lib/judge.mjs):
+
+- **No borrowed instructions.** Judges run with `--setting-sources ""`, which drops the operator's user settings *and* memory. Without it, an agent scoring a submission's `codeQuality` reads the machine owner's rules on comment style and licensing while it grades, and every `UserPromptSubmit` hook fires into its prompt.
+- **No writes to what it grades.** `--disallowed-tools Edit Write NotebookEdit` is not containment — Bash writes files too. Judges are given a read-only `rsync` copy of the repo as their working directory, so a scratch probe script or a "helpful" harness patch fails at the write instead of landing in a vendored submission.
+- **A tripwire behind both.** The working repo is fingerprinted (HEAD, `git status --porcelain`, and the content of every path it names) before and after each stage. If it moved, the stage fails and names the paths rather than repairing them quietly: a judge that reached the real repo has already lost the independence its grade depends on.
+
+This was not theoretical. During the `ox-alpha-max` audit an agent wrote a Playwright probe into `submissions/ox-alpha-max/` — it was caught before the commit, but nothing in the harness would have caught it — and another rewrote `scripts/regrade.sh` *while bash was executing it*, which corrupted the interpreter's read of the file and killed the audit stage.
+
+The artifact itself is pinned too: `add-submission.mjs` records a `vendorHash` over every vendored file at ingest, and `validate.mjs` fails if the tree no longer matches. Re-stamp deliberately with `node scripts/stamp-vendor-hash.mjs <id> --force`.
+
 ## Provider drop-outs
 
 Free and preview endpoints sever the stream mid-run: opencode records an assistant turn with zero tokens and finish `unknown`, then exits `0` as if the model had finished. Left alone this scores an infrastructure failure as a model failure — the first two `ox-alpha-max` attempts died this way at 33k and 100k context, one of them with an empty build directory. The harness now reads the last turn of the run's session out of opencode's own store and, on a severed stream, resumes the same session with a bare `Continue.` (up to `--resume` times, default 12). It adds no information the brief did not already contain, but it is a deviation from a single uninterrupted invocation and is recorded per entry in `runNotes`.
